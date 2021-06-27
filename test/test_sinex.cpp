@@ -2,27 +2,27 @@
 #include <iostream>
 
 int main(int argc, char *argv[]) {
-    if (argc!=2) {
-        fprintf(stderr, "Usage: %s [SINEX_FILE]\n", argv[0]);
-        return 1;
-    }
+  if (argc != 2) {
+    fprintf(stderr, "Usage: %s [SINEX_FILE]\n", argv[0]);
+    return 1;
+  }
 
-    Sinex snx(argv[1]);
-    
-    if (snx.parse_first_line()) {
-        fprintf(stderr, "[ERROR] Failed parsing first line!\n");
-        return 1;
-    }
+  Sinex snx(argv[1]);
+
+  if (snx.parse_first_line()) {
+    fprintf(stderr, "[ERROR] Failed parsing first line!\n");
+    return 1;
+  }
 
 #ifdef DEBUG
-    snx.print_members();
+  snx.print_members();
 #endif
 
-    snx.mark_blocks();
+  snx.mark_blocks();
 #ifdef DEBUG
-    snx.print_blocks();
+  snx.print_blocks();
 #endif
 
-    printf("All seem ok!\n");
-    return 0;
+  printf("All seem ok!\n");
+  return 0;
 }

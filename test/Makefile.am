@@ -1,7 +1,8 @@
 noinst_PROGRAMS = \
         testSinexReadBlocks.out \
 	testSinexBlockSiteId.out \
-	testSinexBlockSiteReceiver.out
+	testSinexBlockSiteReceiver.out \
+        testParameterExists.out
 
 MCXXFLAGS = \
 	-std=c++17 \
@@ -29,3 +30,7 @@ testSinexBlockSiteId_out_LDADD     = $(top_srcdir)/src/libsinex.la $(AM_LIBS)
 testSinexBlockSiteReceiver_out_SOURCES   = test_site_receiver.cpp
 testSinexBlockSiteReceiver_out_CXXFLAGS  = $(MCXXFLAGS) -I$(top_srcdir)/src 
 testSinexBlockSiteReceiver_out_LDADD     = $(top_srcdir)/src/libsinex.la $(AM_LIBS)
+
+testParameterExists_out_SOURCES   = test_parameter_exists.cpp
+testParameterExists_out_CXXFLAGS  = $(MCXXFLAGS) -I$(top_srcdir)/src 
+testParameterExists_out_LDADD     = $(top_srcdir)/src/libsinex.la $(AM_LIBS)
