@@ -11,7 +11,9 @@
 #endif
 
 namespace sinex {
+
 constexpr int max_sinex_chars = 128;
+
 constexpr ngpt::datetime<ngpt::seconds> missing_sinex_date =
     ngpt::datetime<ngpt::seconds>{ngpt::year(0), ngpt::day_of_year(0),
                                   ngpt::seconds(0L)};
@@ -154,6 +156,7 @@ bool parameter_type_exists_impl(const char *ptype, std::false_type) noexcept {
     return false;
   return true;
 }
+
 /// @brief Match a given string to any string in parameter_types array
 /// @param[in] ptype String to match
 /// @note This implementation will only match ptype to a parameter_type
@@ -206,7 +209,7 @@ bool parameter_type_exists(const char *ptype) noexcept {
 struct SinexBlockPosition {
   std::ifstream::pos_type mpos;
   const char *mtype;
-};
+}; // SinexBlockPosition
 
 struct SiteId {
   char m_site_code[5] = {'\0'};
@@ -323,6 +326,9 @@ public:
       std::vector<sinex::SiteAntenna> &site_vec) noexcept;
   int parse_block_solution_estimate(
       std::vector<sinex::SolutionEstimate> &site_vec) noexcept;
+  int parse_block_solution_estimate(
+      std::vector<sinex::SolutionEstimate> &estimates_vec, 
+      const std::vector<sinex::SiteId>& sites_vec) noexcept;
 
   Sinex(const char *fn);
   Sinex(const Sinex &) = delete;
