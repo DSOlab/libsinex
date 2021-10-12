@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  Sinex snx(argv[1]);
+  dso::Sinex snx(argv[1]);
 
   if (snx.parse_first_line()) {
     fprintf(stderr, "[ERROR] Failed parsing first line!\n");
@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
 #endif
 
   // parse STATION/RECEIVER block
-  std::vector<sinex::SiteReceiver> sites;
+  std::vector<dso::sinex::SiteReceiver> sites;
   if (snx.parse_block_site_receiver(sites)) {
     fprintf(stderr, "[ERROR] Failed parsing block \'SITE/RECEIVER\'\n");
     return 1;

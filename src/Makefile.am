@@ -16,7 +16,13 @@ libsinex_la_CXXFLAGS = \
 	-DDEBUG
 
 dist_include_HEADERS = \
+	sinex_details.hpp \
         sinex.hpp
 
 dist_libsinex_la_SOURCES = \
-        sinex.cpp
+        sinex.cpp \
+	parse_sinex_date.cpp \
+	parse_site_id.cpp \
+	parse_site_receiver.cpp \
+	parse_site_antenna.cpp \
+	parse_solution_estimate.cpp

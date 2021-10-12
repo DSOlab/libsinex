@@ -1,6 +1,8 @@
 #include "sinex.hpp"
 #include <vector>
 
+using namespace dso;
+
 int main() {
 
   const char *p1 = "TGETOT";

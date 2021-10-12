@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  Sinex snx(argv[1]);
+  dso::Sinex snx(argv[1]);
 
   if (snx.parse_first_line()) {
     fprintf(stderr, "[ERROR] Failed parsing first line!\n");
