@@ -26,12 +26,14 @@ int match_block_header(const char *str) noexcept {
 int dso::Sinex::mark_blocks() noexcept {
   if (!m_stream.is_open())
     return 1;
+  
   m_blocks.clear();
   m_blocks.reserve(10);
+  
   char line[sinex::max_sinex_chars];
 
   if (!m_stream.getline(line, sinex::max_sinex_chars)) {
-    fprintf(stderr, "[ERROR] Failed parsing blocks; failed to read SINEX\n");
+    fprintf(stderr, "[ERROR] Failed parsing blocks; failed to read SINEX (traceback: %s)\n", __func__);
     return 1;
   }
 
@@ -41,8 +43,8 @@ int dso::Sinex::mark_blocks() noexcept {
     if (*line == '+') {
       int idx = match_block_header(line + 1);
       if (idx < 0) {
-        fprintf(stderr, "[ERROR] Could not match block with title \'%s\'\n",
-                line + 1);
+        fprintf(stderr, "[ERROR] Could not match block with title \'%s\' (traceback: %s)\n",
+                line + 1, __func__);
         return 1;
       }
 #if __cplusplus > 201703L
@@ -57,9 +59,10 @@ int dso::Sinex::mark_blocks() noexcept {
   }
 
   if (!m_stream.eof()) {
-    fprintf(stderr, "[ERROR] Seems SINEX was not read till EOF!\n");
+    fprintf(stderr, "[ERROR] Seems SINEX was not read till EOF! (traceback: %s)\n", __func__);
     return 1;
   }
+
   m_stream.clear();
   return 0;
 }
@@ -98,6 +101,9 @@ int dso::Sinex::parse_first_line() noexcept {
 
   if (!m_stream.is_open())
     return 1;
+
+  // go to start of file
+  m_stream.seekg(0);
 
   m_stream.getline(line, sinex::max_sinex_chars);
 

@@ -18,7 +18,6 @@ int main(int argc, char *argv[]) {
   snx.print_members();
 #endif
 
-  snx.mark_blocks();
 #ifdef DEBUG
   snx.print_blocks();
 #endif
