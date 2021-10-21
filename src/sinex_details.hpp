@@ -8,9 +8,9 @@ namespace dso::sinex {
 
 constexpr int max_sinex_chars = 128;
 
-constexpr ngpt::datetime<ngpt::seconds> missing_sinex_date =
-    ngpt::datetime<ngpt::seconds>{ngpt::year(0), ngpt::day_of_year(0),
-                                  ngpt::seconds(0L)};
+constexpr dso::datetime<dso::seconds> missing_sinex_date =
+    dso::datetime<dso::seconds>{dso::year(0), dso::day_of_year(0),
+                                  dso::seconds(0L)};
 
 const char *const block_names[] = {
     "FILE/REFERENCE",
@@ -50,6 +50,14 @@ const char *const block_names[] = {
     "SOLUTION/NORMAL_EQUATION_VECTOR",
     "SOLUTION/NORMAL_EQUATION_MATRIX L",
     "SOLUTION/NORMAL_EQUATION_MATRIX U",
+    // ---------------------------------------------------------------------//
+    //  The following are not defined in [1] but are present in IDS Sinex   //
+    //  files for DPOD reference frame definition.                          //
+    //  see https://ids-doris.org/combination/dpod.html                     //
+    //----------------------------------------------------------------------//
+    "SOLUTION/DISCONTINUITY",
+    "SOLUTION/DATA_REJECT",
+    "STATION/TO_BE_UPDATED"
 };
 constexpr int block_names_size = sizeof(block_names) / sizeof(char *);
 
@@ -111,12 +119,10 @@ const char *const parameter_types[] = {
     "SATA_Y", // sat. antenna Y offset, m
     "CN",     // spherical harmonic coefficient C_nm
     "SN",     // spherical harmonic coefficient S_nm
-    /* 
-      -------------------------------------------------------------------------
-      The following are not defined in [1] but are present in IERS Sinex files
-      for describing PSD models 
-      -------------------------------------------------------------------------
-    */
+    // ---------------------------------------------------------------------//
+    //  The following are not defined in [1] but are present in IERS Sinex  //
+    //  files for describing PSD models                                     //
+    //----------------------------------------------------------------------//
    "AEXP_N",
    "AEXP_E",
    "AEXP_U",
@@ -139,8 +145,8 @@ constexpr int parameter_types_size = sizeof(parameter_types) / sizeof(char *);
 ///            have any number of whitespace characters at the begining. After
 ///            the SECOD field, the string must have a non-numeric character.
 /// @return The datetime instance represented by the input string, in resolution
-///         ngpt::seconds.
-ngpt::datetime<ngpt::seconds> parse_snx_date(const char *str);
+///         dso::seconds.
+dso::datetime<dso::seconds> parse_snx_date(const char *str);
 
 /// @brief Match a given string to any string in parameter_types array
 /// @param[in] ptype String to match

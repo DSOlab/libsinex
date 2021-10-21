@@ -7,8 +7,8 @@
 ///            have any number of whitespace characters at the begining. After
 ///            the SECOD field, the string must have a non-numeric character.
 /// @return The datetime instance represented by the input string, in resolution
-///         ngpt::seconds.
-ngpt::datetime<ngpt::seconds> dso::sinex::parse_snx_date(const char *str) {
+///         dso::seconds.
+dso::datetime<dso::seconds> dso::sinex::parse_snx_date(const char *str) {
   char *end;
   const char *start = str;
   
@@ -33,6 +33,6 @@ ngpt::datetime<ngpt::seconds> dso::sinex::parse_snx_date(const char *str) {
         "[ERROR] Failed resolving datetime in SINEX file (#3).\n");
   }
   
-  return ngpt::datetime<ngpt::seconds>{ngpt::year(iyr), ngpt::day_of_year(doy),
-                                       ngpt::seconds(isc)};
+  return dso::datetime<dso::seconds>{dso::year(iyr), dso::day_of_year(doy),
+                                       dso::seconds(isc)};
 }

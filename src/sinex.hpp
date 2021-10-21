@@ -34,8 +34,8 @@ struct SiteId {
     printf("Domes Number %s\n", m_domes);
     printf("Obs. Code    %c\n", m_obs_code);
     printf("Description  %s\n", m_description);
-    printf("lat/lon/hgt %+7.1f/%+7.1f/%7.2f\n", ngpt::rad2deg(m_lon),
-           ngpt::rad2deg(m_lat), m_hgt);
+    printf("lat/lon/hgt %+7.1f/%+7.1f/%7.2f\n", dso::rad2deg(m_lon),
+           dso::rad2deg(m_lat), m_hgt);
   }
 #endif
 };// SiteId
@@ -48,7 +48,7 @@ struct SiteReceiver {
   char m_rec_type[21] = {'\0'};
   char m_rec_serial[6] = {'\0'};
   char m_rec_firmware[12] = {'\0'};
-  ngpt::datetime<ngpt::seconds> m_start{}, m_stop{};
+  dso::datetime<dso::seconds> m_start{}, m_stop{};
 #ifdef DEBUG
   void print() const noexcept {
     printf("Site Code    %s\n", m_site_code);
@@ -58,11 +58,12 @@ struct SiteReceiver {
     printf("Rec. Type    %s\n", m_rec_type);
     printf("Rec. Serial  %s\n", m_rec_serial);
     printf("Rec. Firmw   %s\n", m_rec_firmware);
-    printf("From %s to %s\n", ngpt::strftime_ymd_hmfs(m_start).c_str(),
-           ngpt::strftime_ymd_hmfs(m_stop).c_str());
+    printf("From %s to %s\n", dso::strftime_ymd_hmfs(m_start).c_str(),
+           dso::strftime_ymd_hmfs(m_stop).c_str());
   }
 #endif
 };// SiteReceiver
+
 struct SiteAntenna {
   char m_site_code[5] = {'\0'};
   char m_point_code[3] = {'\0'};
@@ -70,7 +71,7 @@ struct SiteAntenna {
   char m_obs_code;
   char m_ant_type[21] = {'\0'};
   char m_ant_serial[6] = {'\0'};
-  ngpt::datetime<ngpt::seconds> m_start{}, m_stop{};
+  dso::datetime<dso::seconds> m_start{}, m_stop{};
 #ifdef DEBUG
   void print() const noexcept {
     printf("Site Code    %s\n", m_site_code);
@@ -79,11 +80,12 @@ struct SiteAntenna {
     printf("Obs. Code    %c\n", m_obs_code);
     printf("Ant. Type    %s\n", m_ant_type);
     printf("Ant. Serial  %s\n", m_ant_serial);
-    printf("From %s to %s\n", ngpt::strftime_ymd_hmfs(m_start).c_str(),
-           ngpt::strftime_ymd_hmfs(m_stop).c_str());
+    printf("From %s to %s\n", dso::strftime_ymd_hmfs(m_start).c_str(),
+           dso::strftime_ymd_hmfs(m_stop).c_str());
   }
 #endif
 };// SiteAntenna
+
 struct SolutionEstimate {
   int m_index;
   char m_param_type[7] = {'\0'};
@@ -93,8 +95,11 @@ struct SolutionEstimate {
   char m_units[5] = {'\0'};
   char m_constraint_code = '\0';
   double m_estimate, m_std_deviation;
-  ngpt::datetime<ngpt::seconds> m_epoch{};
+  dso::datetime<dso::seconds> m_epoch{};
+
+  // int parse_line(const char *line) noexcept;
 };//SolutionEstimate
+
 } // sinex
 
 class Sinex {
@@ -105,7 +110,7 @@ private:
   std::ifstream m_stream;
   float m_version;
   char m_agency[4] = {'\0'};
-  ngpt::datetime<ngpt::seconds> m_created_at, m_data_start, m_data_stop;
+  dso::datetime<dso::seconds> m_created_at, m_data_start, m_data_stop;
   char m_data_agency[4] = {'\0'};
   char m_obs_code, m_constraint_code;
   char m_sol_contents[6] = {'\0'};
@@ -127,7 +132,9 @@ public:
   int mark_blocks() noexcept;
 
   // parse blocks
-  int parse_block_site_id(std::vector<sinex::SiteId> &site_vec) noexcept;
+  int parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
+                          int num_sites_requested = 0,
+                          const char *sites[] = nullptr) noexcept;
   int parse_block_site_receiver(
       std::vector<sinex::SiteReceiver> &site_vec) noexcept;
   int parse_block_site_antenna(
@@ -137,6 +144,8 @@ public:
   int parse_block_solution_estimate(
       std::vector<sinex::SolutionEstimate> &estimates_vec, 
       const std::vector<sinex::SiteId>& sites_vec) noexcept;
+
+  int get_solution_estimate(const char *site_codes[], const dso::datetime<dso::seconds> &t, bool error_if_missing=false) noexcept;
 
   Sinex(const char *fn);
   Sinex(const Sinex &) = delete;

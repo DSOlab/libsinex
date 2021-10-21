@@ -82,16 +82,16 @@ void dso::Sinex::print_members() const {
   printf("version           %5.2f\n", m_version);
   printf("agency            %s\n", m_agency);
   printf("created           %s\n",
-         ngpt::strftime_ymd_hmfs(m_created_at).c_str());
+         dso::strftime_ymd_hmfs(m_created_at).c_str());
   printf("data agency       %s\n", m_data_agency);
   printf("obs. code         %c\n", m_obs_code);
   printf("constraint code   %c\n", m_constraint_code);
   printf("solution contents %s\n", m_sol_contents);
   printf("num of estimated  %5d\n", m_num_estimates);
   printf("data start at     %s\n",
-         ngpt::strftime_ymd_hmfs(m_data_start).c_str());
+         dso::strftime_ymd_hmfs(m_data_start).c_str());
   printf("data end at       %s\n",
-         ngpt::strftime_ymd_hmfs(m_data_stop).c_str());
+         dso::strftime_ymd_hmfs(m_data_stop).c_str());
 }
 #endif
 
