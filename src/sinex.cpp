@@ -6,11 +6,15 @@
 #include "ggdatetime/datetime_write.hpp"
 #endif
 
+constexpr long max_sinex_lines = 1'000'000;
+
 dso::Sinex::Sinex(const char *fn)
     : m_filename(std::string(fn)), m_stream(fn, std::ios::in) {
+  printf(">> initializing SINEX in constructor ... %s\n", __func__);
   if (this->mark_blocks()) {
     throw std::runtime_error("[ERROR] Failed to parse blocks in SINEX file\n");
   }
+  printf("%s done\n", __func__);
 }
 
 int match_block_header(const char *str) noexcept {
@@ -42,7 +46,8 @@ int dso::Sinex::mark_blocks() noexcept {
 
   pos_t pos = m_stream.tellg();
 
-  while (m_stream.getline(line, sinex::max_sinex_chars)) {
+  long linec = 0;
+  while (m_stream.getline(line, sinex::max_sinex_chars) && linec++<max_sinex_lines) {
     if (*line == '+') {
       int idx = match_block_header(line + 1);
       if (idx < 0) {
@@ -63,7 +68,7 @@ int dso::Sinex::mark_blocks() noexcept {
     pos = m_stream.tellg();
   }
 
-  if (!m_stream.eof()) {
+  if (!m_stream.eof() || linec>=max_sinex_lines) {
     fprintf(stderr,
             "[ERROR] Seems SINEX was not read till EOF! (traceback: %s)\n",
             __func__);

@@ -128,6 +128,8 @@ private:
   int goto_block(const char *block) noexcept;
 
 public:
+  std::string filename() const noexcept { return m_filename; }
+
   int parse_first_line() noexcept;
   int mark_blocks() noexcept;
 
@@ -135,12 +137,16 @@ public:
   int parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
                           int num_sites_requested = 0,
                           char **sites = nullptr) noexcept;
+  
   int parse_block_site_receiver(
       std::vector<sinex::SiteReceiver> &site_vec) noexcept;
+  
   int parse_block_site_antenna(
       std::vector<sinex::SiteAntenna> &site_vec) noexcept;
+  
   int parse_block_solution_estimate(
       std::vector<sinex::SolutionEstimate> &site_vec) noexcept;
+  
   int parse_block_solution_estimate(
       std::vector<sinex::SolutionEstimate> &estimates_vec,
       const std::vector<sinex::SiteId> &sites_vec) noexcept;
