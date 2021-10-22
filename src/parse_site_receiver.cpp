@@ -17,14 +17,16 @@ int dso::Sinex::parse_block_site_receiver(
   char line[sinex::max_sinex_chars];
   m_stream.getline(line, sinex::max_sinex_chars);
   if (!m_stream.good() || std::strcmp(line, "+SITE/RECEIVER")) {
-    fprintf(stderr, "[ERROR] Expected \"%s\" line, found: \"%s\" (traceback: %s)\n",
+    fprintf(stderr,
+            "[ERROR] Expected \"%s\" line, found: \"%s\" (traceback: %s)\n",
             "+SITE/RECEIVER", line, __func__);
     return 1;
   }
 
   // read in SiteReceiver's untill end of block
   std::size_t ln_count = 0;
-  while (m_stream.getline(line, sinex::max_sinex_chars) && ++ln_count < max_lines_in_block) {
+  while (m_stream.getline(line, sinex::max_sinex_chars) &&
+         ++ln_count < max_lines_in_block) {
     if (!std::strncmp(line, "-SITE/RECEIVER", 14))
       break;
 
@@ -41,7 +43,10 @@ int dso::Sinex::parse_block_site_receiver(
         vecit->m_start = sinex::parse_snx_date(line + 16);
         vecit->m_stop = sinex::parse_snx_date(line + 29);
       } catch (std::exception &) {
-        fprintf(stderr, "[ERROR] Failed to parse date from line: \"%s\" (traceback: %s)\n", line, __func__);
+        fprintf(
+            stderr,
+            "[ERROR] Failed to parse date from line: \"%s\" (traceback: %s)\n",
+            line, __func__);
         return 1;
       }
       if (vecit->m_start == sinex::missing_sinex_date)

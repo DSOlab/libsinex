@@ -22,6 +22,7 @@ dist_include_HEADERS = \
 dist_libsinex_la_SOURCES = \
         sinex.cpp \
 	parse_sinex_date.cpp \
+	sinex_str_utils.cpp \
 	parse_site_id.cpp \
 	parse_site_receiver.cpp \
 	parse_site_antenna.cpp \

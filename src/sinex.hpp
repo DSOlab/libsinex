@@ -5,9 +5,9 @@
 #include <fstream>
 #include <vector>
 #ifdef DEBUG
-#include <cstdio>
 #include "ggdatetime/datetime_write.hpp"
 #include "ggeodesy/units.hpp"
+#include <cstdio>
 #endif
 
 namespace dso {
@@ -16,8 +16,8 @@ namespace sinex {
 /// @class SinexBlockPosition A data block within a SINEX file
 struct SinexBlockPosition {
   std::ifstream::pos_type mpos; ///< position from file begining
-  const char *mtype; ///< block description
-}; // SinexBlockPosition
+  const char *mtype;            ///< block description
+};                              // SinexBlockPosition
 
 struct SiteId {
   char m_site_code[5] = {'\0'};
@@ -38,7 +38,7 @@ struct SiteId {
            dso::rad2deg(m_lat), m_hgt);
   }
 #endif
-};// SiteId
+}; // SiteId
 
 struct SiteReceiver {
   char m_site_code[5] = {'\0'};
@@ -62,7 +62,7 @@ struct SiteReceiver {
            dso::strftime_ymd_hmfs(m_stop).c_str());
   }
 #endif
-};// SiteReceiver
+}; // SiteReceiver
 
 struct SiteAntenna {
   char m_site_code[5] = {'\0'};
@@ -84,7 +84,7 @@ struct SiteAntenna {
            dso::strftime_ymd_hmfs(m_stop).c_str());
   }
 #endif
-};// SiteAntenna
+}; // SiteAntenna
 
 struct SolutionEstimate {
   int m_index;
@@ -98,9 +98,9 @@ struct SolutionEstimate {
   dso::datetime<dso::seconds> m_epoch{};
 
   // int parse_line(const char *line) noexcept;
-};//SolutionEstimate
+}; // SolutionEstimate
 
-} // sinex
+} // namespace sinex
 
 class Sinex {
 private:
@@ -134,7 +134,7 @@ public:
   // parse blocks
   int parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
                           int num_sites_requested = 0,
-                          const char *sites[] = nullptr) noexcept;
+                          char **sites = nullptr) noexcept;
   int parse_block_site_receiver(
       std::vector<sinex::SiteReceiver> &site_vec) noexcept;
   int parse_block_site_antenna(
@@ -142,10 +142,12 @@ public:
   int parse_block_solution_estimate(
       std::vector<sinex::SolutionEstimate> &site_vec) noexcept;
   int parse_block_solution_estimate(
-      std::vector<sinex::SolutionEstimate> &estimates_vec, 
-      const std::vector<sinex::SiteId>& sites_vec) noexcept;
+      std::vector<sinex::SolutionEstimate> &estimates_vec,
+      const std::vector<sinex::SiteId> &sites_vec) noexcept;
 
-  int get_solution_estimate(const char *site_codes[], const dso::datetime<dso::seconds> &t, bool error_if_missing=false) noexcept;
+  int get_solution_estimate(const char *site_codes[],
+                            const dso::datetime<dso::seconds> &t,
+                            bool error_if_missing = false) noexcept;
 
   Sinex(const char *fn);
   Sinex(const Sinex &) = delete;
@@ -158,6 +160,6 @@ public:
 
 }; // Sinex
 
-}// dso
+} // namespace dso
 
 #endif //__SINEX_FILE_PARSER_HPP__

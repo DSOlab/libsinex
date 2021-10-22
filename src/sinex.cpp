@@ -8,10 +8,10 @@
 
 dso::Sinex::Sinex(const char *fn)
     : m_filename(std::string(fn)), m_stream(fn, std::ios::in) {
-        if (this->mark_blocks()) {
-          throw std::runtime_error("[ERROR] Failed to parse blocks in SINEX file\n");
-        }
-      }
+  if (this->mark_blocks()) {
+    throw std::runtime_error("[ERROR] Failed to parse blocks in SINEX file\n");
+  }
+}
 
 int match_block_header(const char *str) noexcept {
   for (int i = 0; i < dso::sinex::block_names_size; i++) {
@@ -26,14 +26,17 @@ int match_block_header(const char *str) noexcept {
 int dso::Sinex::mark_blocks() noexcept {
   if (!m_stream.is_open())
     return 1;
-  
+
   m_blocks.clear();
   m_blocks.reserve(10);
-  
+
   char line[sinex::max_sinex_chars];
 
   if (!m_stream.getline(line, sinex::max_sinex_chars)) {
-    fprintf(stderr, "[ERROR] Failed parsing blocks; failed to read SINEX (traceback: %s)\n", __func__);
+    fprintf(
+        stderr,
+        "[ERROR] Failed parsing blocks; failed to read SINEX (traceback: %s)\n",
+        __func__);
     return 1;
   }
 
@@ -43,8 +46,10 @@ int dso::Sinex::mark_blocks() noexcept {
     if (*line == '+') {
       int idx = match_block_header(line + 1);
       if (idx < 0) {
-        fprintf(stderr, "[ERROR] Could not match block with title \'%s\' (traceback: %s)\n",
-                line + 1, __func__);
+        fprintf(
+            stderr,
+            "[ERROR] Could not match block with title \'%s\' (traceback: %s)\n",
+            line + 1, __func__);
         return 1;
       }
 #if __cplusplus > 201703L
@@ -59,7 +64,9 @@ int dso::Sinex::mark_blocks() noexcept {
   }
 
   if (!m_stream.eof()) {
-    fprintf(stderr, "[ERROR] Seems SINEX was not read till EOF! (traceback: %s)\n", __func__);
+    fprintf(stderr,
+            "[ERROR] Seems SINEX was not read till EOF! (traceback: %s)\n",
+            __func__);
     return 1;
   }
 
@@ -90,8 +97,7 @@ void dso::Sinex::print_members() const {
   printf("num of estimated  %5d\n", m_num_estimates);
   printf("data start at     %s\n",
          dso::strftime_ymd_hmfs(m_data_start).c_str());
-  printf("data end at       %s\n",
-         dso::strftime_ymd_hmfs(m_data_stop).c_str());
+  printf("data end at       %s\n", dso::strftime_ymd_hmfs(m_data_stop).c_str());
 }
 #endif
 
@@ -108,7 +114,8 @@ int dso::Sinex::parse_first_line() noexcept {
   m_stream.getline(line, sinex::max_sinex_chars);
 
   if (std::strncmp(line, "%=SNX", 5)) {
-    fprintf(stderr, "[ERROR] Invalid first SINEX line (traceback: %s)\n", __func__);
+    fprintf(stderr, "[ERROR] Invalid first SINEX line (traceback: %s)\n",
+            __func__);
     fprintf(stderr, "[ERROR] Expected field \'%%=SNX\' found \'%5s\'\n", line);
     return 1;
   }
@@ -116,34 +123,38 @@ int dso::Sinex::parse_first_line() noexcept {
   m_version = std::strtof(line + 5, &end);
   if (end == line + 5)
     return 1;
-  
+
   std::memcpy(m_agency, line + 11, 3);
-  
+
   try {
     m_created_at = sinex::parse_snx_date(line + 14);
   } catch (std::exception &) {
-        fprintf(stderr, "[ERROR] Failed to parse date from line: \"%s\" (traceback: %s)\n", line, __func__);
+    fprintf(stderr,
+            "[ERROR] Failed to parse date from line: \"%s\" (traceback: %s)\n",
+            line, __func__);
     return 1;
   }
-  
+
   std::memcpy(m_data_agency, line + 28, 3);
-  
+
   try {
     m_data_start = sinex::parse_snx_date(line + 31);
     m_data_stop = sinex::parse_snx_date(line + 44);
   } catch (std::exception &) {
-        fprintf(stderr, "[ERROR] Failed to parse date from line: \"%s\" (traceback: %s)\n", line, __func__);
+    fprintf(stderr,
+            "[ERROR] Failed to parse date from line: \"%s\" (traceback: %s)\n",
+            line, __func__);
     return 1;
   }
-  
+
   m_obs_code = line[58];
-  
+
   m_num_estimates = std::strtol(line + 60, &end, 10);
   if (end == line + 60)
     return 1;
-  
+
   m_constraint_code = line[66];
-  
+
   *m_sol_contents = line[68];
   // up to 6 available solution contents chars
   std::size_t lidx = 70, aidx = 1;
