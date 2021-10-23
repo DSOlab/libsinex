@@ -50,5 +50,9 @@ int main(int argc, char *argv[]) {
            e.m_param_type, e.m_site_code, e.m_estimate, e.m_std_deviation);
   printf("Parsing estimates returned %d\n", error);
 
+  // de-allocate memory
+  for (int i=0; i<num_sites; i++) delete[] sites[i];
+  delete[] sites;
+
   return 0;
 }

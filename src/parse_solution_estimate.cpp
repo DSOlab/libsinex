@@ -47,7 +47,7 @@ int dso::Sinex::parse_block_solution_estimate(
   if (!site_vec.empty())
     site_vec.clear();
 
-  // go to SITE/ANTENNA  block
+  // go to SOLUTION/ESTIMATE  block
   if (goto_block("SOLUTION/ESTIMATE"))
     return 1;
 
@@ -99,7 +99,7 @@ int dso::Sinex::parse_block_solution_estimate(
   if (est_vec.capacity() < site_vec.size() * 6)
     est_vec.reserve(site_vec.size() * 6);
 
-  // go to SITE/ANTENNA  block
+  // go to SOLUTION/ESTIMATE block
   if (goto_block("SOLUTION/ESTIMATE"))
     return 1;
 

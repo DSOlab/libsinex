@@ -10,11 +10,9 @@ constexpr long max_sinex_lines = 1'000'000;
 
 dso::Sinex::Sinex(const char *fn)
     : m_filename(std::string(fn)), m_stream(fn, std::ios::in) {
-  printf(">> initializing SINEX in constructor ... %s\n", __func__);
   if (this->mark_blocks()) {
     throw std::runtime_error("[ERROR] Failed to parse blocks in SINEX file\n");
   }
-  printf("%s done\n", __func__);
 }
 
 int match_block_header(const char *str) noexcept {
