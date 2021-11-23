@@ -15,7 +15,7 @@ libsinex_la_CXXFLAGS = \
 	-Wdisabled-optimization \
 	-DDEBUG
 
-dist_include_HEADERS = \
+pkginclude_HEADERS = \
 	sinex_details.hpp \
         sinex.hpp
 
