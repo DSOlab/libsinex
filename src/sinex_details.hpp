@@ -3,6 +3,7 @@
 
 #include "ggdatetime/dtcalendar.hpp"
 #include <algorithm>
+#include <cstring>
 
 namespace dso::sinex {
 

@@ -158,6 +158,9 @@ public:
   Sinex(const char *fn);
   Sinex(const Sinex &) = delete;
   Sinex &operator=(const Sinex &) = delete;
+  ~Sinex() noexcept {
+    if (m_stream.is_open()) m_stream.close();
+  }
 
 #ifdef DEBUG
   void print_members() const;
