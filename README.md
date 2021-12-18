@@ -1,4 +1,7 @@
 # libsinex
+
+[![Build Status](https://app.travis-ci.com/xanthospap/libsinex.svg?branch=main)](https://app.travis-ci.com/xanthospap/libsinex)
+
 A library to handle Solution (Software/technique) INdependent EXchange Format, SINEX.
 For an detailed description of SINEX, checkout the relevant 
 [IERS webpage](https://www.iers.org/IERS/EN/Organization/AnalysisCoordinator/SinexFormat/sinex.html).
