@@ -1,0 +1,27 @@
+language: c++
+dist: bionic
+compiler:
+  - gcc
+  - clang
+
+before_install:
+  - sudo apt-get install -y scons
+
+before_script:
+  - git clone https://github.com/xanthospap/ggdatetime.git && cd ggdatetime
+  - mv src/Makefile.am.production src/Makefile.am
+  - autoreconf -if
+  - ./configure
+  - make
+  - sudo make install
+  - git clone https://github.com/xanthospap/ggeodesy.git && cd ggeodesy
+  - mv src/Makefile.am.production src/Makefile.am
+  - autoreconf -if
+  - ./configure
+  - make
+  - sudo make install
+  - sudo ldconfig
+
+script:
+  - scons
+  - scons debug=1
