@@ -23,5 +23,6 @@ before_script:
   - sudo ldconfig
 
 script:
+  - cd ../
   - scons
   - scons debug=1
