@@ -15,7 +15,7 @@ before_script:
   - make
   - sudo make install
   - git clone https://github.com/xanthospap/ggeodesy.git && cd ggeodesy
-  - mv src/Makefile.am.production src/Makefile.am
+  - ./install_setup.py
   - autoreconf -if
   - ./configure
   - make
