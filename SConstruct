@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os, sys, glob
 
 ## Prefic for install(ed) files
