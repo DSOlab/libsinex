@@ -1,7 +1,7 @@
 #ifndef __SINEX_FILE_DETAILS_HPP__
 #define __SINEX_FILE_DETAILS_HPP__
 
-#include "ggdatetime/dtcalendar.hpp"
+#include "datetime/dtcalendar.hpp"
 #include <algorithm>
 #include <cstring>
 
