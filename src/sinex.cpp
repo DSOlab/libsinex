@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <stdexcept>
 #ifdef DEBUG
-#include "ggdatetime/datetime_write.hpp"
+#include "datetime/datetime_write.hpp"
 #endif
 
 constexpr long max_sinex_lines = 1'000'000;
