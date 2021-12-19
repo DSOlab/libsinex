@@ -16,11 +16,7 @@ before_script:
   - sudo make install
   - cd ../
   - git clone https://github.com/xanthospap/ggeodesy.git && cd ggeodesy
-  - ./install_setup.py
-  - autoreconf -if
-  - ./configure
-  - make
-  - sudo make install
+  - sudo scons install
   - sudo ldconfig
   - cd ../
 
