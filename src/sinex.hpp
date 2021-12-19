@@ -6,7 +6,7 @@
 #include <vector>
 #ifdef DEBUG
 #include "ggdatetime/datetime_write.hpp"
-#include "ggeodesy/units.hpp"
+#include "geodesy/units.hpp"
 #include <cstdio>
 #endif
 

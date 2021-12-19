@@ -1,5 +1,5 @@
 #include "sinex.hpp"
-#include "ggeodesy/units.hpp"
+#include "geodesy/units.hpp"
 #include <cstdlib>
 #include <stdexcept>
 #ifdef DEBUG
