@@ -17,10 +17,13 @@ To install and use the library, you will need:
 Installation is straightforward, using the [scons](https://scons.org/) build system. You will need a C++17 compliant compiler. 
 To install, just type:
 ```
+## build ...
 scons
+## install ...
+sudo scond install
 ```
 
-or
+When building, you can use the `debug=1` option to trigger a `DEBUG` build:
 ```
 scons debug=1
 ```
