@@ -105,17 +105,20 @@ struct RejectionInterval {
   dso::datetime<dso::seconds> stop;
   char m_soln_id[5] = {'\0'};
   char comments[64] = {'\0'};
-  char T,M,A;
+  char T, M, A;
 };
 
+// Unofficial SINEX block used in dpod*.snx
+// SOLUTION/DATA_REJECT  : lists periods of time rejected in the combination
 struct DataReject {
   char m_site_code[5] = {'\0'};
   char m_point_code[3] = {'\0'};
+  ///< not sorted, may have overlapping intervals
   std::vector<RejectionInterval> m_intervals;
-  DataReject(int size_hint=0) {
-    m_intervals.reserve(size_hint?size_hint:2);
+  DataReject(int size_hint = 0) {
+    m_intervals.reserve(size_hint ? size_hint : 2);
   }
-  void add_rejection_interval(const RejectionInterval& ri);
+  void add_rejection_interval(const RejectionInterval &ri);
 }; // DataReject
 
 } // namespace sinex
@@ -155,16 +158,16 @@ public:
   int parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
                           int num_sites_requested = 0,
                           char **sites = nullptr) noexcept;
-  
+
   int parse_block_site_receiver(
       std::vector<sinex::SiteReceiver> &site_vec) noexcept;
-  
+
   int parse_block_site_antenna(
       std::vector<sinex::SiteAntenna> &site_vec) noexcept;
-  
+
   int parse_block_solution_estimate(
       std::vector<sinex::SolutionEstimate> &site_vec) noexcept;
-  
+
   int parse_block_solution_estimate(
       std::vector<sinex::SolutionEstimate> &estimates_vec,
       const std::vector<sinex::SiteId> &sites_vec) noexcept;
@@ -172,9 +175,8 @@ public:
   int parse_block_data_reject(
       std::vector<sinex::DataReject> &out_vec,
       const std::vector<sinex::SiteId> &site_vec) noexcept;
-  
-  int parse_block_data_reject(
-      std::vector<sinex::DataReject> &out_vec) noexcept;
+
+  int parse_block_data_reject(std::vector<sinex::DataReject> &out_vec) noexcept;
 
   int get_solution_estimate(const char *site_codes[],
                             const dso::datetime<dso::seconds> &t,
@@ -184,7 +186,8 @@ public:
   Sinex(const Sinex &) = delete;
   Sinex &operator=(const Sinex &) = delete;
   ~Sinex() noexcept {
-    if (m_stream.is_open()) m_stream.close();
+    if (m_stream.is_open())
+      m_stream.close();
   }
 
 #ifdef DEBUG

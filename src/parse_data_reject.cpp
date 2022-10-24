@@ -69,7 +69,7 @@ auto search_datareject_vec(const std::vector<dso::sinex::DataReject> &out_vec,
 
 int dso::Sinex::parse_block_data_reject(
     std::vector<sinex::DataReject> &out_vec) noexcept {
-  
+
   // clear the vector
   if (!out_vec.empty())
     out_vec.clear();
@@ -77,8 +77,6 @@ int dso::Sinex::parse_block_data_reject(
   // go to SOLUTION/ESTIMATE block
   if (goto_block("SOLUTION/DATA_REJECT"))
     return 1;
-
-  printf("I am in the block!\n");
 
   // next line to be read should be '+SOLUTION/DATA_REJECT'
   char line[sinex::max_sinex_chars];
@@ -100,31 +98,31 @@ int dso::Sinex::parse_block_data_reject(
 
     if (*line != '*') { // non-comment line
 
-        printf("read line [%s]\n", line);
+      if (parse_data_reject_line(line, drIntrvl, m_data_start, m_data_stop)) {
+        return 1;
+      }
 
-        if (parse_data_reject_line(line, drIntrvl, m_data_start, m_data_stop)) {
-            return 1;
-        }
+      // check if we already have rejected intervals for this site
+      auto out_vec_it = search_datareject_vec(
+          out_vec, line); // this is an iterator to a const instance
 
-        // check if we already have rejected intervals for this site
-        auto out_vec_it = search_datareject_vec(out_vec, line); // this is an iterator to a const instance
-
-        if (out_vec_it == out_vec.cend()) {
-            sinex::DataReject newblock;
-            // GCC 8 added a -Wstringop-truncation warning but i want to do 
-            // exactly this, so fuck off
-            #pragma GCC diagnostic push
-            #pragma GCC diagnostic ignored "-Wstringop-truncation"
-            std::strncpy(newblock.m_site_code, line + scode_start, 4);
-            std::strncpy(newblock.m_point_code, line + spt_start, 2);
-            #pragma GCC diagnostic pop
-            newblock.add_rejection_interval(drIntrvl);
-            out_vec.emplace_back(newblock);
-        } else {
-            // first casat the iterator to an iterator to a non-const instance ...
-            auto ncit = out_vec.begin() + std::distance(out_vec.cbegin(), out_vec_it);
-            ncit->add_rejection_interval(drIntrvl);
-        }
+      if (out_vec_it == out_vec.cend()) {
+        sinex::DataReject newblock;
+// GCC 8 added a -Wstringop-truncation warning but i want to do
+// exactly this, so fuck off
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
+        std::strncpy(newblock.m_site_code, line + scode_start, 4);
+        std::strncpy(newblock.m_point_code, line + spt_start, 2);
+#pragma GCC diagnostic pop
+        newblock.add_rejection_interval(drIntrvl);
+        out_vec.emplace_back(newblock);
+      } else {
+        // first cast the iterator to an iterator to a non-const instance ...
+        auto ncit =
+            out_vec.begin() + std::distance(out_vec.cbegin(), out_vec_it);
+        ncit->add_rejection_interval(drIntrvl);
+      }
     } // non-comment line
     ++ln_count;
   } // end of block
@@ -143,7 +141,7 @@ int dso::Sinex::parse_block_data_reject(
 int dso::Sinex::parse_block_data_reject(
     std::vector<sinex::DataReject> &out_vec,
     const std::vector<sinex::SiteId> &site_vec) noexcept {
-  
+
   // clear the vector
   if (!out_vec.empty())
     out_vec.clear();
@@ -187,27 +185,29 @@ int dso::Sinex::parse_block_data_reject(
       if (it != site_vec.cend()) {
 
         if (parse_data_reject_line(line, drIntrvl, m_data_start, m_data_stop)) {
-            return 1;
+          return 1;
         }
 
         // check if we already have rejected intervals for this site
-        auto out_vec_it = search_datareject_vec(out_vec, line); // this is an iterator to a const instance
+        auto out_vec_it = search_datareject_vec(
+            out_vec, line); // this is an iterator to a const instance
 
         if (out_vec_it == out_vec.cend()) {
-            sinex::DataReject newblock;
-            // GCC 8 added a -Wstringop-truncation warning but i want to do 
-            // exactly this, so fuck off
-            #pragma GCC diagnostic push
-            #pragma GCC diagnostic ignored "-Wstringop-truncation"
-            std::strncpy(newblock.m_site_code, line + scode_start, 4);
-            std::strncpy(newblock.m_point_code, line + spt_start, 2);
-            #pragma GCC diagnostic pop
-            newblock.add_rejection_interval(drIntrvl);
-            out_vec.emplace_back(newblock);
+          sinex::DataReject newblock;
+// GCC 8 added a -Wstringop-truncation warning but i want to do
+// exactly this, so fuck off
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
+          std::strncpy(newblock.m_site_code, line + scode_start, 4);
+          std::strncpy(newblock.m_point_code, line + spt_start, 2);
+#pragma GCC diagnostic pop
+          newblock.add_rejection_interval(drIntrvl);
+          out_vec.emplace_back(newblock);
         } else {
-            // first casat the iterator to an iterator to a non-const instance ...
-            auto ncit = out_vec.begin() + std::distance(out_vec.cbegin(), out_vec_it);
-            ncit->add_rejection_interval(drIntrvl);
+          // first cast the iterator to an iterator to a non-const instance ...
+          auto ncit =
+              out_vec.begin() + std::distance(out_vec.cbegin(), out_vec_it);
+          ncit->add_rejection_interval(drIntrvl);
         }
       }
     } // non-comment line
