@@ -100,6 +100,24 @@ struct SolutionEstimate {
   // int parse_line(const char *line) noexcept;
 }; // SolutionEstimate
 
+struct RejectionInterval {
+  dso::datetime<dso::seconds> start;
+  dso::datetime<dso::seconds> stop;
+  char m_soln_id[5] = {'\0'};
+  char comments[64] = {'\0'};
+  char T,M,A;
+};
+
+struct DataReject {
+  char m_site_code[5] = {'\0'};
+  char m_point_code[3] = {'\0'};
+  std::vector<RejectionInterval> m_intervals;
+  DataReject(int size_hint=0) {
+    m_intervals.reserve(size_hint?size_hint:2);
+  }
+  void add_rejection_interval(const RejectionInterval& ri);
+}; // DataReject
+
 } // namespace sinex
 
 class Sinex {
@@ -150,6 +168,13 @@ public:
   int parse_block_solution_estimate(
       std::vector<sinex::SolutionEstimate> &estimates_vec,
       const std::vector<sinex::SiteId> &sites_vec) noexcept;
+
+  int parse_block_data_reject(
+      std::vector<sinex::DataReject> &out_vec,
+      const std::vector<sinex::SiteId> &site_vec) noexcept;
+  
+  int parse_block_data_reject(
+      std::vector<sinex::DataReject> &out_vec) noexcept;
 
   int get_solution_estimate(const char *site_codes[],
                             const dso::datetime<dso::seconds> &t,
