@@ -1,35 +1,40 @@
 #include "sinex.hpp"
-#include <cstdlib>
 #include <charconv>
+#include <cstdlib>
 
 namespace {
 
 const char *skip_ws(const char *line) noexcept {
-  while (*line && *line == ' ') ++line;
+  while (*line && *line == ' ')
+    ++line;
   return line;
 }
 
-//*Code PT SOLN T Data_start__ Data_end____ AXE Up______ North___ East____        
-// ADEA  A    1 D 93:003:00000 98:084:11545 UNE   0.5100   0.0000   0.0000        
-int parse_eccentricity_line(const char *line, dso::sinex::SiteEccentricity & ecc, const dso::datetime<dso::seconds>& sinex_data_stop) noexcept {
+//*Code PT SOLN T Data_start__ Data_end____ AXE Up______ North___ East____
+// ADEA  A    1 D 93:003:00000 98:084:11545 UNE   0.5100   0.0000   0.0000
+int parse_eccentricity_line(
+    const char *line, dso::sinex::SiteEccentricity &ecc,
+    const dso::datetime<dso::seconds> &sinex_data_stop) noexcept {
   const int sz = std::strlen(line);
-  if (sz < 70) return 9;
+  if (sz < 70)
+    return 9;
 
   auto ExtrapolateAfter(sinex_data_stop);
   ExtrapolateAfter.remove_seconds(dso::seconds(1));
-  
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-truncation"
-  std::strncpy(ecc.m_id, line+1, 4);
-  std::strncpy(ecc.pt, line+6, 2);
+  std::strncpy(ecc.m_id, line + 1, 4);
+  std::strncpy(ecc.pt, line + 6, 2);
 #pragma GCC diagnostic pop
-  
-  auto fc = std::from_chars(skip_ws(line+8), line+sz, ecc.soln);
-  if (fc.ec != std::errc{}) return 8;
-  
+
+  auto fc = std::from_chars(skip_ws(line + 8), line + sz, ecc.soln);
+  if (fc.ec != std::errc{})
+    return 8;
+
   const char *start = ++(fc.ptr);
   ecc.T = *fc.ptr;
-  
+
   start = fc.ptr + 2;
   try {
     ecc.start = dso::sinex::parse_snx_date(start);
@@ -39,11 +44,12 @@ int parse_eccentricity_line(const char *line, dso::sinex::SiteEccentricity & ecc
             line, __func__);
     return 7;
   }
-  
+
   start += 13;
   try {
     ecc.stop = dso::sinex::parse_snx_date(start);
-    if (ecc.stop >= ExtrapolateAfter) ecc.stop = dso::datetime<dso::seconds>::max();
+    if (ecc.stop >= ExtrapolateAfter)
+      ecc.stop = dso::datetime<dso::seconds>::max();
   } catch (std::exception &) {
     fprintf(stderr,
             "[ERROR] Failed to parse date from line: \"%s\" (traceback: %s)\n",
@@ -53,17 +59,18 @@ int parse_eccentricity_line(const char *line, dso::sinex::SiteEccentricity & ecc
 
   start += 13;
   std::strncpy(ecc.axe, start, 3);
-  
+
   start += 3;
-  for (int i=0; i<3; i++) {
-    fc = std::from_chars(skip_ws(start), line+sz, ecc.une[i]);
-    if (fc.ec != std::errc{}) return 5;
+  for (int i = 0; i < 3; i++) {
+    fc = std::from_chars(skip_ws(start), line + sz, ecc.une[i]);
+    if (fc.ec != std::errc{})
+      return 5;
     start = fc.ptr;
   }
-  
+
   return 0;
 }
-}// unnamed namespace
+} // unnamed namespace
 
 int dso::Sinex::parse_block_site_eccentricity(
     std::vector<sinex::SiteEccentricity> &out_vec,
@@ -105,7 +112,10 @@ int dso::Sinex::parse_block_site_eccentricity(
 
       // parse the record line
       if (parse_eccentricity_line(line, secc, m_data_stop)) {
-        fprintf(stderr, "[ERROR] Failed parsing eccentricity line: [%s] (traceback: %s)\n", line, __func__);
+        fprintf(
+            stderr,
+            "[ERROR] Failed parsing eccentricity line: [%s] (traceback: %s)\n",
+            line, __func__);
         return 1;
       }
 
@@ -117,12 +127,12 @@ int dso::Sinex::parse_block_site_eccentricity(
           });
 
       // the station is in the list and the time interval fits ...
-      if (it != site_vec.cend() && (t>=secc.start && t<secc.stop)) {
+      if (it != site_vec.cend() && (t >= secc.start && t < secc.stop)) {
         out_vec.push_back(secc);
       }
     } // non-comment line
-   
-   ++ln_count;
+
+    ++ln_count;
   } // end of block
 
   if (ln_count >= max_lines_in_block) {
