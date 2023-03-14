@@ -96,8 +96,6 @@ struct SolutionEstimate {
   char m_constraint_code = '\0';
   double m_estimate, m_std_deviation;
   dso::datetime<dso::seconds> m_epoch{};
-
-  // int parse_line(const char *line) noexcept;
 }; // SolutionEstimate
 
 struct RejectionInterval {
@@ -106,6 +104,21 @@ struct RejectionInterval {
   char m_soln_id[5] = {'\0'};
   char comments[64] = {'\0'};
   char T, M, A;
+};
+
+struct SiteEccentricity {
+/*
+*Code PT SOLN T Data_start__ Data_end____ AXE Up______ North___ East____
+ ADEA  A    1 D 93:003:00000 98:084:11545 UNE   0.5100   0.0000   0.0000
+*/
+  dso::datetime<dso::seconds> start;
+  dso::datetime<dso::seconds> stop;
+  double une[3] = {0e0,0e0,0e0};
+  char m_id[5] = {'\0'};
+  char pt[2] = {'\0'};
+  char axe[4] = {'\0'};
+  int soln;
+  char T;
 };
 
 // Unofficial SINEX block used in dpod*.snx
@@ -174,6 +187,11 @@ public:
 
   int parse_block_data_reject(
       std::vector<sinex::DataReject> &out_vec,
+      const std::vector<sinex::SiteId> &site_vec) noexcept;
+  
+  int parse_block_site_eccentricity(
+      std::vector<sinex::SiteEccentricity> &out_vec,
+      const dso::datetime<dso::seconds> &t,
       const std::vector<sinex::SiteId> &site_vec) noexcept;
 
   int parse_block_data_reject(std::vector<sinex::DataReject> &out_vec) noexcept;
