@@ -177,8 +177,8 @@ int dso::Sinex::parse_block_data_reject(
       // check if the site is of interest, aka included in site_vec
       auto it = std::find_if(
           site_vec.cbegin(), site_vec.cend(), [&](const sinex::SiteId &site) {
-            return !std::strncmp(site.m_site_code, line + scode_start, 4) &&
-                   !std::strncmp(site.m_point_code, line + spt_start, 2);
+            return !std::strncmp(site.site_code(), line + scode_start, 4) &&
+                   !std::strncmp(site.point_code(), line + spt_start, 2);
           });
 
       // the station is in the list

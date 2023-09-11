@@ -9,7 +9,7 @@ namespace dso::sinex {
 
 constexpr int max_sinex_chars = 128;
 
-constexpr dso::datetime<dso::seconds> missing_sinex_date =
+constexpr const dso::datetime<dso::seconds> missing_sinex_date =
     dso::datetime<dso::seconds>{dso::year(0), dso::day_of_year(0),
                                 dso::seconds(0L)};
 
@@ -112,15 +112,6 @@ const char *const parameter_types[] = {
     "TLOG_U",
 };
 constexpr int parameter_types_size = sizeof(parameter_types) / sizeof(char *);
-
-/// @brief Resolve a string of type YY:DOY:SECOD to a datetime instance
-/// @param[in] str A string of type: YY:DDD:SECOD, where yy is the year, DDD is
-///            the day of year and SECOD the seconds of day. The string can
-///            have any number of whitespace characters at the begining. After
-///            the SECOD field, the string must have a non-numeric character.
-/// @return The datetime instance represented by the input string, in resolution
-///         dso::seconds.
-dso::datetime<dso::seconds> parse_snx_date(const char *str);
 
 /// @brief Match a given string to any string in parameter_types array
 /// @param[in] ptype String to match

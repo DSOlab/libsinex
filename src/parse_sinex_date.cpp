@@ -1,38 +1,41 @@
-#include "sinex_details.hpp"
-#include <cstdlib>
+#include "sinex.hpp"
+#include <charconv>
+#include <cstdio>
 
-/// @brief Resolve a string of type YY:DOY:SECOD to a datetime instance
-/// @param[in] str A string of type: YY:DDD:SECOD, where yy is the year, DDD is
-///            the day of year and SECOD the seconds of day. The string can
-///            have any number of whitespace characters at the begining. After
-///            the SECOD field, the string must have a non-numeric character.
-/// @return The datetime instance represented by the input string, in resolution
-///         dso::seconds.
-dso::datetime<dso::seconds> dso::sinex::parse_snx_date(const char *str) {
-  char *end;
-  const char *start = str;
+int dso::sinex::parse_sinex_date(const char *str,
+                                 const dso::datetime<dso::seconds> &tdefault,
+                                 dso::datetime<dso::seconds> &t) noexcept {
+  int yr, doy;
+  long sec;
+  int error = 0;
 
-  int iyr = std::strtol(start, &end, 10);
-  if (start == end || *end != ':') {
-    throw std::runtime_error(
-        "[ERROR] Failed resolving datetime in SINEX file (#1).\n");
+  /* skip leading whitespaces */
+  while (*str && *str == ' ')
+    ++str;
+
+  /* end of string */
+  const char *end = str + std::strlen(str);
+
+  /* resolve numeric values year, doy, seconds of day */
+  auto cr = std::from_chars(str, end, yr);
+  error += (cr.ec != std::errc{});
+  str = cr.ptr + 1;
+  cr = std::from_chars(str, end, doy);
+  error += (cr.ec != std::errc{});
+  str = cr.ptr + 1;
+  cr = std::from_chars(str, end, sec);
+  error += (cr.ec != std::errc{});
+
+  if (error)
+    return error;
+
+  t = tdefault;
+  if (!((yr == 0) && (doy == 0) && (sec == 0))) {
+    yr += (yr <= 50) ? 2000 : 1900;
+    /* resolve datetime */
+    t = dso::datetime<dso::seconds>(dso::year(yr), dso::day_of_year(doy),
+                                    dso::seconds(sec));
   }
-  iyr += (iyr <= 50) ? 2000 : 1900;
 
-  start = end + 1;
-  int doy = std::strtol(start, &end, 10);
-  if (start == end || *end != ':') {
-    throw std::runtime_error(
-        "[ERROR] Failed resolving datetime in SINEX file (#2).\n");
-  }
-
-  start = end + 1;
-  long isc = std::strtol(start, &end, 10);
-  if (start == end) {
-    throw std::runtime_error(
-        "[ERROR] Failed resolving datetime in SINEX file (#3).\n");
-  }
-
-  return dso::datetime<dso::seconds>{dso::year(iyr), dso::day_of_year(doy),
-                                     dso::seconds(isc)};
+  return 0;
 }

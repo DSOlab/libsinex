@@ -1,6 +1,7 @@
 #include "sinex.hpp"
 #include <cstdlib>
 
+namespace {
 constexpr int max_lines_in_block = 10000;
 
 int parse_solution_estimate_line(
@@ -40,6 +41,7 @@ int parse_solution_estimate_line(
 
   return 0;
 }
+} /* anonymous namespace */
 
 int dso::Sinex::parse_block_solution_estimate(
     std::vector<sinex::SolutionEstimate> &site_vec) noexcept {
@@ -125,8 +127,8 @@ int dso::Sinex::parse_block_solution_estimate(
       // check if the site is of interest, aka included in site_vec
       auto it = std::find_if(
           site_vec.cbegin(), site_vec.cend(), [&](const sinex::SiteId &site) {
-            return !std::strncmp(site.m_site_code, line + 14, 4) &&
-                   !std::strncmp(site.m_point_code, line + 19, 2);
+            return !std::strncmp(site.site_code(), line + 14, 4) &&
+                   !std::strncmp(site.point_code(), line + 19, 2);
           });
 
       if (it != site_vec.cend()) { // collect estimate

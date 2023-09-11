@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
   // print status
   printf("Number of sites collected: %lu\n", site_vec.size());
   for (auto const &s : site_vec)
-    printf("\tSite %s/%s Domes %s\n", s.m_site_code, s.m_point_code, s.m_domes);
+    printf("\tSite %s/%s Domes %s\n", s.site_code(), s.point_code(), s.domes());
   printf("Parsing block sites returned %d\n", error);
 
   // Ok, now we have all the info we need, for the sites we want estimates for
