@@ -32,8 +32,9 @@ int main() {
   sv2.emplace_back(p6);
   sv2.emplace_back(p9);
 
+  int index;
   for (auto const &str : sv1) {
-    if (!sinex::parameter_type_exists(str)) {
+    if (!sinex::parameter_type_exists(str, index)) {
       fprintf(stderr, "[ERROR] Failed to recognize parameter type \"%s\"\n",
               str);
       fprintf(stderr, "Policy = strict\n");
@@ -42,7 +43,7 @@ int main() {
   }
 
   for (auto const &str : sv2) {
-    if (sinex::parameter_type_exists(str)) {
+    if (sinex::parameter_type_exists(str, index)) {
       fprintf(stderr, "[ERROR] Matched erronuous parameter type \"%s\"\n", str);
       fprintf(stderr, "Policy = strict\n");
       return 1;
@@ -67,7 +68,7 @@ int main() {
 
   for (auto const &str : sv1) {
     if (!sinex::parameter_type_exists<
-            sinex::ParameterMatchPolicyType::NonStrict>(str)) {
+            sinex::ParameterMatchPolicyType::NonStrict>(str, index)) {
       fprintf(stderr, "[ERROR] Failed to recognize parameter type \"%s\"\n",
               str);
       fprintf(stderr, "Policy = non-strict\n");
@@ -77,7 +78,7 @@ int main() {
 
   for (auto const &str : sv2) {
     if (sinex::parameter_type_exists<
-            sinex::ParameterMatchPolicyType::NonStrict>(str)) {
+            sinex::ParameterMatchPolicyType::NonStrict>(str, index)) {
       fprintf(stderr, "[ERROR] Matched erronuous parameter type \"%s\"\n", str);
       fprintf(stderr, "Policy = non-strict\n");
       return 2;

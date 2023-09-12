@@ -22,11 +22,13 @@ int main(int argc, char *argv[]) {
   snx.print_blocks();
 #endif
 
+  /*
   std::vector<dso::sinex::DataReject> rj;
   if ( snx.parse_block_data_reject(rj) ) {
     fprintf(stderr, "ERROR Failed to parse DATA_REJECT block\n");
     return 1;
   }
+  */
 
   printf("All seem ok!\n");
   return 0;

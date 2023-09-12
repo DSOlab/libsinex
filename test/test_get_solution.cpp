@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
   printf("Number of sites collected: %lu\n", est_vec.size());
   for (auto const &e : est_vec)
     printf("\tParameter: [%s] Site: [%s] Estimate %.5f +/- %.5f\n",
-           e.m_param_type, e.m_site_code, e.m_estimate, e.m_std_deviation);
+           e.parameter_type(), e.site_code(), e.m_estimate, e.m_std_deviation);
   printf("Parsing estimates returned %d\n", error);
 
   // de-allocate memory

@@ -23,7 +23,8 @@ char dso::sinex::SinexObservationCode_to_char(
 }
 
 /* char to SinexObservationCode (may throw) */
-dso::sinex::SinexObservationCode char_to_SinexObservationCode(char c) {
+dso::sinex::SinexObservationCode
+dso::sinex::char_to_SinexObservationCode(char c) {
   switch (c) {
   case 'C':
     return dso::sinex::SinexObservationCode::COMBINED;
@@ -43,7 +44,8 @@ dso::sinex::SinexObservationCode char_to_SinexObservationCode(char c) {
 }
 
 /* char to SinexConstraintCode (may throw) */
-dso::sinex::SinexConstraintCode char_to_SinexConstraintCode(char c) {
+dso::sinex::SinexConstraintCode
+dso::sinex::char_to_SinexConstraintCode(char c) {
   switch (c) {
   case '0':
     return dso::sinex::SinexConstraintCode::FIXED;
