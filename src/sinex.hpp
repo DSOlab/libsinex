@@ -271,6 +271,43 @@ struct SolutionEstimate {
   dso::datetime<dso::seconds> m_epoch{};
 }; /* SolutionEstimate */
 
+/* class to hold a record line from block SOLUTION/EPOCH */
+struct SolutionEpoch {
+  static constexpr const int site_code_at = 0;  /* [0,4] including NULL */
+  static constexpr const int point_code_at = 5; /* [5,7] including NULL */
+  static constexpr const int soln_id_at = 8;    /* [8,12] including NULL */
+  char charbuf__[16] = {'\0'};
+  /* Site Code: Site code for which some parameters are estimated. [A4] */
+  char *site_code() noexcept {return charbuf__ + site_code_at;}
+  const char *site_code() const noexcept {return charbuf__ + site_code_at;}
+  /* Point Code: Point Code at a site for which some parameters are estimated. 
+   * [A2]
+   */
+  char *point_code() noexcept {return charbuf__ + point_code_at;}
+  const char *point_code() const noexcept {return charbuf__ + point_code_at;}
+  /* Solution ID: Solution Number at a Site/Point code for which some 
+   * parameters are estimated. [A4]
+   */
+  char *soln_id() noexcept {return charbuf__ + soln_id_at;}
+  const char *soln_id() const noexcept {return charbuf__ + soln_id_at;}
+  /* Time: Time since the antenna has been installed at the Site/Point. Value 
+   * 00:000:00000 indicates that the antenna has been installed at least since 
+   * the "File Epoch Start Time".
+   */
+  dso::datetime<dso::seconds> m_start{}; 
+  /* Time: Time until the antenna is installed at a Site/Point. Value 
+   * 00:000:00000 indicates that the antenna has been installed at least until 
+   * the "File Epoch End Time".
+   */
+  dso::datetime<dso::seconds> m_stop{};
+  /* Time: Mean time of the observations for which the solution (SPNO) is 
+   * derived.
+   */
+  dso::datetime<dso::seconds> m_mean{}; 
+  /* Observation Code: Identification of the observation technique used [A1] */
+  SinexObservationCode m_obscode;
+}; /* SolutionEstimate */
+
 /* class to hold a record line from block SOLUTION/DATA_REJECT.
  * Such a block is NOT documened within the IERS (ie the standard format). It 
  * is an extension used by e.g. the IDS to mark periods of time not included 
