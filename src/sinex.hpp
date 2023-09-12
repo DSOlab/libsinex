@@ -33,11 +33,23 @@ struct SinexBlockPosition {
  */
 enum class SinexObservationCode {COMBINED, DORIS, SLR, LLR, GNSS, VLBI};
 
+/* Enum class to hold SINEX Constraint Codes.
+ * Within SINEX files, this is a single character indicating the type of 
+ * constraints applied to a parameter. These can be:
+ * 0-fixed/tight constraints,
+ * 1-significant constraints,
+ * 2-unconstrained.
+ */
+enum class SinexConstraintCode {FIXED, SIGNIFICANT, UNCONSTRAINED};
+
 /* SinexObservationCode to char (may throw) */
 char SinexObservationCode_to_char(SinexObservationCode);
 
 /* char to SineObservationCode (may throw) */
 SinexObservationCode char_to_SinexObservationCode(char c);
+
+/* char to SinexConstraintCode (may throw) */
+SinexConstraintCode char_to_SinexConstraintCode(char c);
 
 /* Class to hold information stored (per line) in an SITE/ID Block */
 struct SiteId {
@@ -203,24 +215,106 @@ struct SiteAntenna {
 #endif
 }; /* SiteAntenna */
 
+/* class to hold a record line from block SOLUTION/ESTIMATE */
 struct SolutionEstimate {
+  static constexpr const int site_code_at = 0;  /* [0,4] including NULL */
+  static constexpr const int point_code_at = 5; /* [5,7] including NULL */
+  static constexpr const int soln_id_at = 8;    /* [8,12] including NULL */
+  static constexpr const int units_at = 13;     /* [13,17] including NULL */
+  char charbuf__[32] = {'\0'};
+  /* Estimated Parameters Index: Index of estimated parameters. [I5] */
   int m_index;
-  char m_param_type[7] = {'\0'};
-  char m_site_code[5] = {'\0'};
-  char m_point_code[3] = {'\0'};
-  char m_soln_id[5] = {'\0'};
-  char m_units[5] = {'\0'};
-  char m_constraint_code = '\0';
-  double m_estimate, m_std_deviation;
+  /* Parameter Type: Identification of the type of parameter. [A6] 
+   * This is a pointer to the respective type in the 
+   * dso::sinex::parameter_types[] array
+   */
+  const char *m_parameter_type;
+  const char *parameter_type() const {return m_parameter_type;}
+  /* Site Code: Site code for which some parameters are estimated. [A4] */
+  char *site_code() noexcept {return charbuf__ + site_code_at;}
+  const char *site_code() const noexcept {return charbuf__ + site_code_at;}
+  /* Point Code: Point Code at a site for which some parameters are estimated. 
+   * [A2]
+   */
+  char *point_code() noexcept {return charbuf__ + point_code_at;}
+  const char *point_code() const noexcept {return charbuf__ + point_code_at;}
+  /* Solution ID: Solution Number at a Site/Point code for which some 
+   * parameters are estimated. [A4]
+   */
+  char *soln_id() noexcept {return charbuf__ + soln_id_at;}
+  const char *soln_id() const noexcept {return charbuf__ + soln_id_at;}
+  /* Parameter Units: Units used for the estimates and sigmas. [A4] 
+   * The notations are:
+   * m (metres),
+   * m/y (metres per year),
+   * m/s2 (metres per second**2),
+   * ppb (parts per billion),
+   * ms (milliseconds),
+   * msd2 (milliseconds per day**2),
+   * mas (milli-arc-seconds),
+   * ma/d (milli-arc-seconds / day),
+   * rad (radians),
+   * rd/y (radians per year),
+   * rd/d (radians per day)
+   */
+  char *units() noexcept {return charbuf__ + units_at;}
+  const char *units() const noexcept {return charbuf__ + units_at;}
+  /* Constraint Code: Constraint applied to the parameter. [A1]*/
+  SinexConstraintCode m_constraint;
+  /* Parameter Estimate: Estimated value of the parameter. */
+  double m_estimate;
+  /* Parameter Standard Deviation: Estimated standard deviation for the 
+   * parameter.
+   */
+  double m_std_deviation;
+  /* Time: Epoch at which the estimated parameter is valid. */
   dso::datetime<dso::seconds> m_epoch{};
-}; // SolutionEstimate
+}; /* SolutionEstimate */
 
-struct RejectionInterval {
+/* class to hold a record line from block SOLUTION/DATA_REJECT.
+ * Such a block is NOT documened within the IERS (ie the standard format). It 
+ * is an extension used by e.g. the IDS to mark periods of time not included 
+ * in the combination. A SOLUTION/DATA_REJECT block is often included in the 
+ * dpod SINEX files.
+ */
+struct DataReject {
+  static constexpr const int site_code_at = 0;  /* [0,4] including NULL */
+  static constexpr const int point_code_at = 5; /* [5,7] including NULL */
+  static constexpr const int soln_id_at = 8;    /* [8,12] including NULL */
+  static constexpr const int colm_at= 13;    /* [13,13] including NULL */
+  static constexpr const int cola_at= 14;    /* [14,14] including NULL */
+  static constexpr const int comment_at= 15;    /* [15,63] including NULL */
+  char charbuf__[64] = {'\0'};
+  /* Site Code: Site code for which some parameters are estimated. [A4] */
+  char *site_code() noexcept {return charbuf__ + site_code_at;}
+  const char *site_code() const noexcept {return charbuf__ + site_code_at;}
+  /* Point Code: Point Code at a site for which some parameters are estimated. 
+   * [A2]
+   */
+  char *point_code() noexcept {return charbuf__ + point_code_at;}
+  const char *point_code() const noexcept {return charbuf__ + point_code_at;}
+  /* Solution ID: Solution Number at a Site/Point code for which some 
+   * parameters are estimated. [A4]
+   */
+  char *soln_id() noexcept {return charbuf__ + soln_id_at;}
+  const char *soln_id() const noexcept {return charbuf__ + soln_id_at;}
+  /*  Column tagged 'M'
+   */
+  char colm() const noexcept {return charbuf__[colm_at];}
+  char &colm() noexcept {return charbuf__[colm_at];}
+  /*  Column tagged 'A'
+   */
+  char cola() const noexcept {return charbuf__[cola_at];}
+  char &cola() noexcept {return charbuf__[cola_at];}
+  /* Comment string */
+  char *comment() noexcept {return charbuf__ + comment_at;}
+  const char *comment() const noexcept {return charbuf__ + comment_at;}
+  /* Time: start of rejection period */
   dso::datetime<dso::seconds> start;
+  /* Time: end of rejection period */
   dso::datetime<dso::seconds> stop;
-  char m_soln_id[5] = {'\0'};
-  char comments[64] = {'\0'};
-  char T, M, A;
+  /* Observation Code: Identification of the observation technique used [A1] */
+  SinexObservationCode m_obscode;
 };
 
 /* Class to hold information stored (per line) in a SITE/ECCENTRICITY Block */
@@ -274,19 +368,6 @@ struct SiteEccentricity {
   /* Observation Code: Identification of the observation technique used [A1] */
   SinexObservationCode m_obscode;
 }; /* SiteEccentricity */
-
-// Unofficial SINEX block used in dpod*.snx
-// SOLUTION/DATA_REJECT  : lists periods of time rejected in the combination
-struct DataReject {
-  char m_site_code[5] = {'\0'};
-  char m_point_code[3] = {'\0'};
-  ///< not sorted, may have overlapping intervals
-  std::vector<RejectionInterval> m_intervals;
-  DataReject(int size_hint = 0) {
-    m_intervals.reserve(size_hint ? size_hint : 2);
-  }
-  void add_rejection_interval(const RejectionInterval &ri);
-}; // DataReject
 
 /* @brief Parse a SINEX datetime string; accepted format is: "YY:DDD:SSSSS".
  * Time scale is "UTC", 
@@ -348,6 +429,7 @@ public:
   /* @brief Parse the whole SITE/RECEIVER Block off from the SINEX instance.
    * @param[inout] site_vec A vector of sinex::SiteReceiver instances, one 
    *               entry for each block line.
+   * @return Anything other than zero denotes an error
    */
   int parse_block_site_receiver(
       std::vector<sinex::SiteReceiver> &site_vec) noexcept;
@@ -355,13 +437,41 @@ public:
   int parse_block_site_antenna(
       std::vector<sinex::SiteAntenna> &site_vec) noexcept;
 
+  /* @brief Parse the whole SOLUTION/ESTIMATE Block off from the SINEX 
+   * instance.
+   * @param[inout] site_vec A vector of sinex::SolutionEstimate instances, one 
+   *               entry for each block line.
+   * @return Anything other than zero denotes an error
+   */
   int parse_block_solution_estimate(
       std::vector<sinex::SolutionEstimate> &site_vec) noexcept;
 
+  /* @brief Parse the whole SOLUTION/ESTIMATE Block off from the SINEX 
+   * instance and collect sinex::SolutionEstimate records for the SITES of 
+   * interest. The sites of interest are the ones included in the sites_vec 
+   * (input) vector. Any SOLUTION/ESTIMATE line for which we have a matching 
+   * SITE ID and POINT ID will be collected.
+   * @param[inout] site_vec A vector of sinex::SolutionEstimate instances, one 
+   *               entry for each block line.
+   * @param[in] sites_vec A vector of sinex::SiteId instances to match against,
+   *               using the SITE CODE and POINT CODE fields.
+   * @return Anything other than zero denotes an error
+   */
   int parse_block_solution_estimate(
       std::vector<sinex::SolutionEstimate> &estimates_vec,
       const std::vector<sinex::SiteId> &sites_vec) noexcept;
 
+  /* @brief Parse the whole SOLUTION/DATA_REJECT Block off from the SINEX 
+   * instance and collect sinex::DataReject instances for the SITES of 
+   * interest. The sites of interest are the ones included in the sites_vec 
+   * (input) vector. Any SOLUTION/DATA_REJECT line for which we have a matching 
+   * SITE ID and POINT ID will be collected.
+   * @param[inout] site_vec A vector of sinex::DataReject instances, one 
+   *               entry for each block line.
+   * @param[in] sites_vec A vector of sinex::SiteId instances to match against,
+   *               using the SITE CODE and POINT CODE fields.
+   * @return Anything other than zero denotes an error
+   */
   int parse_block_data_reject(
       std::vector<sinex::DataReject> &out_vec,
       const std::vector<sinex::SiteId> &site_vec) noexcept;
@@ -390,8 +500,6 @@ public:
       const dso::datetime<dso::seconds> &t,
       const std::vector<sinex::SiteId> &site_vec) noexcept;
 
-  int parse_block_data_reject(std::vector<sinex::DataReject> &out_vec) noexcept;
-
   int get_solution_estimate(const char *site_codes[],
                             const dso::datetime<dso::seconds> &t,
                             bool error_if_missing = false) noexcept;
@@ -409,8 +517,8 @@ public:
   void print_blocks() const noexcept;
 #endif
 
-}; // Sinex
+}; /* Sinex */
 
-} // namespace dso
+} /* namespace dso */
 
 #endif //__SINEX_FILE_PARSER_HPP__

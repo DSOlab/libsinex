@@ -6,7 +6,9 @@
 #include "datetime/datetime_write.hpp"
 #endif
 
+namespace {
 constexpr long max_sinex_lines = 1'000'000;
+}
 
 dso::Sinex::Sinex(const char *fn)
     : m_filename(std::string(fn)), m_stream(fn, std::ios::in) {
@@ -129,6 +131,7 @@ int dso::Sinex::parse_first_line() noexcept {
 
   std::memcpy(m_agency, line + 11, 3);
 
+  /*
   try {
     m_created_at = sinex::parse_snx_date(line + 14);
   } catch (std::exception &) {
@@ -137,17 +140,25 @@ int dso::Sinex::parse_first_line() noexcept {
             line, __func__);
     return 1;
   }
-
-  std::memcpy(m_data_agency, line + 28, 3);
-
-  try {
-    m_data_start = sinex::parse_snx_date(line + 31);
-    m_data_stop = sinex::parse_snx_date(line + 44);
-  } catch (std::exception &) {
+  */
+  if (sinex::parse_sinex_date(line + 14, dso::datetime<dso::seconds>::min(),
+                              m_created_at)) {
     fprintf(stderr,
             "[ERROR] Failed to parse date from line: \"%s\" (traceback: %s)\n",
             line, __func__);
-    return 1;
+  }
+
+  std::memcpy(m_data_agency, line + 28, 3);
+
+  int error = 0;
+  error += sinex::parse_sinex_date(
+      line + 31, dso::datetime<dso::seconds>::min(), m_data_start);
+  error += sinex::parse_sinex_date(
+      line + 44, dso::datetime<dso::seconds>::max(), m_data_stop);
+  if (error) {
+    fprintf(stderr,
+            "[ERROR] Failed to parse date from line: \"%s\" (traceback: %s)\n",
+            line, __func__);
   }
 
   m_obs_code = line[58];

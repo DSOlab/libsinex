@@ -121,8 +121,9 @@ constexpr int parameter_types_size = sizeof(parameter_types) / sizeof(char *);
 ///       characters beyond n, and they will not be considered; e.g.
 ///       ptype = "STAX" will match "STAX", but so will "STAXX",
 ///       "STAX " and "STAXfoobar".
-inline bool parameter_type_exists_impl(const char *ptype,
+inline bool parameter_type_exists_impl(const char *ptype, int &index,
                                        std::false_type) noexcept {
+  index = -1;
   auto it =
       std::find_if(parameter_types, parameter_types + parameter_types_size,
                    [&](const char *const str) {
@@ -130,6 +131,8 @@ inline bool parameter_type_exists_impl(const char *ptype,
                    });
   if (it == parameter_types + parameter_types_size)
     return false;
+
+  index = std::distance(parameter_types, it);
   return true;
 }
 
@@ -139,13 +142,15 @@ inline bool parameter_type_exists_impl(const char *ptype,
 ///       if and only if they are completely the same (up untill the
 ///       null terminating character). E.g. ptype = "STAX" will match
 ///       "STAX" but "STAXX", "STAX " and "STAXfoobar" will not match
-inline bool parameter_type_exists_impl(const char *ptype,
+inline bool parameter_type_exists_impl(const char *ptype, int &index,
                                        std::true_type) noexcept {
+  index = -1;
   auto it = std::find_if(
       parameter_types, parameter_types + parameter_types_size,
       [&](const char *const str) { return !std::strcmp(ptype, str); });
   if (it == parameter_types + parameter_types_size)
     return false;
+  index = std::distance(parameter_types, it);
   return true;
 }
 
@@ -179,8 +184,8 @@ struct ParameterMatchPolicy<ParameterMatchPolicyType::Strict> : std::true_type {
 /// ptype = "STAXfoobar" will match "STAX" only if Policy is
 /// NonStrict
 template <ParameterMatchPolicyType Policy = ParameterMatchPolicyType::Strict>
-bool parameter_type_exists(const char *ptype) noexcept {
-  return parameter_type_exists_impl(ptype, ParameterMatchPolicy<Policy>{});
+bool parameter_type_exists(const char *ptype, int &index) noexcept {
+  return parameter_type_exists_impl(ptype, index, ParameterMatchPolicy<Policy>{});
 }
 
 /// @brief Skip whitespace characters
