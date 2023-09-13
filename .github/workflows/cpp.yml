@@ -23,9 +23,19 @@ jobs:
         repository: xanthospap/ggdatetime
         path: ./ggdatetime
         #token: ${{ secrets.my_pat }}
+
+    - name: Check out geodesy
+      uses: actions/checkout@master
+      with:
+        repository: xanthospap/ggeodesy
+        path: ./ggeodesy
+        #token: ${{ secrets.my_pat }}
     
     - name: install ggdatetime
       run: cd ggdatetime && sudo scons install
+
+    - name: install geodesy
+      run: cd ggeodesy && sudo scons install
     
     - name: build (production)
       run: scons
