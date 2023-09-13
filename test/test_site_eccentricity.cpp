@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
   // print status
   printf("Number of sites collected: %lu\n", site_vec.size());
   for (auto const &s : site_vec)
-    printf("\tSite %s/%s Domes %s\n", s.m_site_code, s.m_point_code, s.m_domes);
+    printf("\tSite %s/%s Domes %s\n", s.site_code(), s.point_code(), s.domes());
   printf("Parsing block sites returned %d\n", error);
 
   // get the eccentricities
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 
   printf("Eccentricity per site:\n");
   for (const auto &e : ecc) {
-    printf("%s %.6f %.6f %.6f\n", e.m_id, e.une[0], e.une[1], e.une[2]);
+    printf("%s %.6f %.6f %.6f\n", e.soln_id(), e.une[0], e.une[1], e.une[2]);
   }
 
   printf("All seem ok!\n");

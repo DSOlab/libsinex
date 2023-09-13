@@ -1,5 +1,13 @@
 #include "sinex.hpp"
 #include <iostream>
+#include <stdexcept>
+
+/* Test program: Creating SINEX files 
+ *
+ * Given valid SINEX file, this program should return 0
+ * Given any non-SINEX file (including non-existent) it should throw and 
+ * return 1.
+ */ 
 
 int main(int argc, char *argv[]) {
   if (argc != 2) {
@@ -7,27 +15,18 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  dso::Sinex snx(argv[1]);
-
-  if (snx.parse_first_line()) {
-    fprintf(stderr, "[ERROR] Failed parsing first line!\n");
+  /* create an instance; could throw */
+  try {
+    dso::Sinex snx(argv[1]);
+    return 0;
+  } catch (std::exception &e) {
+    fprintf(stderr, "ERROR. Failed to create SINEX instance from file %s\n",
+            argv[1]);
+    fprintf(stderr, "%s\n", e.what());
     return 1;
   }
 
-#ifdef DEBUG
-  snx.print_members();
-#endif
-
-#ifdef DEBUG
-  snx.print_blocks();
-#endif
-
-  std::vector<dso::sinex::DataReject> rj;
-  if ( snx.parse_block_data_reject(rj) ) {
-    fprintf(stderr, "ERROR Failed to parse DATA_REJECT block\n");
-    return 1;
-  }
-
-  printf("All seem ok!\n");
+  /* all done */
+  printf("\n");
   return 0;
 }

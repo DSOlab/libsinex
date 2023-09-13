@@ -9,7 +9,7 @@ namespace dso::sinex {
 
 constexpr int max_sinex_chars = 128;
 
-constexpr dso::datetime<dso::seconds> missing_sinex_date =
+constexpr const dso::datetime<dso::seconds> missing_sinex_date =
     dso::datetime<dso::seconds>{dso::year(0), dso::day_of_year(0),
                                 dso::seconds(0L)};
 
@@ -113,15 +113,6 @@ const char *const parameter_types[] = {
 };
 constexpr int parameter_types_size = sizeof(parameter_types) / sizeof(char *);
 
-/// @brief Resolve a string of type YY:DOY:SECOD to a datetime instance
-/// @param[in] str A string of type: YY:DDD:SECOD, where yy is the year, DDD is
-///            the day of year and SECOD the seconds of day. The string can
-///            have any number of whitespace characters at the begining. After
-///            the SECOD field, the string must have a non-numeric character.
-/// @return The datetime instance represented by the input string, in resolution
-///         dso::seconds.
-dso::datetime<dso::seconds> parse_snx_date(const char *str);
-
 /// @brief Match a given string to any string in parameter_types array
 /// @param[in] ptype String to match
 /// @note This implementation will only consider the first n
@@ -130,8 +121,9 @@ dso::datetime<dso::seconds> parse_snx_date(const char *str);
 ///       characters beyond n, and they will not be considered; e.g.
 ///       ptype = "STAX" will match "STAX", but so will "STAXX",
 ///       "STAX " and "STAXfoobar".
-inline bool parameter_type_exists_impl(const char *ptype,
+inline bool parameter_type_exists_impl(const char *ptype, int &index,
                                        std::false_type) noexcept {
+  index = -1;
   auto it =
       std::find_if(parameter_types, parameter_types + parameter_types_size,
                    [&](const char *const str) {
@@ -139,6 +131,8 @@ inline bool parameter_type_exists_impl(const char *ptype,
                    });
   if (it == parameter_types + parameter_types_size)
     return false;
+
+  index = std::distance(parameter_types, it);
   return true;
 }
 
@@ -148,13 +142,15 @@ inline bool parameter_type_exists_impl(const char *ptype,
 ///       if and only if they are completely the same (up untill the
 ///       null terminating character). E.g. ptype = "STAX" will match
 ///       "STAX" but "STAXX", "STAX " and "STAXfoobar" will not match
-inline bool parameter_type_exists_impl(const char *ptype,
+inline bool parameter_type_exists_impl(const char *ptype, int &index,
                                        std::true_type) noexcept {
+  index = -1;
   auto it = std::find_if(
       parameter_types, parameter_types + parameter_types_size,
       [&](const char *const str) { return !std::strcmp(ptype, str); });
   if (it == parameter_types + parameter_types_size)
     return false;
+  index = std::distance(parameter_types, it);
   return true;
 }
 
@@ -188,8 +184,8 @@ struct ParameterMatchPolicy<ParameterMatchPolicyType::Strict> : std::true_type {
 /// ptype = "STAXfoobar" will match "STAX" only if Policy is
 /// NonStrict
 template <ParameterMatchPolicyType Policy = ParameterMatchPolicyType::Strict>
-bool parameter_type_exists(const char *ptype) noexcept {
-  return parameter_type_exists_impl(ptype, ParameterMatchPolicy<Policy>{});
+bool parameter_type_exists(const char *ptype, int &index) noexcept {
+  return parameter_type_exists_impl(ptype, index, ParameterMatchPolicy<Policy>{});
 }
 
 /// @brief Skip whitespace characters
