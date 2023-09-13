@@ -13,6 +13,6 @@ jobs:
 
     steps:
       - name: Download test SINEX files
-      - run: |
+        run: |
           wget ftp://doris.ign.fr/pub/doris/products/dpod/dpod2020/dpod2020_current.snx.Z -O ./dpod2020.snx.Z
           uncompress dpod2020_current.snx.Z
