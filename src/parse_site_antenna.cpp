@@ -44,7 +44,7 @@ int dso::Sinex::parse_block_site_antenna(
         fprintf(
             stderr,
             "[ERROR] Erronuous SINEX Observation Code \'%c\' (traceback: %s)\n",
-            line[19], __func__);
+            line[14], __func__);
         ++error;
       }
 

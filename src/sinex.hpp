@@ -426,7 +426,7 @@ int parse_sinex_date(const char *dtstr,
                      const dso::datetime<dso::seconds> &tdefault,
                      dso::datetime<dso::seconds> &t) noexcept;
 
-} // namespace sinex
+} /* namespace sinex */
 
 class Sinex {
 private:
@@ -536,6 +536,29 @@ public:
       std::vector<sinex::SiteEccentricity> &out_vec,
       const dso::datetime<dso::seconds> &t,
       const std::vector<sinex::SiteId> &site_vec) noexcept;
+
+  /* @brief Parse the SINEX block SOLUTION/EPOCHS and return a vector of 
+   *        sinex::SolutionEpoch instances for the sites included in site_vec, 
+   *        valid at the epoch t.
+   *        The sites of interest are the ones included in the sites_vec 
+   *        (input) vector. Any SOLUTION/EPOCHS line for which we have a 
+   *        matching SITE ID and POINT ID will be inspected. If the input time 
+   *        t matches the SOLUTION/EPOCHS recorded interval, then the record 
+   *        will be collcted and returned in the out_vec.
+   * @param[in] t Epoch for which we want the solution record (SOLUTION/EPOCHS 
+   *              line).
+   * @param[in] site_vec A list of SITE/ID instances that shall be considered.
+   *              We will be matching records according to SITE CODE and 
+   *              POINT CODE.
+   * @param[out] out_vec A vector of sinex::SolutionEpoch instances for some 
+   *              or all of the sites contained in site_vec, valid for the 
+   *              time given (ie t)
+   * @return Anything other than zero denotes an error
+   */        
+  int parse_solution_epoch(
+      const dso::datetime<dso::seconds> &t,
+      const std::vector<sinex::SiteId> &site_vec,
+      std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept;
 
   int get_solution_estimate(const char *site_codes[],
                             const dso::datetime<dso::seconds> &t,
