@@ -1,0 +1,44 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: install scons
+      run: sudo apt-get install -y scons
+
+    - name: install (latest) eigen
+      run: sudo apt install libeigen3-dev
+    
+    - name: Check out ggdatetime
+      uses: actions/checkout@master
+      with:
+        repository: xanthospap/ggdatetime
+        path: ./ggdatetime
+        #token: ${{ secrets.my_pat }}
+
+    - name: Check out geodesy
+      uses: actions/checkout@master
+      with:
+        repository: xanthospap/ggeodesy
+        path: ./ggeodesy
+        #token: ${{ secrets.my_pat }}
+    
+    - name: install ggdatetime
+      run: cd ggdatetime && sudo scons install
+
+    - name: install geodesy
+      run: cd ggeodesy && sudo scons install
+    
+    - name: build (production)
+      run: scons
