@@ -16,6 +16,9 @@ jobs:
     
     - name: install scons
       run: sudo apt-get install -y scons
+
+    - name: install (latest) eigen
+      run: sudo apt install libeigen3-dev
     
     - name: Check out ggdatetime
       uses: actions/checkout@master
