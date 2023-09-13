@@ -185,7 +185,8 @@ struct ParameterMatchPolicy<ParameterMatchPolicyType::Strict> : std::true_type {
 /// NonStrict
 template <ParameterMatchPolicyType Policy = ParameterMatchPolicyType::Strict>
 bool parameter_type_exists(const char *ptype, int &index) noexcept {
-  return parameter_type_exists_impl(ptype, index, ParameterMatchPolicy<Policy>{});
+  return parameter_type_exists_impl(ptype, index,
+                                    ParameterMatchPolicy<Policy>{});
 }
 
 /// @brief Skip whitespace characters

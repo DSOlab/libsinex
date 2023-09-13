@@ -9,7 +9,8 @@
 namespace {
 constexpr long max_sinex_lines = 1'000'000;
 const char *skipws(const char *line) noexcept {
-  while (*line && *line == ' ') ++line;
+  while (*line && *line == ' ')
+    ++line;
   return line;
 }
 int match_block_header(const char *str) noexcept {
@@ -49,7 +50,8 @@ int dso::Sinex::mark_blocks() noexcept {
   while (m_stream.getline(line, sinex::max_sinex_chars) &&
          (linec++ < max_sinex_lines) && (!error)) {
     /* end of file; break */
-    if (!std::strcmp(line, "%ENDSNX")) break;
+    if (!std::strcmp(line, "%ENDSNX"))
+      break;
     /* encounter start of block */
     if (*line == '+') {
       /* match it to a valid SINEX block */

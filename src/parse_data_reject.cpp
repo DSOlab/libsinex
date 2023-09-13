@@ -102,7 +102,8 @@ int dso::Sinex::parse_block_data_reject(
       /* the station is in the list */
       if (it != site_vec.cend()) {
         /* parse line */
-        error = parse_data_reject_line(line, drIntrvl, m_data_start, m_data_stop);
+        error =
+            parse_data_reject_line(line, drIntrvl, m_data_start, m_data_stop);
         /* add to list */
         out_vec.emplace_back(drIntrvl);
       }

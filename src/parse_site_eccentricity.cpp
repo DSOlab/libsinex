@@ -24,9 +24,9 @@ int parse_eccentricity_line(
     return 1;
 
   /* copy Site/Point Codes, Solution ID and Observation Code */
-  std::memcpy(ecc.site_code(), line + 1, 4*sizeof(char));
-  std::memcpy(ecc.point_code(), line + 6, 2*sizeof(char));
-  std::memcpy(ecc.soln_id(), line + 9, 4*sizeof(char));
+  std::memcpy(ecc.site_code(), line + 1, 4 * sizeof(char));
+  std::memcpy(ecc.point_code(), line + 6, 2 * sizeof(char));
+  std::memcpy(ecc.soln_id(), line + 9, 4 * sizeof(char));
   try {
     ecc.m_obscode = dso::sinex::char_to_SinexObservationCode(line[14]);
   } catch (std::exception &) {
@@ -47,7 +47,7 @@ int parse_eccentricity_line(
   }
 
   /* ref system */
-  std::memcpy(ecc.ref_system(), line + 42, 3*sizeof(char));
+  std::memcpy(ecc.ref_system(), line + 42, 3 * sizeof(char));
 
   /* parse eccentricities */
   const char *start = line + 42 + 3;

@@ -52,7 +52,8 @@ int main(int argc, char *argv[]) {
   printf("Parsing estimates returned %d\n", error);
 
   /* de-allocate memory */
-  for (int i=0; i<num_sites; i++) delete[] sites[i];
+  for (int i = 0; i < num_sites; i++)
+    delete[] sites[i];
   delete[] sites;
 
   return 0;

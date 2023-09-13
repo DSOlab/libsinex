@@ -48,8 +48,8 @@ int dso::Sinex::parse_block_site_antenna(
         ++error;
       }
 
-      error += sinex::parse_sinex_date(line+16, m_data_start, vecit->m_start);
-      error += sinex::parse_sinex_date(line+29, m_data_stop , vecit->m_stop );
+      error += sinex::parse_sinex_date(line + 16, m_data_start, vecit->m_start);
+      error += sinex::parse_sinex_date(line + 29, m_data_stop, vecit->m_stop);
       if (error) {
         fprintf(
             stderr,

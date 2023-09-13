@@ -2,12 +2,12 @@
 #include <iostream>
 #include <stdexcept>
 
-/* Test program: Creating SINEX files 
+/* Test program: Creating SINEX files
  *
  * Given valid SINEX file, this program should return 0
- * Given any non-SINEX file (including non-existent) it should throw and 
+ * Given any non-SINEX file (including non-existent) it should throw and
  * return 1.
- */ 
+ */
 
 int main(int argc, char *argv[]) {
   if (argc != 2) {
