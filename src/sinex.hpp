@@ -6,7 +6,6 @@
 #include <vector>
 #ifdef DEBUG
 #include "datetime/datetime_write.hpp"
-#include "geodesy/units.hpp"
 #include <cstdio>
 #endif
 
@@ -83,17 +82,6 @@ struct SiteId {
   double m_lat;
   /* Approximate height of the site in [m] */
   double m_hgt;
-#ifdef DEBUG
-  void print() const noexcept {
-    printf("Site Code    %s\n", m_site_code);
-    printf("Point Code   %s\n", m_point_code);
-    printf("Domes Number %s\n", m_domes);
-    printf("Obs. Code    %c\n", m_obs_code);
-    printf("Description  %s\n", m_description);
-    printf("lat/lon/hgt %+7.1f/%+7.1f/%7.2f\n", dso::rad2deg(m_lon),
-           dso::rad2deg(m_lat), m_hgt);
-  }
-#endif
 }; /* SiteId */
 
 /* Class to hold information stored (per line) in a SITE/RECEIVER Block */
@@ -145,19 +133,6 @@ struct SiteReceiver {
   dso::datetime<dso::seconds> m_stop{};
   /* Observation Code: Identification of the observation technique used [A1] */
   SinexObservationCode m_obscode;
-#ifdef DEBUG
-  void print() const noexcept {
-    printf("Site Code    %s\n", m_site_code);
-    printf("Point Code   %s\n", m_point_code);
-    printf("Solution Id  %s\n", m_soln_id);
-    printf("Obs. Code    %c\n", m_obs_code);
-    printf("Rec. Type    %s\n", m_rec_type);
-    printf("Rec. Serial  %s\n", m_rec_serial);
-    printf("Rec. Firmw   %s\n", m_rec_firmware);
-    printf("From %s to %s\n", dso::strftime_ymd_hmfs(m_start).c_str(),
-           dso::strftime_ymd_hmfs(m_stop).c_str());
-  }
-#endif
 }; /* SiteReceiver */
 
 /* Class to hold information stored (per line) in a SITE/ANTENNA Block */
@@ -201,18 +176,6 @@ struct SiteAntenna {
   dso::datetime<dso::seconds> m_stop{};
   /* Observation Code: Identification of the observation technique used [A1] */
   SinexObservationCode m_obscode;
-#ifdef DEBUG
-  void print() const noexcept {
-    printf("Site Code    %s\n", m_site_code);
-    printf("Point Code   %s\n", m_point_code);
-    printf("Solution Id  %s\n", m_soln_id);
-    printf("Obs. Code    %c\n", m_obs_code);
-    printf("Ant. Type    %s\n", m_ant_type);
-    printf("Ant. Serial  %s\n", m_ant_serial);
-    printf("From %s to %s\n", dso::strftime_ymd_hmfs(m_start).c_str(),
-           dso::strftime_ymd_hmfs(m_stop).c_str());
-  }
-#endif
 }; /* SiteAntenna */
 
 /* class to hold a record line from block SOLUTION/ESTIMATE */
@@ -629,11 +592,6 @@ public:
     if (m_stream.is_open())
       m_stream.close();
   }
-
-#ifdef DEBUG
-  void print_members() const;
-  void print_blocks() const noexcept;
-#endif
 
 }; /* Sinex */
 

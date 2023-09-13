@@ -1,5 +1,4 @@
 #include "sinex.hpp"
-#include "geodesy/units.hpp"
 #include <charconv>
 #include <cstdlib>
 #include <stdexcept>
@@ -97,33 +96,6 @@ int dso::Sinex::mark_blocks() noexcept {
   m_stream.clear();
   return error;
 }
-
-#ifdef DEBUG
-void dso::Sinex::print_blocks() const noexcept {
-  for (const auto &b : this->m_blocks) {
-    printf("\tSinex Block \"%s\"\n", b.mtype);
-  }
-}
-#endif
-
-#ifdef DEBUG
-void dso::Sinex::print_members() const {
-  printf("Sinex Details:\n");
-  printf("filename          %s\n", m_filename.c_str());
-  printf("version           %5.2f\n", m_version);
-  printf("agency            %s\n", m_agency);
-  printf("created           %s\n",
-         dso::strftime_ymd_hmfs(m_created_at).c_str());
-  printf("data agency       %s\n", m_data_agency);
-  printf("obs. code         %c\n", m_obs_code);
-  printf("constraint code   %c\n", m_constraint_code);
-  printf("solution contents %s\n", m_sol_contents);
-  printf("num of estimated  %5d\n", m_num_estimates);
-  printf("data start at     %s\n",
-         dso::strftime_ymd_hmfs(m_data_start).c_str());
-  printf("data end at       %s\n", dso::strftime_ymd_hmfs(m_data_stop).c_str());
-}
-#endif
 
 int dso::Sinex::parse_first_line() noexcept {
   char line[sinex::max_sinex_chars];

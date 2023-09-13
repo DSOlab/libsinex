@@ -1,7 +1,7 @@
 from __future__ import print_function
 import os, sys, glob
 
-## Prefic for install(ed) files
+## Prefix for install(ed) files
 prefix="/usr/local"
 if not os.path.isdir(prefix):
     print('[ERROR] Cannot find \'prefix\' directory, aka {:}; aborting'.format(prefix), file=sys.stderr)
@@ -28,11 +28,12 @@ lib_src_files = glob.glob(r"src/*.cpp")
 hdr_src_files = glob.glob(r"src/*.hpp")
 
 ## Environments ...
-denv = Environment(CXXFLAGS='-std=c++17 -g -pg -Wall -Wextra -Werror -pedantic -W -Wshadow -Winline -Wdisabled-optimization -DDEBUG')
-penv = Environment(CXXFLAGS='-std=c++17 -Wall -Wextra -Werror -pedantic -W -Wshadow -Winline -O2 -march=native')
+denv = Environment(CXXFLAGS='-std=c++17 -g -pg -Wall -Wextra -Werror -pedantic -W -Wshadow -Winline -Wdisabled-optimization -DDEBUG -DEIGEN_NO_AUTOMATIC_RESIZING')
+penv = Environment(CXXFLAGS='-std=c++17 -Wall -Wextra -Werror -pedantic -W -Wshadow -Winline -O2 -march=native -DEIGEN_NO_AUTOMATIC_RESIZING')
 
 ## Command line arguments ...
 debug = ARGUMENTS.get('debug', 0)
+test  = ARGUMENTS.get('test', 0)
 
 ## Construct the build enviroment
 env = denv.Clone() if int(debug) else penv.Clone()
@@ -45,8 +46,9 @@ env.Alias(target='install', source=env.Install(dir=os.path.join(prefix, 'include
 env.Alias(target='install', source=env.InstallVersionedLib(dir=os.path.join(prefix, 'lib'), source=vlib))
 
 ## Tests ...
-tests_sources = glob.glob(r"test/*.cpp")
-env.Append(RPATH=root_dir)
-for tsource in tests_sources:
-  ttarget = tsource.replace('_', '-').replace('.cpp', '.out')
-  env.Program(target=ttarget, source=tsource, CPPPATH='src/', LIBS=vlib+['geodesy', 'datetime'], LIBPATH='.')
+if test:
+    tests_sources = glob.glob(r"test/*.cpp")
+    env.Append(RPATH=root_dir)
+    for tsource in tests_sources:
+      ttarget = tsource.replace('_', '-').replace('.cpp', '.out')
+      env.Program(target=ttarget, source=tsource, CPPPATH='src/', LIBS=vlib+['geodesy', 'datetime'], LIBPATH='.')
