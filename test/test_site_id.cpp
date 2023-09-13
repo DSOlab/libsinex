@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
 
   dso::Sinex snx(argv[1]);
 
-  // parse STATION/ID block
+  /* parse STATION/ID block */
   std::vector<dso::sinex::SiteId> sites;
   if (snx.parse_block_site_id(sites)) {
     fprintf(stderr, "[ERROR] Failed parsing block \'SITE/ID\'\n");
