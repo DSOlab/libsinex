@@ -22,7 +22,7 @@ jobs:
       with:
         repository: xanthospap/ggdatetime
         path: ./ggdatetime
-        token: ${{ secrets.my_pat }}
+        #token: ${{ secrets.my_pat }}
     
     - name: install ggdatetime
       run: cd ggdatetime && sudo scons install
