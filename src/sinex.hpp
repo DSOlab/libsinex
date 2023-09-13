@@ -13,11 +13,11 @@
 namespace dso {
 
 namespace sinex {
-/// @class SinexBlockPosition A data block within a SINEX file
+/* @class SinexBlockPosition A data block within a SINEX file */
 struct SinexBlockPosition {
-  std::ifstream::pos_type mpos; ///< position from file begining
-  const char *mtype;            ///< block description
-};                              // SinexBlockPosition
+  std::ifstream::pos_type mpos; /* position from file begining */
+  const char *mtype;            /* block description */
+};                              /* SinexBlockPosition */
 
 /* Enum class to hold SINEX Observation Codes.
  * Within SINEX files, this is a single character indicating the technique(s) 
@@ -432,17 +432,72 @@ class Sinex {
 private:
   using pos_t = std::ifstream::pos_type;
 
+  /* SINEX filename */
   std::string m_filename;
+  /* input stream (opened at c'tor) */
   std::ifstream m_stream;
+  /* format version */
   float m_version;
+  /* agency creating the file [A3] */
   char m_agency[4] = {'\0'};
-  dso::datetime<dso::seconds> m_created_at, m_data_start, m_data_stop;
+  /* Identify the agency providing the data in the SINEX file [A3] */
   char m_data_agency[4] = {'\0'};
-  char m_obs_code, m_constraint_code;
+  /* Solution Contents */
   char m_sol_contents[6] = {'\0'};
-  int m_num_estimates;
+  /* Creation time of this SINEX file */
+  dso::datetime<dso::seconds> m_created_at;
+  /* Start time of the data used in the SINEX solution */
+  dso::datetime<dso::seconds> m_data_start;
+  /* End time of the data used in the SINEX solution */
+  dso::datetime<dso::seconds> m_data_stop;
+  /* Technique(s) used to generate the SINEX solution */
+  sinex::SinexObservationCode m_obscode;
+  /* Single character indicating the constraint in the SINEX solution. */
+  sinex::SinexConstraintCode m_constraint_code;
+  /* Number of parameters estimated in this SINEX file */
+  long m_num_estimates;
+  /* Markers for easily accesing blocks. The entries here mark SINEX 
+   * block-positions and block-types. When placing the stream at a the 
+   * m_blocks[n], that means that:
+   * We place the (input) stream poisition at m_blocks[n].mpos, i.e. the end 
+   * of the previous line, prior to the start of the new block (this means 
+   * that the next line to be read is the starting of a new block, e.g. 
+   * '+SOLUTION/EPOCHS'). Next line to be read is start of block described by 
+   * m_blocks[n].mtype.
+   */
   std::vector<sinex::SinexBlockPosition> m_blocks;
+  
+  /* @brief Parse first SINEX line (header) and assign instance's member vars 
+   */
+  int parse_first_line() noexcept;
+  
+  /* @brief Read the SINEX file through, and mark all positions of interest 
+   *       (i.e. start of blocks).
+   * This function will fill in the m_blocks vector and perform a basic 
+   * sanity check of the SINEX file. Note that m_blocks does not contain 
+   * positions of the 'start of a block line', but rather positions of 
+   * 'eol before a new block line'.
+   * This function should only be called once, at the instance's ctor.
+   */
+  int mark_blocks() noexcept;
 
+  /* @brief Go (i.e. place the stream) at the the start of a block in a SINEX 
+   *        instance.
+   * Asserts that the mark_blocks() function has already been called. Example:
+   * if (goto_block("SOLUTION/EPOCHS")) return 1;
+   * Now, next line to be read is: "+SOLUTION/EPOCHS"
+   *
+   * @param[in] A valid SINEX block (see e.g. dso::sinex::block_names[]); 
+   *            expects a NULL terminated C-string.
+   */
+  int goto_block(const char *block) noexcept;
+
+  /* @brief Given a block name, find the relevant entry in the m_blocks 
+   *        vector.
+   * @param[in] blk A valid SINEX block name (C-string), e.g. "SOLUTION/EPOCHS"
+   * @return An iterator to the relevant entry in m_blocks (or m_blocks.cend() 
+   *         if no such block exists in the SINEX file).
+   */
   std::vector<sinex::SinexBlockPosition>::const_iterator
   find_block(const char *blk) noexcept {
     return std::find_if(m_blocks.cbegin(), m_blocks.cend(),
@@ -451,12 +506,10 @@ private:
                         });
   }
 
-  int goto_block(const char *block) noexcept;
 public:
-  std::string filename() const noexcept { return m_filename; }
 
-  int parse_first_line() noexcept;
-  int mark_blocks() noexcept;
+  /* return the SINEX filename */
+  std::string filename() const noexcept { return m_filename; }
 
   // parse blocks
   int parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
@@ -564,6 +617,12 @@ public:
                             const dso::datetime<dso::seconds> &t,
                             bool error_if_missing = false) noexcept;
 
+  /* @brief Constructor (may throw). This will:
+   * 1. Assign filename,
+   * 2. open the stream,
+   * 3. parse_first_line() to assign member vars,
+   * 4. call mark_blocks() to fill in m_blocks
+   */
   Sinex(const char *fn);
   Sinex(const Sinex &) = delete;
   Sinex &operator=(const Sinex &) = delete;
