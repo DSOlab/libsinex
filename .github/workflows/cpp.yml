@@ -13,7 +13,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
     - name: install scons
       run: sudo apt-get install -y scons
+    
+    - name: Check out ggdatetime
+      uses: actions/checkout@master
+      with:
+        repository: xanthospap/ggdatetime
+        path: ./ggdatetime
+        token: ${{ secrets.my_pat }}
+    
+    - name: install ggdatetime
+      run: cd ggdatetime && sudo scons install
+    
     - name: build (production)
       run: scons
