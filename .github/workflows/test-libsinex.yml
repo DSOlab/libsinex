@@ -3,7 +3,7 @@ name: CI notify
 # Only trigger, when the build workflow succeeded
 on:
   workflow_run:
-    workflows: [C/C++ CI]
+    workflows: ["Linux CI build"]
     types:
       - completed
 
@@ -13,5 +13,6 @@ jobs:
 
     steps:
       - name: Download test SINEX files
-        run: wget ftp://doris.ign.fr/pub/doris/products/dpod/dpod2020/dpod2020_current.snx.Z -O ./dpod2020.snx.Z
-        run: uncompress dpod2020_current.snx.Z
+      - run: |
+          wget ftp://doris.ign.fr/pub/doris/products/dpod/dpod2020/dpod2020_current.snx.Z -O ./dpod2020.snx.Z
+          uncompress dpod2020_current.snx.Z
