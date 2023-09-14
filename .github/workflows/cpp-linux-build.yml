@@ -42,3 +42,9 @@ jobs:
     
     - name: build (production)
       run: scons
+    
+    - name: build (debug)
+      run: scons debug=1
+    
+    - name: build (debug & tests)
+      run: scons debug=1 test=1
