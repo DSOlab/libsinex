@@ -106,7 +106,6 @@ private:
    */
   bool sinex_site_equal_impl(const char *siteid,
                              std::true_type) const noexcept {
-    //printf("checks: [%d/%d][%d][%d]\n", (std::strlen(siteid) >= 14), (int)std::strlen(siteid), (!std::strncmp(siteid, site_code(), 4)), (!std::strncmp(siteid + 5, domes(), 10)));
     return (std::strlen(siteid) >= 15)
                ? ((!std::strncmp(siteid, site_code(), 4)) &&
                   (!std::strncmp(siteid + 5, domes(), 10)))

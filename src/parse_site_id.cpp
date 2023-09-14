@@ -129,12 +129,10 @@ int dso::Sinex::parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
       bool store_siteid = false;
       {
         for (const auto &ptr : sites) {
-          //printf("\tComparing \"%s\" to \"%s %s\"", ptr, site.site_code(), site.domes());
           const bool same =
               (use_domes)
                   ? (site.issame<sinex::SiteMatchPolicyType::USEDOMES>(ptr))
                   : (site.issame<sinex::SiteMatchPolicyType::IGNOREDOMES>(ptr));
-          //printf(", match=%d\n", same);
           if (same) {
             store_siteid = true;
             break;

@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
 
   dso::Sinex snx(argv[1]);
 
-  // parse STATION/RECEIVER block
+  /* parse STATION/RECEIVER block (all sites in SINEX) */
   std::vector<dso::sinex::SiteReceiver> sites;
   if (snx.parse_block_site_receiver(sites)) {
     fprintf(stderr, "[ERROR] Failed parsing block \'SITE/RECEIVER\'\n");
