@@ -20,7 +20,7 @@ int parse_site_id_line(const char *line, dso::sinex::SiteId &sid) noexcept {
   std::memcpy(sid.point_code(), line + 6, 2);
   std::memcpy(sid.domes(), line + 9, 9);
   try {
-    sid.m_obscode = dso::sinex::char_to_SinexObservationCode(line[19]);
+    sid.obscode() = dso::sinex::char_to_SinexObservationCode(line[19]);
   } catch (std::exception &) {
     fprintf(stderr,
             "[ERROR] Erronuous SINEX Observation Code \'%c\' (traceback: %s)\n",
@@ -51,7 +51,7 @@ int parse_site_id_line(const char *line, dso::sinex::SiteId &sid) noexcept {
             __func__);
     return error;
   }
-  sid.m_lon = dso::hexd2rad(deg, mm, sec, deg);
+  sid.longitude() = dso::hexd2rad(deg, mm, sec, deg);
 
   /* Latitude */
   cv = std::from_chars(skipws(start), end, deg);
@@ -68,10 +68,10 @@ int parse_site_id_line(const char *line, dso::sinex::SiteId &sid) noexcept {
             __func__);
     return error;
   }
-  sid.m_lat = dso::hexd2rad(deg, mm, sec, deg);
+  sid.latitude() = dso::hexd2rad(deg, mm, sec, deg);
 
   /* height */
-  cv = std::from_chars(skipws(start), end, sid.m_hgt);
+  cv = std::from_chars(skipws(start), end, sid.height());
   error += (cv.ec != std::errc());
   if (error > 1) {
     fprintf(stderr, "[ERROR] Failed parsing site height (traceback: %s)\n",
@@ -83,13 +83,13 @@ int parse_site_id_line(const char *line, dso::sinex::SiteId &sid) noexcept {
 }
 
 int dso::Sinex::parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
-                                    int num_sites_requested,
-                                    char **sites) noexcept {
+                                    const std::vector<const char *> &sites,
+                                    bool use_domes) noexcept {
   /* clear the vector, alocate storage */
   if (!site_vec.empty())
     site_vec.clear();
-  if (site_vec.capacity() < (std::size_t)num_sites_requested)
-    site_vec.reserve(num_sites_requested);
+  if (site_vec.capacity() < sites.size())
+    site_vec.reserve(sites.size());
 
   /* go to SITE/ID block */
   if (goto_block("SITE/ID"))
@@ -107,51 +107,64 @@ int dso::Sinex::parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
 
   /* read in SiteId's untill end of block */
   std::size_t ln_count = 0;
-  bool parse_line = true;
+  sinex::SiteId site;
+  int error = 0;
   while (m_stream.getline(line, sinex::max_sinex_chars) &&
-         ++ln_count < max_lines_in_block) {
-    /* do we need to parse the line ? */
-    parse_line = true;
+         (++ln_count < max_lines_in_block) && (!error)) {
     /* end of block encountered */
     if (!std::strncmp(line, "-SITE/ID", 8))
       break;
     if (*line != '*') { /* non-comment line */
-      /* do we need to filter the stations ? */
-      if (num_sites_requested) {
-        parse_line = false;
-        for (int s = 0; s < num_sites_requested; s++) {
-          if (!std::strncmp(sites[s], line + 1, 4)) {
-            parse_line = true;
+      /* try to parse line */
+      if (parse_site_id_line(line, site)) {
+        fprintf(stderr,
+                "[ERROR] Failed to parse SITE/ID line from SINEX file %s "
+                "(traceback: %s)\n",
+                m_filename.c_str(), __func__);
+        fprintf(stderr, "[ERROR] Line was \"%s\" (traceback: %s)\n", line,
+                __func__);
+        ++error;
+      }
+      /* compare parse site to input ones */
+      bool store_siteid = false;
+      {
+        for (const auto &ptr : sites) {
+          //printf("\tComparing \"%s\" to \"%s %s\"", ptr, site.site_code(), site.domes());
+          const bool same =
+              (use_domes)
+                  ? (site.issame<sinex::SiteMatchPolicyType::USEDOMES>(ptr))
+                  : (site.issame<sinex::SiteMatchPolicyType::IGNOREDOMES>(ptr));
+          //printf(", match=%d\n", same);
+          if (same) {
+            store_siteid = true;
             break;
           }
         }
       }
-      /* only parse line if we need to ... */
-      if (parse_line) {
-        site_vec.emplace_back(sinex::SiteId{});
-        auto vecit = site_vec.end() - 1;
-        if (parse_site_id_line(line, *vecit)) {
-          fprintf(stderr,
-                  "[ERROR] Failed to parse SITE/ID line from SINEX file %s "
-                  "(traceback: %s)\n",
-                  m_filename.c_str(), __func__);
-          fprintf(stderr, "[ERROR] Line was \"%s\" (traceback: %s)\n", line,
-                  __func__);
-          return 1;
-        }
-      } /* if parse_line */
-    }   /* non-comment line */
+      /* push_back if needed (if site is empty store anyway) */
+      if (store_siteid || (!sites.size()))
+        site_vec.push_back(site);
+    } /* non-comment line */
 
     /* augment line count */
     ++ln_count;
   }
 
-  /* final check, number of lines read */
+  /* check number of lines read */
   if (ln_count >= max_lines_in_block) {
     fprintf(stderr,
             "[ERROR] Read in %8zu lines and no \'%s\' line found .... smthng "
             "is wrong! (traceback: %s)\n",
             ln_count, "-SITE/ID", __func__);
+    return 1;
+  }
+
+  /* check for parsing errors */
+  if (error) {
+    fprintf(stderr,
+            "[ERROR] Failed parsing block SITE/ID; erronuous line was: \'%s\' "
+            "(traceback: %s)\n",
+            line, __func__);
     return 1;
   }
 

@@ -3,6 +3,7 @@
 
 #include "sinex_details.hpp"
 #include <fstream>
+#include <type_traits>
 #include <vector>
 #ifdef DEBUG
 #include "datetime/datetime_write.hpp"
@@ -50,13 +51,69 @@ SinexObservationCode char_to_SinexObservationCode(char c);
 /* char to SinexConstraintCode (may throw) */
 SinexConstraintCode char_to_SinexConstraintCode(char c);
 
+/// @enum Choose a policy for comparing strings against parameter_type
+enum class SiteMatchPolicyType { USEDOMES, IGNOREDOMES };
+
+/// @class SiteMatchPolicy
+/// @brief Dummy class to enable tag-dispatch for parameter_type_exists
+///        function based on SiteMatchPolicyType
+template <SiteMatchPolicyType T> struct SiteMatchPolicy : std::false_type {};
+
+/// @class SiteMatchPolicy
+/// @brief Dummy class to enable tag-dispatch for parameter_type_exists
+///        function based on SiteMatchPolicyType. Specialization
+///        for Strict string comparisson.
+template <>
+struct SiteMatchPolicy<SiteMatchPolicyType::USEDOMES> : std::true_type {};
 /* Class to hold information stored (per line) in an SITE/ID Block */
-struct SiteId {
+class SiteId {
+private:
   static constexpr const int site_code_at = 0;    /* [0,4] including NULL */
   static constexpr const int point_code_at = 5;   /* [5,7] including NULL */
   static constexpr const int domes_at = 8;        /* [8,17] including NULL */
   static constexpr const int description_at = 18; /* [18,39] including NULL */
   char charbuf__[40] = {'\0'};
+  /* Observation Code: Observation technique(s) used [A1] */
+  SinexObservationCode m_obscode;
+  /* Approximate Longitude: Approximate longitude of the site in [rad] */
+  double m_lon;
+  /* Approximate Latitude: Approximate latitude of the site in [rad] */
+  double m_lat;
+  /* Approximate height of the site in [m] */
+  double m_hgt;
+  /* @brief Check if a given string matches the instance's SITE CODE.
+   *
+   * Only the first 4 characters of the input string are considered, and the
+   * input string does not have to be null terminated.
+   * @param[in] siteid String to check against the instance's SITE CODE
+   * @return True if the first 4 characters of siteid are exactly the same as
+   *         the instance's site_code.
+   */
+  bool sinex_site_equal_impl(const char *siteid,
+                             std::false_type) const noexcept {
+    return !std::strncmp(siteid, site_code(), 4);
+  }
+  /* @brief Check if a given string matches the instance's SITE CODE plus DOMES.
+   *
+   * The input string is assumed to be a string of type "CODE DOMES", where
+   * CODE is the site's SITE CODE and DOMES is the site's DOMES NUMBER. The
+   * two (sub)strings should be seperated by a whitespace character. The input
+   * string does not have to be null-terminated.
+   * Example: "DIOB 12602S012"
+   * @param[in] siteid String to check against the instance's SITE CODE plus
+   *             DOMES
+   * @return True if both the siteid's SITE CODE and DOMES compare the same.
+   */
+  bool sinex_site_equal_impl(const char *siteid,
+                             std::true_type) const noexcept {
+    //printf("checks: [%d/%d][%d][%d]\n", (std::strlen(siteid) >= 14), (int)std::strlen(siteid), (!std::strncmp(siteid, site_code(), 4)), (!std::strncmp(siteid + 5, domes(), 10)));
+    return (std::strlen(siteid) >= 15)
+               ? ((!std::strncmp(siteid, site_code(), 4)) &&
+                  (!std::strncmp(siteid + 5, domes(), 10)))
+               : false;
+  }
+
+public:
   /* Site Code: Call sign for a site [A4] */
   char *site_code() noexcept { return charbuf__ + site_code_at; }
   const char *site_code() const noexcept { return charbuf__ + site_code_at; }
@@ -74,14 +131,24 @@ struct SiteId {
   const char *description() const noexcept {
     return charbuf__ + description_at;
   }
-  /* Observation Code: Observation technique(s) used [A1] */
-  SinexObservationCode m_obscode;
-  /* Approximate Longitude: Approximate longitude of the site in [rad] */
-  double m_lon;
-  /* Approximate Latitude: Approximate latitude of the site in [rad] */
-  double m_lat;
-  /* Approximate height of the site in [m] */
-  double m_hgt;
+  /* @brief Get latitude in [rad] */
+  double latitude() const noexcept { return m_lat; }
+  double &latitude() noexcept { return m_lat; }
+  /* @brief Get longitude in [rad] */
+  double longitude() const noexcept { return m_lat; }
+  double &longitude() noexcept { return m_lon; }
+  /* @brief Get height in [m] */
+  double height() const noexcept { return m_lat; }
+  double &height() noexcept { return m_lon; }
+  /* @brief Get observation code */
+  sinex::SinexObservationCode obscode() const noexcept { return m_obscode; }
+  sinex::SinexObservationCode &obscode() noexcept { return m_obscode; }
+
+  /* @brief */
+  template <SiteMatchPolicyType Policy = SiteMatchPolicyType::IGNOREDOMES>
+  bool issame(const char *str) const noexcept {
+    return sinex_site_equal_impl(str, SiteMatchPolicy<Policy>{});
+  }
 }; /* SiteId */
 
 /* Class to hold information stored (per line) in a SITE/RECEIVER Block */
@@ -474,9 +541,15 @@ public:
   std::string filename() const noexcept { return m_filename; }
 
   // parse blocks
-  int parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
+  /*int parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
                           int num_sites_requested = 0,
-                          char **sites = nullptr) noexcept;
+                          char **sites = nullptr) noexcept;*/
+  int parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
+                          const std::vector<const char *> &sites,
+                          bool use_domes) noexcept;
+  int parse_block_site_id(std::vector<sinex::SiteId> &site_vec) noexcept {
+    return parse_block_site_id(site_vec, std::vector<const char *>(), false);
+  }
 
   /* @brief Parse the whole SITE/RECEIVER Block off from the SINEX instance.
    * @param[inout] site_vec A vector of sinex::SiteReceiver instances, one
