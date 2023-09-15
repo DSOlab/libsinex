@@ -28,6 +28,8 @@ int parse_data_reject_line(
     const dso::datetime<dso::seconds> &sinex_data_start,
     const dso::datetime<dso::seconds> &sinex_data_stop) noexcept {
   int error = 0;
+  std::memcpy(rintrv.site_code(), line + scode_start, 4);
+  std::memcpy(rintrv.point_code(), line + spt_start, 2);
   std::memcpy(rintrv.soln_id(), line + ssoln_start, 4);
   try {
     rintrv.m_obscode = dso::sinex::char_to_SinexObservationCode(line[st_start]);
@@ -57,8 +59,10 @@ int parse_data_reject_line(
 } /* anonymous namespace */
 
 int dso::Sinex::parse_block_data_reject(
+    const std::vector<sinex::SiteId> &site_vec,
     std::vector<sinex::DataReject> &out_vec,
-    const std::vector<sinex::SiteId> &site_vec) noexcept {
+    const dso::datetime<dso::seconds> from,
+    const dso::datetime<dso::seconds> to) noexcept {
 
   /* clear the vector, allocate storage */
   if (!out_vec.empty())
@@ -104,8 +108,14 @@ int dso::Sinex::parse_block_data_reject(
         /* parse line */
         error =
             parse_data_reject_line(line, drIntrvl, m_data_start, m_data_stop);
-        /* add to list */
-        out_vec.emplace_back(drIntrvl);
+        /* if the record's interval is whithin limits (ranges overlap) */
+        if (dso::intervals_overlap<
+                dso::seconds,
+                dso::datetime_ranges::OverlapComparissonType::Strict>(
+                from, to, drIntrvl.start, drIntrvl.stop)) {
+          /* add to list */
+          out_vec.emplace_back(drIntrvl);
+        }
       }
 
     } /* non-comment line */

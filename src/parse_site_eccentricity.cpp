@@ -53,7 +53,7 @@ int parse_eccentricity_line(
   const char *start = line + 42 + 3;
   error = 0;
   for (int i = 0; i < 3; i++) {
-    auto fc = std::from_chars(skip_ws(start), line + sz, ecc.une[i]);
+    auto fc = std::from_chars(skip_ws(start), line + sz, ecc.eccentricity(i));
     error += (fc.ec != std::errc{});
     start = fc.ptr;
   }
@@ -63,9 +63,9 @@ int parse_eccentricity_line(
 } /* unnamed namespace */
 
 int dso::Sinex::parse_block_site_eccentricity(
-    std::vector<sinex::SiteEccentricity> &out_vec,
+    const std::vector<sinex::SiteId> &site_vec,
     const dso::datetime<dso::seconds> &t,
-    const std::vector<sinex::SiteId> &site_vec) noexcept {
+    std::vector<sinex::SiteEccentricity> &out_vec) noexcept {
 
   /* clear the vector, and allocate */
   if (!out_vec.empty())

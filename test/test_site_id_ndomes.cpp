@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
     for (int i = 2; i < argc; i++) {
       sites.push_back(argv[i]);
     }
-    if (snx.parse_block_site_id(sitesids, sites, /*use_domes=*/false)) {
+    if (snx.parse_block_site_id(sites, /*use_domes=*/false, sitesids)) {
       fprintf(stderr, "ERROR. Failed parsing SITE/ID from SINEX file\n");
       return 1;
     }

@@ -37,8 +37,8 @@ int parse_epoch_line(const char *line,
 } /* anonymous namespace */
 
 int dso::Sinex::parse_solution_epoch(
-    const dso::datetime<dso::seconds> &t,
     const std::vector<sinex::SiteId> &site_vec,
+    const dso::datetime<dso::seconds> &t,
     std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept {
   /* clear the vector; allocate storage */
   if (!out_vec.empty())

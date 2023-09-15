@@ -1,6 +1,7 @@
 #include "sinex.hpp"
 #include <iostream>
 #include <vector>
+#include "datetime/datetime_write.hpp"
 
 int main(int argc, char *argv[]) {
 
@@ -27,22 +28,27 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  /* random date, for which we want eccentricities */
-  dso::datetime<dso::seconds> t(dso::year(2020), dso::month(1),
-                                dso::day_of_month(1), dso::seconds(0));
+  /* random datetime interval; collect data rejection periods that fall within
+   * this interval
+   */
+  dso::datetime<dso::seconds> t1(dso::year(2020), dso::month(1),
+                                 dso::day_of_month(1), dso::seconds(0));
+  dso::datetime<dso::seconds> t2(dso::year(2020), dso::month(2),
+                                 dso::day_of_month(1), dso::seconds(0));
 
-  /* get the eccentricities */
-  std::vector<dso::sinex::SiteEccentricity> ecc;
-  if (snx.parse_block_site_eccentricity(siteids, t, ecc)) {
-    fprintf(stderr, "Failed collecting site eccentricities\n");
+  /* get data rejection info */
+  std::vector<dso::sinex::DataReject> rej;
+  if (snx.parse_block_data_reject(siteids, rej, t1, t2)) {
+    fprintf(stderr, "Failed collecting data rejection info\n");
     return 1;
   }
 
   /* report results */
-  printf("Eccentricity per site:\n");
-  for (const auto &e : ecc) {
-    printf("%s %.6f %.6f %.6f\n", e.site_code(), e.eccentricity(0),
-           e.eccentricity(1), e.eccentricity(2));
+  char b1[64], b2[64];
+  for (const auto &d : rej) {
+    dso::strftime_ymd_hmfs(d.start, b1);
+    dso::strftime_ymd_hmfs(d.stop, b2);
+    printf("%s %s %s %s\n", d.site_code(), b1, b2, d.comment());
   }
 
   printf("All seem ok!\n");

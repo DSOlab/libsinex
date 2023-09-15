@@ -77,65 +77,8 @@ int parse_solution_estimate_line(
 } /* anonymous namespace */
 
 int dso::Sinex::parse_block_solution_estimate(
-    std::vector<sinex::SolutionEstimate> &site_vec) noexcept {
-  /* clear the vector */
-  if (!site_vec.empty())
-    site_vec.clear();
-
-  /* go to SOLUTION/ESTIMATE block */
-  if (goto_block("SOLUTION/ESTIMATE"))
-    return 1;
-
-  /* next line to be read should be '+SOLUTION/ESTIMATE' */
-  char line[sinex::max_sinex_chars];
-  m_stream.getline(line, sinex::max_sinex_chars);
-  if (!m_stream.good() || std::strcmp(line, "+SOLUTION/ESTIMATE")) {
-    fprintf(stderr,
-            "[ERROR] Expected \"%s\" line, found: \"%s\" (traceback: %s)\n",
-            "+SOLUTION/ESTIMATE", line, __func__);
-    return 1;
-  }
-
-  /* read in SolutionEstimates's untill end of block */
-  std::size_t ln_count = 0;
-  int error = 0;
-  while (m_stream.getline(line, sinex::max_sinex_chars) &&
-         (++ln_count < max_lines_in_block) && (!error)) {
-    /* end of block encountered; break */
-    if (!std::strncmp(line, "-SOLUTION/ESTIMATE", 14))
-      break;
-
-    if (*line != '*') { /* non-comment line */
-      site_vec.emplace_back(sinex::SolutionEstimate{});
-      auto vecit = site_vec.end() - 1;
-      error = parse_solution_estimate_line(line, *vecit, m_data_start);
-    }
-
-    ++ln_count;
-  }
-
-  /* check for infinite loop */
-  if (ln_count >= max_lines_in_block) {
-    fprintf(stderr,
-            "[ERROR] Read in %8zu lines and no \'%s\' line found .... smthng "
-            "is wrong! (traceback: %s)\n",
-            ln_count, "-SOLUTION/ESTIMATE", __func__);
-    return 1;
-  }
-
-  /* check for parsing error */
-  if (error) {
-    fprintf(stderr, "[ERROR] Failed paring SINEX file %s (traceback: %s)\n",
-            m_filename.c_str(), __func__);
-    return 1;
-  }
-
-  return 0;
-}
-
-int dso::Sinex::parse_block_solution_estimate(
-    std::vector<sinex::SolutionEstimate> &est_vec,
-    const std::vector<sinex::SiteId> &site_vec) noexcept {
+    const std::vector<sinex::SiteId> &site_vec,
+    std::vector<sinex::SolutionEstimate> &est_vec) noexcept {
 
   /* clear the vector; allocate storage */
   if (!est_vec.empty())

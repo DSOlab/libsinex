@@ -65,6 +65,7 @@ template <SiteMatchPolicyType T> struct SiteMatchPolicy : std::false_type {};
 ///        for Strict string comparisson.
 template <>
 struct SiteMatchPolicy<SiteMatchPolicyType::USEDOMES> : std::true_type {};
+
 /* Class to hold information stored (per line) in an SITE/ID Block */
 class SiteId {
 private:
@@ -384,7 +385,8 @@ struct DataReject {
 };
 
 /* Class to hold information stored (per line) in a SITE/ECCENTRICITY Block */
-struct SiteEccentricity {
+class SiteEccentricity {
+private:
   /*
   *Code PT SOLN T Data_start__ Data_end____ AXE Up______ North___ East____
    ADEA  A    1 D 93:003:00000 98:084:11545 UNE   0.5100   0.0000   0.0000
@@ -395,6 +397,27 @@ struct SiteEccentricity {
   static constexpr const int ref_system_at = 13; /* [13,16] including NULL */
   static constexpr const int ant_serial_at = 34; /* [34,39] including NULL */
   char charbuf__[40] = {'\0'};
+  
+  /* [Up or X,  North or Y, East or Z] offset from the marker to the Antenna
+   * reference point (ARP). Units are [m].
+   */
+  double une[3] = {0e0, 0e0, 0e0};
+
+public:
+  /* Time: Time since the antenna has been installed at the Site/Point. Value
+   * 00:000:00000 indicates that the antenna has been installed at least since
+   * the "File Epoch Start Time".
+   */
+  dso::datetime<dso::seconds> start;
+  /* Time: Time until the antenna is installed at a Site/Point. Value
+   * 00:000:00000 indicates that the antenna has been installed at least until
+   * the "File Epoch End Time".
+   */
+  dso::datetime<dso::seconds> stop;
+  /* Observation Code: Identification of the observation technique used [A1] */
+  SinexObservationCode m_obscode;
+
+public:
   /* Site Code: Site code for which some parameters are estimated. [A4] */
   char *site_code() noexcept { return charbuf__ + site_code_at; }
   const char *site_code() const noexcept { return charbuf__ + site_code_at; }
@@ -417,22 +440,9 @@ struct SiteEccentricity {
    */
   char *ref_system() noexcept { return charbuf__ + ref_system_at; }
   const char *ref_system() const noexcept { return charbuf__ + ref_system_at; }
-  /* [Up or X,  North or Y, East or Z] offset from the marker to the Antenna
-   * reference point (ARP). Units are [m].
-   */
-  double une[3] = {0e0, 0e0, 0e0};
-  /* Time: Time since the antenna has been installed at the Site/Point. Value
-   * 00:000:00000 indicates that the antenna has been installed at least since
-   * the "File Epoch Start Time".
-   */
-  dso::datetime<dso::seconds> start;
-  /* Time: Time until the antenna is installed at a Site/Point. Value
-   * 00:000:00000 indicates that the antenna has been installed at least until
-   * the "File Epoch End Time".
-   */
-  dso::datetime<dso::seconds> stop;
-  /* Observation Code: Identification of the observation technique used [A1] */
-  SinexObservationCode m_obscode;
+  /* @brief Return an eccentricity component of choice; index in [0,3) */
+  double eccentricity(int index) const noexcept {return une[index];}
+  double &eccentricity(int index) noexcept {return une[index];}
 }; /* SiteEccentricity */
 
 /* @brief Parse a SINEX datetime string; accepted format is: "YY:DDD:SSSSS".
@@ -539,15 +549,41 @@ public:
   /* return the SINEX filename */
   std::string filename() const noexcept { return m_filename; }
 
-  // parse blocks
-  /*int parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
-                          int num_sites_requested = 0,
-                          char **sites = nullptr) noexcept;*/
-  int parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
-                          const std::vector<const char *> &sites,
-                          bool use_domes) noexcept;
+  /* @brief Parse the SITE/ID block of the SINEX file and collect info for 
+   *        given sites
+   * This function will search through the SITE/ID block, and collect all 
+   * infor for the sites that are included in the sites vector. Matching of 
+   * stations can be parformed in two ways:
+   * 1. if use_domes is set to false, then only the SITE CODE is checked, i.e. 
+   *    each string in the sites vector should contain a 4-char id of the 
+   *    station (of interest). E.g. "DIOA", "HERS", etc ...
+   * 2. if use_domes is set to true, then both the SITE CODE and the DOMES are 
+   *    checked. This means that the input sites vector should contain strings 
+   *    that include the SITE CODE a whitespace charatcer and the DOMES 
+   *    identifier. E.g. "DIOB 12602S012", "HOFC 10204S001", etc ...
+   * Only the sites that are matched will be included in the (output) site_vec 
+   * vector.
+   * @param[in] sites Vector of stations of interest; strings of the form:
+   *            e.g. "DIOB" or "DIOB 12602S012" (if we are matching DOMES).
+   *            The strings do not have to be null-terminated.
+   * @param[in] use_domes Mark if we are also matching DOMES numbers (except 
+   *            SITE CODEs).
+   * @param[out] site_vec A vector containing one SiteId entry for each of the 
+   *            the sites that were matched (i.e. it could be that 
+   *            size(sites) != size(site_vec)
+   * @return Anything other than 0 denotes an error
+   */
+  int parse_block_site_id(const std::vector<const char *> &sites,
+                          bool use_domes,
+                          std::vector<sinex::SiteId> &site_vec) noexcept;
+
+  /* @brief Parse the (whole) SITE/ID block of the SINEX and return all info
+   * @param[out] site_vec A vector containing one SiteId entry for each of the 
+   *            the sites that are included in the block.
+   * @return Anything other than 0 denotes an error
+   */
   int parse_block_site_id(std::vector<sinex::SiteId> &site_vec) noexcept {
-    return parse_block_site_id(site_vec, std::vector<const char *>(), false);
+    return parse_block_site_id(std::vector<const char *>(), false, site_vec);
   }
 
   /* @brief Parse the whole SITE/RECEIVER Block off from the SINEX instance.
@@ -561,14 +597,6 @@ public:
   int parse_block_site_antenna(
       std::vector<sinex::SiteAntenna> &site_vec) noexcept;
 
-  /* @brief Parse the whole SOLUTION/ESTIMATE Block off from the SINEX
-   * instance.
-   * @param[inout] site_vec A vector of sinex::SolutionEstimate instances, one
-   *               entry for each block line.
-   * @return Anything other than zero denotes an error
-   */
-  int parse_block_solution_estimate(
-      std::vector<sinex::SolutionEstimate> &site_vec) noexcept;
 
   /* @brief Parse the whole SOLUTION/ESTIMATE Block off from the SINEX
    * instance and collect sinex::SolutionEstimate records for the SITES of
@@ -582,47 +610,56 @@ public:
    * @return Anything other than zero denotes an error
    */
   int parse_block_solution_estimate(
-      std::vector<sinex::SolutionEstimate> &estimates_vec,
-      const std::vector<sinex::SiteId> &sites_vec) noexcept;
+      const std::vector<sinex::SiteId> &sites_vec,
+      std::vector<sinex::SolutionEstimate> &estimates_vec) noexcept;
 
-  /* @brief Parse the whole SOLUTION/DATA_REJECT Block off from the SINEX
-   * instance and collect sinex::DataReject instances for the SITES of
-   * interest. The sites of interest are the ones included in the sites_vec
-   * (input) vector. Any SOLUTION/DATA_REJECT line for which we have a matching
-   * SITE ID and POINT ID will be collected.
-   * @param[inout] site_vec A vector of sinex::DataReject instances, one
-   *               entry for each block line.
+  /* @brief 
+   * Parse the whole SOLUTION/DATA_REJECT Block off from the SINEX instance 
+   * and collect sinex::DataReject instances for the SITES of interest. The 
+   * sites of interest are the ones included in the sites_vec (input) vector. 
+   * Any SOLUTION/DATA_REJECT line for which we have a matching SITE ID and 
+   * POINT ID will be collected, so long as it falls within or overlaps the 
+   * given interval [from, to].
    * @param[in] sites_vec A vector of sinex::SiteId instances to match against,
-   *               using the SITE CODE and POINT CODE fields.
+   *             using the SITE CODE and POINT CODE fields.
+   * @param[out] site_vec A vector of sinex::DataReject instances, one
+   *             entry for each block line (note that this means that for one 
+   *             station we can have multiple rejection intervals).
+   * @param[in] from Start of period of interest. Rejection intervals that end 
+   *             before this date will not be collected (inclusive).
+   * @to[in]    Stop period of interest. Rejection intervals that start after 
+   *             this date will not be considered (inclusive).
    * @return Anything other than zero denotes an error
    */
-  int parse_block_data_reject(
-      std::vector<sinex::DataReject> &out_vec,
-      const std::vector<sinex::SiteId> &site_vec) noexcept;
+  int parse_block_data_reject(const std::vector<sinex::SiteId> &site_vec,
+                              std::vector<sinex::DataReject> &out_vec,
+                              const dso::datetime<dso::seconds> from =
+                                  dso::datetime<dso::seconds>::min(),
+                              const dso::datetime<dso::seconds> to =
+                                  dso::datetime<dso::seconds>::max()) noexcept;
 
   /* @brief Read and parse the SITE/ECCENTRICITY block off from the SINEX
    * instance.
    *
-   * @param[out] out_vec A vector of sinex::SiteEccentricity for some or all
-   *                    of the sites contained in site_vec, valid for the time
-   *                    given (ie t)
-   * @param[in] t       The time at which we want the eccentricities. If later
-   *                    than the instance's DATA STOP time, then we will be
-   *                    assuming that the validity intervals that end at
-   *                    DATA STOP time are valid internaly in the future.Hence,
-   *                    if DATA STOP = 2022/365 and t = 2023/001 and we
-   *                    encounter a record with data stop = "00:000:00000",
-   *                    then it is presumed that this record is valid for the
-   *                    given t.
    * @param[in] site_vec A list of SITE/ID instances that shall be considered.
-   *                    We will be matching records according to SITE CODE and
-   *                    POINT CODE.
+   *            We will be matching records according to SITE CODE and 
+   *            POINT CODE.
+   * @param[in] t  The time at which we want the eccentricities. If later
+   *            than the instance's DATA STOP time, then we will be assuming 
+   *            that the validity intervals that end at DATA STOP time are 
+   *            valid internaly in the future.Hence, if DATA STOP = 2022/365 
+   *            and t = 2023/001 and we encounter a record with data 
+   *            stop = "00:000:00000", then it is presumed that this record is 
+   *            valid for the given t.
+   * @param[out] out_vec A vector of sinex::SiteEccentricity for some or all
+   *            of the sites contained in site_vec, valid for the time given 
+   *            (ie t)
    * @return Anything other than 0 denotes an error
    */
   int parse_block_site_eccentricity(
-      std::vector<sinex::SiteEccentricity> &out_vec,
+      const std::vector<sinex::SiteId> &site_vec,
       const dso::datetime<dso::seconds> &t,
-      const std::vector<sinex::SiteId> &site_vec) noexcept;
+      std::vector<sinex::SiteEccentricity> &out_vec) noexcept;
 
   /* @brief Parse the SINEX block SOLUTION/EPOCHS and return a vector of
    *        sinex::SolutionEpoch instances for the sites included in site_vec,
@@ -643,8 +680,8 @@ public:
    * @return Anything other than zero denotes an error
    */
   int parse_solution_epoch(
-      const dso::datetime<dso::seconds> &t,
       const std::vector<sinex::SiteId> &site_vec,
+      const dso::datetime<dso::seconds> &t,
       std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept;
 
   int get_solution_estimate(const char *site_codes[],
@@ -666,6 +703,15 @@ public:
   }
 
 }; /* Sinex */
+
+int filter_solution_estimates(
+    const std::vector<sinex::SolutionEstimate> &estimates,
+    const dso::datetime<dso::seconds> &t,
+    std::vector<sinex::SolutionEstimate> &filtered_estimates) noexcept;
+int filter_solution_estimates(
+    const std::vector<dso::sinex::SolutionEstimate> &estimates,
+    const std::vector<dso::sinex::SolutionEpoch> &epochs,
+    std::vector<dso::sinex::SolutionEstimate> &filtered_estimates) noexcept;
 
 } /* namespace dso */
 

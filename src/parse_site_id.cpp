@@ -12,7 +12,6 @@ inline const char *skipws(const char *line) noexcept {
     ++line;
   return line;
 }
-} /* unnamed namespace */
 
 int parse_site_id_line(const char *line, dso::sinex::SiteId &sid) noexcept {
   int error = 0;
@@ -81,10 +80,11 @@ int parse_site_id_line(const char *line, dso::sinex::SiteId &sid) noexcept {
 
   return 0;
 }
+} /* unnamed namespace */
 
-int dso::Sinex::parse_block_site_id(std::vector<sinex::SiteId> &site_vec,
-                                    const std::vector<const char *> &sites,
-                                    bool use_domes) noexcept {
+int dso::Sinex::parse_block_site_id(
+    const std::vector<const char *> &sites, bool use_domes,
+    std::vector<sinex::SiteId> &site_vec) noexcept {
   /* clear the vector, alocate storage */
   if (!site_vec.empty())
     site_vec.clear();
