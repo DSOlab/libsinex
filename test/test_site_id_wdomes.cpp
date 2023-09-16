@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
       *(ptr+4) = ' ';
       sites.push_back(ptr);
     }
-    for (const auto &p : sites) {printf("%s\n", p);}
+    // for (const auto &p : sites) {printf("%s\n", p);}
 
     if (snx.parse_block_site_id(sites, /*use_domes=*/true, sitesids)) {
       fprintf(stderr, "ERROR. Failed parsing SITE/ID from SINEX file\n");
@@ -44,6 +44,5 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  printf("All seem ok!\n");
   return 0;
 }

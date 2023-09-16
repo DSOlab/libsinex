@@ -19,14 +19,13 @@ int main(int argc, char *argv[]) {
   try {
     dso::Sinex snx(argv[1]);
     return 0;
-  } catch (std::exception &e) {
+  } catch (std::exception& e) {
     fprintf(stderr, "ERROR. Failed to create SINEX instance from file %s\n",
-            argv[1]);
+        argv[1]);
     fprintf(stderr, "%s\n", e.what());
     return 1;
   }
 
   /* all done */
-  printf("\n");
   return 0;
 }
