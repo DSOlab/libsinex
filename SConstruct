@@ -16,6 +16,23 @@ inc_dir="sinex"
 ## the rootdir of the project
 root_dir=os.path.abspath(os.getcwd())
 
+AddOption('--cxx',
+          dest='cxx',
+          type='string',
+          nargs=1,
+          action='store',
+          metavar='CXX',
+          help='C++ Compiler',
+          default=None)
+AddOption('--std',
+          dest='std',
+          type='string',
+          nargs=1,
+          action='store',
+          metavar='STD',
+          help='C++ Standard [11/14/17/20]',
+          default='17')
+
 ## get number of CPUs and use for parallel builds
 num_cpu = int(os.environ.get('NUM_CPU', 2))
 SetOption('num_jobs', num_cpu)
@@ -37,6 +54,13 @@ test  = ARGUMENTS.get('test', 0)
 
 ## Construct the build enviroment
 env = denv.Clone() if int(debug) else penv.Clone()
+
+## What compiler should we be using ?
+if GetOption('cxx') is not None: env['CXX'] = GetOption('cxx')
+
+## Set the C++ standard
+cxxstd = GetOption('std')
+env.Append(CXXFLAGS=' --std=c++{}'.format(cxxstd))
 
 ## (shared) library ...
 vlib = env.SharedLibrary(source=lib_src_files, target=lib_name, CPPPATH=['.'], SHLIBVERSION=lib_version)

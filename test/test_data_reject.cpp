@@ -1,7 +1,7 @@
+#include "datetime/datetime_write.hpp"
 #include "sinex.hpp"
 #include <iostream>
 #include <vector>
-#include "datetime/datetime_write.hpp"
 
 int main(int argc, char *argv[]) {
 

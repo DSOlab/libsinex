@@ -17,7 +17,7 @@ int main() {
   const char *p9 = "TGETOTT";
   const char *p10 = "TGGETOT";
 
-  // Using Policy = Strict for comparisson
+  /* Using Policy = Strict for comparisson */
   std::vector<const char *> sv1;
   sv1.emplace_back(p1);
   sv1.emplace_back(p2);
@@ -50,7 +50,7 @@ int main() {
     }
   }
 
-  // Using Policy = NonStrict for comparisson
+  /* Using Policy = NonStrict for comparisson */
   sv1.clear();
   sv2.clear();
 
@@ -85,6 +85,5 @@ int main() {
     }
   }
 
-  printf("All seem ok!\n");
   return 0;
 }

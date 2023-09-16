@@ -1,7 +1,7 @@
 #include "sinex.hpp"
 #include <cstdio>
-#include <vector>
 #include <cstring>
+#include <vector>
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
@@ -15,21 +15,22 @@ int main(int argc, char *argv[]) {
   std::vector<dso::sinex::SiteId> sitesids;
   /* collect SITE/ID info for given sites (no DOMES) */
   if (argc > 2) {
-    
+
     int numsites = argc - 2;
-    if (numsites%2) {
-      fprintf(stderr, "ERROR Invalid usage. Each site should have a domes number!\n");
+    if (numsites % 2) {
+      fprintf(stderr,
+              "ERROR Invalid usage. Each site should have a domes number!\n");
       return 1;
     }
 
     std::vector<const char *> sites;
     /* construct vector of SITE ID + SITE DOMES */
-    for (int i = 2; i < argc; i+=2) {
+    for (int i = 2; i < argc; i += 2) {
       char *ptr = new char[24];
       std::memset(ptr, 0, 12);
       std::memcpy(ptr, argv[i], 4);
-      std::memcpy(ptr+5, argv[i+1], 10);
-      *(ptr+4) = ' ';
+      std::memcpy(ptr + 5, argv[i + 1], 10);
+      *(ptr + 4) = ' ';
       sites.push_back(ptr);
     }
     // for (const auto &p : sites) {printf("%s\n", p);}

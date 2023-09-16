@@ -26,14 +26,14 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "ERROR. Failed matching sites in SINEX file\n");
     return 1;
   }
-    
-    /* store eccentricities here */
-    std::vector<dso::sinex::SiteEccentricity> ecc;
+
+  /* store eccentricities here */
+  std::vector<dso::sinex::SiteEccentricity> ecc;
 
   {
     /* random date, for which we want eccentricities */
-    const auto t = dso::datetime<dso::seconds>(dso::year(2020), dso::month(1),
-                                  dso::day_of_month(1), dso::seconds(0));
+    const auto t = dso::datetime<dso::seconds>(
+        dso::year(2020), dso::month(1), dso::day_of_month(1), dso::seconds(0));
     /* get the eccentricities */
     if (snx.parse_block_site_eccentricity(siteids, t, ecc)) {
       fprintf(stderr, "Failed collecting site eccentricities\n");
@@ -48,8 +48,8 @@ int main(int argc, char *argv[]) {
 
   {
     /* reset random date, way into the future */
-    const auto t = dso::datetime<dso::seconds>(dso::year(2030), dso::month(1),
-                                    dso::day_of_month(1), dso::seconds(0));
+    const auto t = dso::datetime<dso::seconds>(
+        dso::year(2030), dso::month(1), dso::day_of_month(1), dso::seconds(0));
     /* get the eccentricities */
     if (snx.parse_block_site_eccentricity(siteids, t, ecc)) {
       fprintf(stderr, "Failed collecting site eccentricities\n");
@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) {
 
   {
     /* reset random date, neither DIOA nor DIOB present */
-    const auto t = dso::datetime<dso::seconds>(dso::year(2005), dso::day_of_year(349),
-                                    dso::seconds(0));
+    const auto t = dso::datetime<dso::seconds>(
+        dso::year(2005), dso::day_of_year(349), dso::seconds(0));
     /* get the eccentricities */
     if (snx.parse_block_site_eccentricity(siteids, t, ecc)) {
       fprintf(stderr, "Failed collecting site eccentricities\n");
@@ -77,11 +77,11 @@ int main(int argc, char *argv[]) {
              e.eccentricity(1), e.eccentricity(2));
     }
   }
-  
+
   {
     /* reset random date, into the past (first day of DIOA) */
-    const auto t = dso::datetime<dso::seconds>(dso::year(1993), dso::month(1),
-                                    dso::day_of_month(3), dso::seconds(0));
+    const auto t = dso::datetime<dso::seconds>(
+        dso::year(1993), dso::month(1), dso::day_of_month(3), dso::seconds(0));
     /* get the eccentricities */
     if (snx.parse_block_site_eccentricity(siteids, t, ecc)) {
       fprintf(stderr, "Failed collecting site eccentricities\n");
@@ -93,11 +93,11 @@ int main(int argc, char *argv[]) {
              e.eccentricity(1), e.eccentricity(2));
     }
   }
-  
+
   {
     /* reset random date, into the past (first day of DIOB) */
-    const auto t = dso::datetime<dso::seconds>(dso::year(2006),
-                                    dso::day_of_year(137), dso::seconds(0));
+    const auto t = dso::datetime<dso::seconds>(
+        dso::year(2006), dso::day_of_year(137), dso::seconds(0));
     /* get the eccentricities */
     if (snx.parse_block_site_eccentricity(siteids, t, ecc)) {
       fprintf(stderr, "Failed collecting site eccentricities\n");

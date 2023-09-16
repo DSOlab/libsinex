@@ -138,8 +138,8 @@ public:
   double longitude() const noexcept { return m_lat; }
   double &longitude() noexcept { return m_lon; }
   /* @brief Get height in [m] */
-  double height() const noexcept { return m_lat; }
-  double &height() noexcept { return m_lon; }
+  double height() const noexcept { return m_hgt; }
+  double &height() noexcept { return m_hgt; }
   /* @brief Get observation code */
   sinex::SinexObservationCode obscode() const noexcept { return m_obscode; }
   sinex::SinexObservationCode &obscode() noexcept { return m_obscode; }
@@ -397,7 +397,7 @@ private:
   static constexpr const int ref_system_at = 13; /* [13,16] including NULL */
   static constexpr const int ant_serial_at = 34; /* [34,39] including NULL */
   char charbuf__[40] = {'\0'};
-  
+
   /* [Up or X,  North or Y, East or Z] offset from the marker to the Antenna
    * reference point (ARP). Units are [m].
    */
@@ -441,8 +441,8 @@ public:
   char *ref_system() noexcept { return charbuf__ + ref_system_at; }
   const char *ref_system() const noexcept { return charbuf__ + ref_system_at; }
   /* @brief Return an eccentricity component of choice; index in [0,3) */
-  double eccentricity(int index) const noexcept {return une[index];}
-  double &eccentricity(int index) noexcept {return une[index];}
+  double eccentricity(int index) const noexcept { return une[index]; }
+  double &eccentricity(int index) noexcept { return une[index]; }
 }; /* SiteEccentricity */
 
 /* @brief Parse a SINEX datetime string; accepted format is: "YY:DDD:SSSSS".
@@ -549,27 +549,27 @@ public:
   /* return the SINEX filename */
   std::string filename() const noexcept { return m_filename; }
 
-  /* @brief Parse the SITE/ID block of the SINEX file and collect info for 
+  /* @brief Parse the SITE/ID block of the SINEX file and collect info for
    *        given sites
-   * This function will search through the SITE/ID block, and collect all 
-   * infor for the sites that are included in the sites vector. Matching of 
+   * This function will search through the SITE/ID block, and collect all
+   * infor for the sites that are included in the sites vector. Matching of
    * stations can be parformed in two ways:
-   * 1. if use_domes is set to false, then only the SITE CODE is checked, i.e. 
-   *    each string in the sites vector should contain a 4-char id of the 
+   * 1. if use_domes is set to false, then only the SITE CODE is checked, i.e.
+   *    each string in the sites vector should contain a 4-char id of the
    *    station (of interest). E.g. "DIOA", "HERS", etc ...
-   * 2. if use_domes is set to true, then both the SITE CODE and the DOMES are 
-   *    checked. This means that the input sites vector should contain strings 
-   *    that include the SITE CODE a whitespace charatcer and the DOMES 
+   * 2. if use_domes is set to true, then both the SITE CODE and the DOMES are
+   *    checked. This means that the input sites vector should contain strings
+   *    that include the SITE CODE a whitespace charatcer and the DOMES
    *    identifier. E.g. "DIOB 12602S012", "HOFC 10204S001", etc ...
-   * Only the sites that are matched will be included in the (output) site_vec 
+   * Only the sites that are matched will be included in the (output) site_vec
    * vector.
    * @param[in] sites Vector of stations of interest; strings of the form:
    *            e.g. "DIOB" or "DIOB 12602S012" (if we are matching DOMES).
    *            The strings do not have to be null-terminated.
-   * @param[in] use_domes Mark if we are also matching DOMES numbers (except 
+   * @param[in] use_domes Mark if we are also matching DOMES numbers (except
    *            SITE CODEs).
-   * @param[out] site_vec A vector containing one SiteId entry for each of the 
-   *            the sites that were matched (i.e. it could be that 
+   * @param[out] site_vec A vector containing one SiteId entry for each of the
+   *            the sites that were matched (i.e. it could be that
    *            size(sites) != size(site_vec)
    * @return Anything other than 0 denotes an error
    */
@@ -578,7 +578,7 @@ public:
                           std::vector<sinex::SiteId> &site_vec) noexcept;
 
   /* @brief Parse the (whole) SITE/ID block of the SINEX and return all info
-   * @param[out] site_vec A vector containing one SiteId entry for each of the 
+   * @param[out] site_vec A vector containing one SiteId entry for each of the
    *            the sites that are included in the block.
    * @return Anything other than 0 denotes an error
    */
@@ -597,7 +597,6 @@ public:
   int parse_block_site_antenna(
       std::vector<sinex::SiteAntenna> &site_vec) noexcept;
 
-
   /* @brief Parse the whole SOLUTION/ESTIMATE Block off from the SINEX
    * instance and collect sinex::SolutionEstimate records for the SITES of
    * interest. The sites of interest are the ones included in the sites_vec
@@ -613,21 +612,21 @@ public:
       const std::vector<sinex::SiteId> &sites_vec,
       std::vector<sinex::SolutionEstimate> &estimates_vec) noexcept;
 
-  /* @brief 
-   * Parse the whole SOLUTION/DATA_REJECT Block off from the SINEX instance 
-   * and collect sinex::DataReject instances for the SITES of interest. The 
-   * sites of interest are the ones included in the sites_vec (input) vector. 
-   * Any SOLUTION/DATA_REJECT line for which we have a matching SITE ID and 
-   * POINT ID will be collected, so long as it falls within or overlaps the 
+  /* @brief
+   * Parse the whole SOLUTION/DATA_REJECT Block off from the SINEX instance
+   * and collect sinex::DataReject instances for the SITES of interest. The
+   * sites of interest are the ones included in the sites_vec (input) vector.
+   * Any SOLUTION/DATA_REJECT line for which we have a matching SITE ID and
+   * POINT ID will be collected, so long as it falls within or overlaps the
    * given interval [from, to].
    * @param[in] sites_vec A vector of sinex::SiteId instances to match against,
    *             using the SITE CODE and POINT CODE fields.
    * @param[out] site_vec A vector of sinex::DataReject instances, one
-   *             entry for each block line (note that this means that for one 
+   *             entry for each block line (note that this means that for one
    *             station we can have multiple rejection intervals).
-   * @param[in] from Start of period of interest. Rejection intervals that end 
+   * @param[in] from Start of period of interest. Rejection intervals that end
    *             before this date will not be collected (inclusive).
-   * @to[in]    Stop period of interest. Rejection intervals that start after 
+   * @to[in]    Stop period of interest. Rejection intervals that start after
    *             this date will not be considered (inclusive).
    * @return Anything other than zero denotes an error
    */
@@ -642,17 +641,17 @@ public:
    * instance.
    *
    * @param[in] site_vec A list of SITE/ID instances that shall be considered.
-   *            We will be matching records according to SITE CODE and 
+   *            We will be matching records according to SITE CODE and
    *            POINT CODE.
    * @param[in] t  The time at which we want the eccentricities. If later
-   *            than the instance's DATA STOP time, then we will be assuming 
-   *            that the validity intervals that end at DATA STOP time are 
-   *            valid internaly in the future.Hence, if DATA STOP = 2022/365 
-   *            and t = 2023/001 and we encounter a record with data 
-   *            stop = "00:000:00000", then it is presumed that this record is 
+   *            than the instance's DATA STOP time, then we will be assuming
+   *            that the validity intervals that end at DATA STOP time are
+   *            valid internaly in the future.Hence, if DATA STOP = 2022/365
+   *            and t = 2023/001 and we encounter a record with data
+   *            stop = "00:000:00000", then it is presumed that this record is
    *            valid for the given t.
    * @param[out] out_vec A vector of sinex::SiteEccentricity for some or all
-   *            of the sites contained in site_vec, valid for the time given 
+   *            of the sites contained in site_vec, valid for the time given
    *            (ie t)
    * @return Anything other than 0 denotes an error
    */
