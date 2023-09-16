@@ -41,3 +41,16 @@ and if possible stick to it.
 Use [clang-format](https://clang.llvm.org/docs/ClangFormat.html)
 to format you code before commiting; if you try to commit with non-acceptable 
 code format, the CI system will fail.
+
+### Testing
+Test source code is found in [test folder](https://github.com/xanthospap/libsinex/tree/main/test). 
+To automatically run all tests, use the Python script 
+[run_test_suite.py](https://github.com/xanthospap/libsinex/blob/main/run_test_suite.py). 
+Note that to be able to run the scipt, you will have to compile using the 
+`test=1` option, i.e.
+```
+## build project and tests
+scons test=1
+## run tests
+./run_test_suite.py --progs-dir=test
+```
