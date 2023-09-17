@@ -44,4 +44,4 @@ jobs:
       run: scons test=1
     
     - name: Run test suites
-      run: python3 run_test_suite.py --progs-dir=test
+      run: python3 run_test_suite.py --progs-dir=test --verbose
