@@ -1,3 +1,7 @@
+[![CI test](https://github.com/xanthospap/libsinex/actions/workflows/test-libsinex.yml/badge.svg)](https://github.com/xanthospap/libsinex/actions/workflows/test-libsinex.yml)
+[![clang-format Check](https://github.com/xanthospap/libsinex/actions/workflows/clang-format-check.yml/badge.svg)](https://github.com/xanthospap/libsinex/actions/workflows/clang-format-check.yml)
+[![Linux CI build](https://github.com/xanthospap/libsinex/actions/workflows/cpp-linux-build.yml/badge.svg)](https://github.com/xanthospap/libsinex/actions/workflows/cpp-linux-build.yml)
+
 # libsinex
 
 A library to handle Solution (Software/technique) INdependent EXchange Format, SINEX.
