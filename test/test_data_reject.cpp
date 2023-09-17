@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "ERROR. Failed matching sites in SINEX file\n");
     return 1;
   }
-  
+
   /* store results here */
   std::vector<dso::sinex::DataReject> rej;
 
@@ -72,10 +72,10 @@ int main(int argc, char *argv[]) {
       printf("%s %s %s %s\n", d.site_code(), b1, b2, d.comment());
     }
   }
-  
+
   {
-    /* datetime interval; DIOA is rejected from start of this period to 
-     * 06:136:86399 
+    /* datetime interval; DIOA is rejected from start of this period to
+     * 06:136:86399
      */
     const auto t1 = dso::datetime<dso::seconds>(
         dso::year(2005), dso::day_of_year(350), dso::seconds(0));
@@ -92,9 +92,9 @@ int main(int argc, char *argv[]) {
       printf("%s %s %s %s\n", d.site_code(), b1, b2, d.comment());
     }
   }
-  
+
   {
-    /* datetime interval; DIOA is rejected only at the last day of the given 
+    /* datetime interval; DIOA is rejected only at the last day of the given
      * interval
      */
     const auto t2 = dso::datetime<dso::seconds>(

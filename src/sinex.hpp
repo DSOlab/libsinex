@@ -621,9 +621,9 @@ public:
    * POINT ID will be collected, so long as it falls within or overlaps the
    * given interval [from, to].
    *
-   * @note The sinex::DataReject instance's start and end times (for data 
-   *       rejection) shall not differ (at output) from the ones recorded in 
-   *       the SINEX file, even if the line only includes a sub-interval of 
+   * @note The sinex::DataReject instance's start and end times (for data
+   *       rejection) shall not differ (at output) from the ones recorded in
+   *       the SINEX file, even if the line only includes a sub-interval of
    *       [from, to]. For exmple:
    * auto t1 = datetime<seconds>(year(2005), day_of_year(349), seconds(0));
    * auto t2 = datetime<seconds>(year(2005), day_of_year(351), seconds(0));
@@ -632,8 +632,8 @@ public:
    * DIOA 2005-12-15 00:00:00 2006-05-16 23:59:59 Transmission stopped
    *       where the relevant SINEX line is:
    * DIOA  A    1 D 05:349:00000 06:136:86399 X - Transmission stopped
-   *       Here, [from,to] = [2005/349, 2005/351] is only a sub-interval of 
-   *       the rejection period [2005/349, 2006/136] recorded in the SINEX 
+   *       Here, [from,to] = [2005/349, 2005/351] is only a sub-interval of
+   *       the rejection period [2005/349, 2006/136] recorded in the SINEX
    *       file. However, the whole period is stored in the instance.
    *
    * @param[in] sites_vec A vector of sinex::SiteId instances to match against,
