@@ -15,6 +15,11 @@ DIOA 0.510000 0.000000 0.000000
 DIOB 0.487000 0.000000 0.000000
 """
 
+ds4 = """DIOA 2005-12-15 00:00:00.000000000 2006-05-16 23:59:59.000000000 Transmission stopped
+DIOA 2005-12-15 00:00:00.000000000 2006-05-16 23:59:59.000000000 Transmission stopped
+DIOA 2005-12-15 00:00:00.000000000 2006-05-16 23:59:59.000000000 Transmission stopped
+"""
+
 progs = [
   {'name': 'test-sinex', 'args': ['DATA_DIR/foobar'], 'exit': 1},
   {'name': 'test-sinex', 'args': ['DATA_DIR/dpod.snx'], 'exit': 0},
@@ -22,6 +27,7 @@ progs = [
   {'name': 'test-site-id-wdomes', 'args': ['DATA_DIR/dpod.snx', 'DIOA', '12602S011', 'A', 'B', 'DIOB', '12602S012', 'FOO', 'BAR', 'BAR', '12602S011', 'DIOC', '123'], 'sout': ds2, 'exit': 0},
   {'name': 'test-site-eccentricity', 'args': ['DATA_DIR/dpod.snx', 'FOO', 'DIOA', 'BAR1', 'DIOB', 'DIOC'], 'sout': ds3, 'exit': 0},
   {'name': 'test-parameter-exists', 'args': [], 'exit': 0},
+  {'name': 'test-data-reject', 'args': ['DATA_DIR/dpod.snx', 'FOO', 'DIOA', 'BAR1', 'DIOB', 'DIOC'], 'sout': ds4, 'exit': 0}
   ]
 
 def check_file_vs_str(file, str):
@@ -81,7 +87,7 @@ if __name__ == '__main__':
     exe = os.path.join(args.progs_dir, dct['name']) + '.out'
 ## check that the program is where expected
     if not os.path.isfile(exe):
-      print('ERROR Failed to find executable {:}'.format(exe), fout=sys.stderr)
+      print('ERROR Failed to find executable {:}'.format(exe), file=sys.stderr)
       sys.exit(1)
 ## write output (if needed) here
     ftmp = open(temp_fn, "w")

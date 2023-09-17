@@ -27,30 +27,92 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "ERROR. Failed matching sites in SINEX file\n");
     return 1;
   }
-
-  /* random datetime interval; collect data rejection periods that fall within
-   * this interval
-   */
-  dso::datetime<dso::seconds> t1(dso::year(2020), dso::month(1),
-                                 dso::day_of_month(1), dso::seconds(0));
-  dso::datetime<dso::seconds> t2(dso::year(2020), dso::month(2),
-                                 dso::day_of_month(1), dso::seconds(0));
-
-  /* get data rejection info */
+  
+  /* store results here */
   std::vector<dso::sinex::DataReject> rej;
-  if (snx.parse_block_data_reject(siteids, rej, t1, t2)) {
-    fprintf(stderr, "Failed collecting data rejection info\n");
-    return 1;
+
+  {
+    /* random datetime interval; collect data rejection periods that fall within
+     * this interval
+     */
+    const auto t1 = dso::datetime<dso::seconds>(
+        dso::year(2020), dso::month(1), dso::day_of_month(1), dso::seconds(0));
+    const auto t2 = dso::datetime<dso::seconds>(
+        dso::year(2020), dso::month(2), dso::day_of_month(1), dso::seconds(0));
+    /* get data rejection info */
+    if (snx.parse_block_data_reject(siteids, rej, t1, t2)) {
+      fprintf(stderr, "Failed collecting data rejection info\n");
+      return 1;
+    }
+    /* report results */
+    char b1[64], b2[64];
+    for (const auto &d : rej) {
+      dso::strftime_ymd_hmfs(d.start, b1);
+      dso::strftime_ymd_hmfs(d.stop, b2);
+      printf("%s %s %s %s\n", d.site_code(), b1, b2, d.comment());
+    }
   }
 
-  /* report results */
-  char b1[64], b2[64];
-  for (const auto &d : rej) {
-    dso::strftime_ymd_hmfs(d.start, b1);
-    dso::strftime_ymd_hmfs(d.stop, b2);
-    printf("%s %s %s %s\n", d.site_code(), b1, b2, d.comment());
+  {
+    /* datetime interval; DIOA is rejected within this period */
+    const auto t1 = dso::datetime<dso::seconds>(
+        dso::year(2005), dso::day_of_year(349), dso::seconds(0));
+    const auto t2 = dso::datetime<dso::seconds>(
+        dso::year(2005), dso::day_of_year(351), dso::seconds(0));
+    /* get data rejection info */
+    if (snx.parse_block_data_reject(siteids, rej, t1, t2)) {
+      fprintf(stderr, "Failed collecting data rejection info\n");
+      return 1;
+    }
+    /* report results */
+    char b1[64], b2[64];
+    for (const auto &d : rej) {
+      dso::strftime_ymd_hmfs(d.start, b1);
+      dso::strftime_ymd_hmfs(d.stop, b2);
+      printf("%s %s %s %s\n", d.site_code(), b1, b2, d.comment());
+    }
+  }
+  
+  {
+    /* datetime interval; DIOA is rejected from start of this period to 
+     * 06:136:86399 
+     */
+    const auto t1 = dso::datetime<dso::seconds>(
+        dso::year(2005), dso::day_of_year(350), dso::seconds(0));
+    /* get data rejection info */
+    if (snx.parse_block_data_reject(siteids, rej, t1)) {
+      fprintf(stderr, "Failed collecting data rejection info\n");
+      return 1;
+    }
+    /* report results */
+    char b1[64], b2[64];
+    for (const auto &d : rej) {
+      dso::strftime_ymd_hmfs(d.start, b1);
+      dso::strftime_ymd_hmfs(d.stop, b2);
+      printf("%s %s %s %s\n", d.site_code(), b1, b2, d.comment());
+    }
+  }
+  
+  {
+    /* datetime interval; DIOA is rejected only at the last day of the given 
+     * interval
+     */
+    const auto t2 = dso::datetime<dso::seconds>(
+        dso::year(2005), dso::day_of_year(350), dso::seconds(0));
+    /* get data rejection info */
+    if (snx.parse_block_data_reject(siteids, rej,
+                                    dso::datetime<dso::seconds>::min(), t2)) {
+      fprintf(stderr, "Failed collecting data rejection info\n");
+      return 1;
+    }
+    /* report results */
+    char b1[64], b2[64];
+    for (const auto &d : rej) {
+      dso::strftime_ymd_hmfs(d.start, b1);
+      dso::strftime_ymd_hmfs(d.stop, b2);
+      printf("%s %s %s %s\n", d.site_code(), b1, b2, d.comment());
+    }
   }
 
-  printf("All seem ok!\n");
   return 0;
 }
