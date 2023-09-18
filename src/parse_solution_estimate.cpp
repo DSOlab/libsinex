@@ -150,14 +150,14 @@ int dso::Sinex::parse_block_solution_estimate(
 
 int dso::Sinex::parse_block_solution_estimate(
     const std::vector<sinex::SiteId> &site_vec,
-    const dso::datetime<dso::seconds> &t,
+    const dso::datetime<dso::seconds> &t, bool allow_extrapolation,
     std::vector<sinex::SolutionEstimate> &est_vec) noexcept {
 
   /* first off, get the solution id's (SOLUTION/EPOCH block) vaild for this
    * date and the given sites
    */
   std::vector<dso::sinex::SolutionEpoch> solns;
-  if (this->parse_solution_epoch(site_vec, t, solns)) {
+  if (this->parse_solution_epoch(site_vec, t, allow_extrapolation, solns)) {
     fprintf(stderr,
             "[ERROR] Failed to get solution ids; cannot parse "
             "SOLUTION/ESTIMATE (traceback: %s)\n",

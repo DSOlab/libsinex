@@ -32,7 +32,7 @@ int dso::sinex::parse_sinex_date(const char *str,
             "(traceback: %s)\n",
             str, __func__);
     return error;
-  } 
+  }
 
   t = tdefault;
   if (!((yr == 0) && (doy == 0) && (sec == 0))) {

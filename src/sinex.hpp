@@ -320,11 +320,11 @@ struct SolutionEpoch {
    */
   char *soln_id() noexcept { return charbuf__ + soln_id_at; }
   const char *soln_id() const noexcept { return charbuf__ + soln_id_at; }
-  /* Time: Start time for which the solution identified (SPNO) has 
+  /* Time: Start time for which the solution identified (SPNO) has
    * observations
    */
   dso::datetime<dso::seconds> m_start{};
-  /* Time: End time for which the solution identified (SPNO) has 
+  /* Time: End time for which the solution identified (SPNO) has
    * observations
    */
   dso::datetime<dso::seconds> m_stop{};
@@ -334,6 +334,12 @@ struct SolutionEpoch {
   dso::datetime<dso::seconds> m_mean{};
   /* Observation Code: Identification of the observation technique used [A1] */
   SinexObservationCode m_obscode;
+
+  /* @brief Check if two SolutioEpoch instances describe the same site */
+  bool match_site(const SolutionEpoch &se) const noexcept {
+    return (!std::strcmp(site_code(), se.site_code())) &&
+           (!std::strcmp(point_code(), se.point_code()));
+  }
 }; /* SolutionEstimate */
 
 /* class to hold a record line from block SOLUTION/DATA_REJECT.
@@ -543,6 +549,58 @@ private:
                         });
   }
 
+  /* @brief Parse the SINEX block SOLUTION/EPOCHS and return a vector of
+   *        sinex::SolutionEpoch instances for the sites included in site_vec,
+   *        valid at the epoch t.
+   * The sites of interest are the ones included in the sites_vec (input) 
+   * vector. Any SOLUTION/EPOCHS line for which we have a matching SITE ID and 
+   * POINT ID will be inspected. If the input time t matches (ie lies within) 
+   * the SOLUTION/EPOCHS recorded interval, then the record will be collected 
+   * and returned in the out_vec.
+   * @param[in] site_vec A list of SITE/ID instances that shall be considered.
+   *              We will be matching records according to SITE CODE and
+   *              POINT CODE.
+   * @param[in] t Epoch for which we want the solution record (SOLUTION/EPOCHS
+   *              line). For a solution record to be collected, the relation:
+   *              SOLUTION ID START <= t < SOLUTION ID STOP
+   *              must hold.
+   * @param[out] out_vec A vector of sinex::SolutionEpoch instances for some
+   *              or all of the sites contained in site_vec, valid for the
+   *              time given (ie t)
+   * @return Anything other than zero denotes an error
+   */
+  int parse_solution_epoch_noextrapolate(
+      const std::vector<sinex::SiteId> &site_vec,
+      const dso::datetime<dso::seconds> &t,
+      std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept;
+
+  /* @brief Parse the SINEX block SOLUTION/EPOCHS and return a vector of
+   *        sinex::SolutionEpoch instances for the sites included in site_vec.
+   *        
+   * The sites of interest are the ones included in the sites_vec (input) 
+   * vector. Any SOLUTION/EPOCHS line for which we have a matching SITE ID and 
+   * POINT ID will be inspected. The solution to be collected for each site, 
+   * will be the one with a start/stop interval closest to t (ie t does not
+   * have to lay within the interval SOLUTION ID START <= t < SOLUTION ID STOP.
+   * This means that if a site has only one SOLUTION/EPOCH record, then this 
+   * will be collected. If it has multiple records, then the one with the 
+   * closest interval to t will be collected.
+   *
+   * @param[in] site_vec A list of SITE/ID instances that shall be considered.
+   *              We will be matching records according to SITE CODE and
+   *              POINT CODE.
+   * @param[in] t Epoch for which we want the solution record (SOLUTION/EPOCHS
+   *              line).
+   * @param[out] out_vec A vector of sinex::SolutionEpoch instances for some
+   *              or all of the sites contained in site_vec, valid for the
+   *              time given (ie t)
+   * @return Anything other than zero denotes an error
+   */
+  int parse_solution_epoch_extrapolate(
+      const std::vector<sinex::SiteId> &site_vec,
+      const dso::datetime<dso::seconds> &t,
+      std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept;
+
 public:
   /* return the SINEX filename */
   std::string filename() const noexcept { return m_filename; }
@@ -611,7 +669,7 @@ public:
       std::vector<sinex::SolutionEstimate> &estimates_vec) noexcept;
   int parse_block_solution_estimate(
       const std::vector<sinex::SiteId> &sites_vec,
-      const dso::datetime<dso::seconds> &t,
+      const dso::datetime<dso::seconds> &t, bool allow_extrapolation,
       std::vector<sinex::SolutionEstimate> &estimates_vec) noexcept;
 
   /* @brief Parse the SOLUTION/DATA_REJECT Block for given sites and date.
@@ -680,27 +738,31 @@ public:
       std::vector<sinex::SiteEccentricity> &out_vec) noexcept;
 
   /* @brief Parse the SINEX block SOLUTION/EPOCHS and return a vector of
-   *        sinex::SolutionEpoch instances for the sites included in site_vec,
-   *        valid at the epoch t.
-   *        The sites of interest are the ones included in the sites_vec
-   *        (input) vector. Any SOLUTION/EPOCHS line for which we have a
-   *        matching SITE ID and POINT ID will be inspected. If the input time
-   *        t matches the SOLUTION/EPOCHS recorded interval, then the record
-   *        will be collcted and returned in the out_vec.
-   * @param[in] t Epoch for which we want the solution record (SOLUTION/EPOCHS
-   *              line).
+   *        sinex::SolutionEpoch instances for the sites included in site_vec.
+   *
    * @param[in] site_vec A list of SITE/ID instances that shall be considered.
    *              We will be matching records according to SITE CODE and
    *              POINT CODE.
+   * @param[in] t Epoch for which we want the solution record (SOLUTION/EPOCHS
+   *              line).
+   * @param[in] allow_extrapolation If set to false, then for a solution 
+   *              record to be valid, the relation 
+   *              SOLUTION ID START <= t < SOLUTION ID STOP
+   *              must hold. If set to true, then the solution record with the 
+   *              interval closest to t will be collected (even if t does not
+   *              lay within its specified observation interval).
    * @param[out] out_vec A vector of sinex::SolutionEpoch instances for some
-   *              or all of the sites contained in site_vec, valid for the
-   *              time given (ie t)
+   *              or all of the sites contained in site_vec
    * @return Anything other than zero denotes an error
    */
   int parse_solution_epoch(
       const std::vector<sinex::SiteId> &site_vec,
-      const dso::datetime<dso::seconds> &t,
-      std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept;
+      const dso::datetime<dso::seconds> &t, bool allow_extrapolation,
+      std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept {
+    return (allow_extrapolation)
+               ? this->parse_solution_epoch_extrapolate(site_vec, t, out_vec)
+               : this->parse_solution_epoch_noextrapolate(site_vec, t, out_vec);
+  }
 
   int get_solution_estimate(const char *site_codes[],
                             const dso::datetime<dso::seconds> &t,
