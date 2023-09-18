@@ -26,15 +26,28 @@ int dso::sinex::parse_sinex_date(const char *str,
   cr = std::from_chars(str, end, sec);
   error += (cr.ec != std::errc{});
 
-  if (error)
+  if (error) {
+    fprintf(stderr,
+            "[ERROR] Failed to resolve SINEX date from string \"%s\" "
+            "(traceback: %s)\n",
+            str, __func__);
     return error;
+  } 
 
   t = tdefault;
   if (!((yr == 0) && (doy == 0) && (sec == 0))) {
     yr += (yr <= 50) ? 2000 : 1900;
     /* resolve datetime */
-    t = dso::datetime<dso::seconds>(dso::year(yr), dso::day_of_year(doy),
-                                    dso::seconds(sec));
+    try {
+      t = dso::datetime<dso::seconds>(dso::year(yr), dso::day_of_year(doy),
+                                      dso::seconds(sec));
+    } catch (std::exception &e) {
+      fprintf(stderr,
+              "[ERROR] Failed to resolve SINEX date from string \"%s\" "
+              "(traceback: %s)\n",
+              str, __func__);
+      return 1;
+    }
   }
 
   return 0;

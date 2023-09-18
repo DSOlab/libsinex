@@ -25,7 +25,7 @@ int parse_epoch_line(const char *line,
   error +=
       dso::sinex::parse_sinex_date(line + 29, sinex_data_end, entry.m_stop);
   error += dso::sinex::parse_sinex_date(
-      line + 32, dso::datetime<dso::seconds>::min(), entry.m_mean);
+      line + 42, dso::datetime<dso::seconds>::min(), entry.m_mean);
   if (error) {
     fprintf(stderr,
             "[ERROR] Failed to parse date from line: \"%s\" (traceback: %s)\n",

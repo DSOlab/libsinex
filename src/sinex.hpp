@@ -320,14 +320,12 @@ struct SolutionEpoch {
    */
   char *soln_id() noexcept { return charbuf__ + soln_id_at; }
   const char *soln_id() const noexcept { return charbuf__ + soln_id_at; }
-  /* Time: Time since the antenna has been installed at the Site/Point. Value
-   * 00:000:00000 indicates that the antenna has been installed at least since
-   * the "File Epoch Start Time".
+  /* Time: Start time for which the solution identified (SPNO) has 
+   * observations
    */
   dso::datetime<dso::seconds> m_start{};
-  /* Time: Time until the antenna is installed at a Site/Point. Value
-   * 00:000:00000 indicates that the antenna has been installed at least until
-   * the "File Epoch End Time".
+  /* Time: End time for which the solution identified (SPNO) has 
+   * observations
    */
   dso::datetime<dso::seconds> m_stop{};
   /* Time: Mean time of the observations for which the solution (SPNO) is
@@ -611,6 +609,10 @@ public:
   int parse_block_solution_estimate(
       const std::vector<sinex::SiteId> &sites_vec,
       std::vector<sinex::SolutionEstimate> &estimates_vec) noexcept;
+  int parse_block_solution_estimate(
+      const std::vector<sinex::SiteId> &sites_vec,
+      const dso::datetime<dso::seconds> &t,
+      std::vector<sinex::SolutionEstimate> &estimates_vec) noexcept;
 
   /* @brief Parse the SOLUTION/DATA_REJECT Block for given sites and date.
    *
@@ -720,10 +722,6 @@ public:
 
 }; /* Sinex */
 
-int filter_solution_estimates(
-    const std::vector<sinex::SolutionEstimate> &estimates,
-    const dso::datetime<dso::seconds> &t,
-    std::vector<sinex::SolutionEstimate> &filtered_estimates) noexcept;
 int filter_solution_estimates(
     const std::vector<dso::sinex::SolutionEstimate> &estimates,
     const std::vector<dso::sinex::SolutionEpoch> &epochs,

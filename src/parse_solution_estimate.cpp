@@ -147,3 +147,99 @@ int dso::Sinex::parse_block_solution_estimate(
 
   return 0;
 }
+
+int dso::Sinex::parse_block_solution_estimate(
+    const std::vector<sinex::SiteId> &site_vec,
+    const dso::datetime<dso::seconds> &t,
+    std::vector<sinex::SolutionEstimate> &est_vec) noexcept {
+
+  /* first off, get the solution id's (SOLUTION/EPOCH block) vaild for this
+   * date and the given sites
+   */
+  std::vector<dso::sinex::SolutionEpoch> solns;
+  if (this->parse_solution_epoch(site_vec, t, solns)) {
+    fprintf(stderr,
+            "[ERROR] Failed to get solution ids; cannot parse "
+            "SOLUTION/ESTIMATE (traceback: %s)\n",
+            __func__);
+    return 1;
+  }
+
+  /* clear the vector; allocate storage */
+  if (!est_vec.empty())
+    est_vec.clear();
+  if (est_vec.capacity() < site_vec.size() * 6)
+    est_vec.reserve(site_vec.size() * 6);
+
+  /* go to SOLUTION/ESTIMATE block */
+  if (goto_block("SOLUTION/ESTIMATE"))
+    return 1;
+
+  /* next line to be read should be '+SOLUTION/ESTIMATE' */
+  char line[sinex::max_sinex_chars];
+  m_stream.getline(line, sinex::max_sinex_chars);
+  if (!m_stream.good() || std::strcmp(line, "+SOLUTION/ESTIMATE")) {
+    fprintf(stderr,
+            "[ERROR] Expected \"%s\" line, found: \"%s\" (traceback: %s)\n",
+            "+SOLUTION/ESTIMATE", line, __func__);
+    return 1;
+  }
+
+  /* read in SOLUTION/ESTIMATES untill end of block */
+  std::size_t ln_count = 0;
+  int error = 0;
+  dso::sinex::SolutionEstimate est;
+  while (m_stream.getline(line, sinex::max_sinex_chars) &&
+         (++ln_count < max_lines_in_block) && (!error)) {
+    /* end of block encountered; break */
+    if (!std::strncmp(line, "-SOLUTION/ESTIMATE", 14))
+      break;
+
+    if (*line != '*') { /* non-comment line */
+
+      /* check if the site is of interest, aka included in site_vec */
+      auto it = std::find_if(
+          site_vec.cbegin(), site_vec.cend(), [&](const sinex::SiteId &site) {
+            return !std::strncmp(site.site_code(), line + 14, 4) &&
+                   !std::strncmp(site.point_code(), line + 19, 2);
+          });
+
+      if (it != site_vec.cend()) {
+        /* parse estimate record line*/
+        error = parse_solution_estimate_line(line, est, m_data_start);
+        /* check if the record's dolution id matches the one we have collected
+         * for the given epoch
+         */
+        auto mit = std::find_if(
+            solns.begin(), solns.end(), [&](const sinex::SolutionEpoch &se) {
+              return (!std::strncmp(se.site_code(), est.site_code(), 4)) &&
+                     (!std::strncmp(se.point_code(), est.point_code(), 2)) &&
+                     (!std::strncmp(se.soln_id(), est.soln_id(), 4));
+            });
+        /* if site is of interest and the solution id matches, append */
+        if (mit != solns.end()) {
+          est_vec.push_back(est);
+        }
+      }
+    } /* non-comment line */
+    ++ln_count;
+  } /* end of block */
+
+  /* check for infinite loop */
+  if (ln_count >= max_lines_in_block) {
+    fprintf(stderr,
+            "[ERROR] Read in %8zu lines and no \'%s\' line found .... smthng "
+            "is wrong! (traceback: %s)\n",
+            ln_count, "-SOLUTION/ESTIMATE", __func__);
+    return 1;
+  }
+
+  /* check for parsing error */
+  if (error) {
+    fprintf(stderr, "[ERROR] Failed paring SINEX file %s (traceback: %s)\n",
+            m_filename.c_str(), __func__);
+    return 1;
+  }
+
+  return 0;
+}
