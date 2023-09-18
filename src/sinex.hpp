@@ -658,7 +658,7 @@ public:
    * interest. The sites of interest are the ones included in the sites_vec
    * (input) vector. Any SOLUTION/ESTIMATE line for which we have a matching
    * SITE ID and POINT ID will be collected.
-   * @param[inout] site_vec A vector of sinex::SolutionEstimate instances, one
+   * @param[in] site_vec A vector of sinex::SolutionEstimate instances, one
    *               entry for each block line.
    * @param[in] sites_vec A vector of sinex::SiteId instances to match against,
    *               using the SITE CODE and POINT CODE fields.
@@ -667,6 +667,18 @@ public:
   int parse_block_solution_estimate(
       const std::vector<sinex::SiteId> &sites_vec,
       std::vector<sinex::SolutionEstimate> &estimates_vec) noexcept;
+  
+  /* @brief Parse the whole SOLUTION/ESTIMATE Block off from the SINEX
+   * instance and collect sinex::SolutionEstimate records for the SITES of
+   * interest. The sites of interest are the ones included in the sites_vec
+   * (input) vector. Any SOLUTION/ESTIMATE line for which we have a matching
+   * SITE ID and POINT ID will be collected.
+   * @param[in] site_vec A vector of sinex::SolutionEstimate instances, one
+   *               entry for each block line.
+   * @param[in] sites_vec A vector of sinex::SiteId instances to match against,
+   *               using the SITE CODE and POINT CODE fields.
+   * @return Anything other than zero denotes an error
+   */
   int parse_block_solution_estimate(
       const std::vector<sinex::SiteId> &sites_vec,
       const dso::datetime<dso::seconds> &t, bool allow_extrapolation,
