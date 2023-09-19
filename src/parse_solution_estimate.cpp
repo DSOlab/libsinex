@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <stdexcept>
 
+using dso::sinex::details::ParameterMatchPolicyType;
+
 namespace {
 constexpr int max_lines_in_block = 10000;
 const char *skipws(const char *line) noexcept {
@@ -24,9 +26,8 @@ int parse_solution_estimate_line(
 
   /* parameter type */
   int index;
-  if (dso::sinex::parameter_type_exists<
-          dso::sinex::ParameterMatchPolicyType::NonStrict>(skipws(line + 7),
-                                                           index)) {
+  if (dso::sinex::parameter_type_exists<ParameterMatchPolicyType::NonStrict>(
+          skipws(line + 7), index)) {
     est.m_parameter_type = dso::sinex::parameter_types[index];
   } else {
     fprintf(stderr,

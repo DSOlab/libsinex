@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <stdexcept>
 
+using dso::sinex::details::SiteMatchPolicyType;
+
 namespace {
 constexpr int max_lines_in_block = 10000;
 inline const char *skipws(const char *line) noexcept {
@@ -131,8 +133,8 @@ int dso::Sinex::parse_block_site_id(
         for (const auto &ptr : sites) {
           const bool same =
               (use_domes)
-                  ? (site.issame<sinex::SiteMatchPolicyType::USEDOMES>(ptr))
-                  : (site.issame<sinex::SiteMatchPolicyType::IGNOREDOMES>(ptr));
+                  ? (site.issame<SiteMatchPolicyType::USEDOMES>(ptr))
+                  : (site.issame<SiteMatchPolicyType::IGNOREDOMES>(ptr));
           if (same) {
             store_siteid = true;
             break;
