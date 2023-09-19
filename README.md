@@ -26,7 +26,7 @@ To install, just type:
 ## build ...
 scons
 ## install ...
-sudo scond install
+sudo scons install
 ```
 
 When building, you can use the `debug=1` option to trigger a `DEBUG` build:
