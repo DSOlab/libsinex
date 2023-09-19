@@ -5,77 +5,15 @@ import sys
 import subprocess
 import argparse
 import ftplib
+import importlib.util
 
-ds1 = """DIOA  A 12602S011
-DIOB  A 12602S012
-"""
 
-ds2 = """DIOA  A 12602S011
-DIOB  A 12602S012
-"""
-
-ds3 = """DIOB 0.487000 0.000000 0.000000
-DIOA 0.510000 0.000000 0.000000
-DIOB 0.487000 0.000000 0.000000
-"""
-
-ds4 = """DIOA 2005-12-15 00:00:00.000000000 2006-05-16 23:59:59.000000000 Transmission stopped
-DIOA 2005-12-15 00:00:00.000000000 2006-05-16 23:59:59.000000000 Transmission stopped
-DIOA 2005-12-15 00:00:00.000000000 2006-05-16 23:59:59.000000000 Transmission stopped
-"""
-
-progs = [{'name': 'test-sinex',
-          'args': ['DATA_DIR/foobar'],
-          'exit': 1},
-         {'name': 'test-sinex',
-          'args': ['DATA_DIR/dpod2020.snx'],
-          'exit': 0},
-         {'name': 'test-site-id-ndomes',
-          'args': ['DATA_DIR/dpod2020.snx',
-                   'DIOA',
-                   'DIOB',
-                   'FOO',
-                   'BAR',
-                   'DIOC'],
-          'sout': ds1,
-          'exit': 0},
-         {'name': 'test-site-id-wdomes',
-          'args': ['DATA_DIR/dpod2020.snx',
-                   'DIOA',
-                   '12602S011',
-                   'A',
-                   'B',
-                   'DIOB',
-                   '12602S012',
-                   'FOO',
-                   'BAR',
-                   'BAR',
-                   '12602S011',
-                   'DIOC',
-                   '123'],
-          'sout': ds2,
-          'exit': 0},
-         {'name': 'test-site-eccentricity',
-          'args': ['DATA_DIR/dpod2020.snx',
-                   'FOO',
-                   'DIOA',
-                   'BAR1',
-                   'DIOB',
-                   'DIOC'],
-          'sout': ds3,
-          'exit': 0},
-         {'name': 'test-parameter-exists',
-          'args': [],
-          'exit': 0},
-         {'name': 'test-data-reject',
-          'args': ['DATA_DIR/dpod2020.snx',
-                   'FOO',
-                   'DIOA',
-                   'BAR1',
-                   'DIOB',
-                   'DIOC'],
-          'sout': ds4,
-          'exit': 0}]
+def runtime_load_progs(pyfile):
+    spec = importlib.util.spec_from_file_location("bar.baz", pyfile)
+    foo = importlib.util.module_from_spec(spec)
+    sys.modules["bar.baz"] = foo
+    spec.loader.exec_module(foo)
+    return foo.progs
 
 
 def check_file_vs_str(file, str):
@@ -92,12 +30,12 @@ class myFormatter(argparse.ArgumentDefaultsHelpFormatter,
 
 parser = argparse.ArgumentParser(
     formatter_class=myFormatter,
-    description='Run validatation programs against SOFA library',
+    description='Run validatation programs for the libsinex library',
     epilog=('''National Technical University of Athens,
     Dionysos Satellite Observatory\n
     Send bug reports to:
     Xanthos Papanikolaou, xanthos@mail.ntua.gr
-    May, 2023'''))
+    Sep, 2023'''))
 
 parser.add_argument(
     '--progs-dir',
@@ -116,17 +54,37 @@ parser.add_argument(
     help='Directory with test data')
 
 parser.add_argument(
+    '--reference-results',
+    metavar='REFERENCE_RESULTS_FILE',
+    dest='ref_respy',
+    default=os.path.join(
+        os.path.abspath(
+            os.getcwd()),
+        'test/reference_results.py'),
+    required=False,
+    help='File with reference test results, for comparing against')
+
+parser.add_argument(
     '--verbose',
     action='store_true',
     dest='verbose',
     help='Verbose mode on')
 
 if __name__ == '__main__':
-# parse cmd
+    # parse cmd
     args = parser.parse_args()
 
 # verbose print
     verboseprint = print if args.verbose else lambda *a, **k: None
+
+# import reference results (including the progs dictionary)
+    if not os.path.isfile(args.ref_respy):
+        print(
+            'ERROR Failed to locate reference results file {:}'.format(
+                args.ref_respy),
+            file=sys.stderr)
+        sys.exit(1)
+    progs = runtime_load_progs(args.ref_respy)
 
 # Download the latest dpod2020 SINEX file and store it as DATA_DIR/dpod2020.snx
     if not os.path.isfile(os.path.join(args.data_dir, 'dpod2020.snx')):
