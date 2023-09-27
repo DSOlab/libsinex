@@ -2,9 +2,13 @@
 #include <charconv>
 #include <cstdio>
 
-int dso::sinex::parse_sinex_date(const char *str,
-                                 const dso::datetime<dso::seconds> &tdefault,
-                                 dso::datetime<dso::seconds> &t) noexcept {
+using SecIntType = typename dso::nanoseconds::underlying_type;
+constexpr const SecIntType S2NS =
+    dso::nanoseconds::template sec_factor<SecIntType>();
+
+int dso::sinex::parse_sinex_date(
+    const char *str, const dso::datetime<dso::nanoseconds> &tdefault,
+    dso::datetime<dso::nanoseconds> &t) noexcept {
   int yr, doy;
   long sec;
   int error = 0;
@@ -39,8 +43,8 @@ int dso::sinex::parse_sinex_date(const char *str,
     yr += (yr <= 50) ? 2000 : 1900;
     /* resolve datetime */
     try {
-      t = dso::datetime<dso::seconds>(dso::year(yr), dso::day_of_year(doy),
-                                      dso::seconds(sec));
+      t = dso::datetime<dso::nanoseconds>(dso::year(yr), dso::day_of_year(doy),
+                                          dso::nanoseconds(sec * S2NS));
     } catch (std::exception &e) {
       fprintf(stderr,
               "[ERROR] Failed to resolve SINEX date from string \"%s\" "

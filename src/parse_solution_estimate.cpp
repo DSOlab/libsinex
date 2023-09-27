@@ -15,20 +15,20 @@ const char *skipws(const char *line) noexcept {
 
 int parse_solution_estimate_line(
     const char *line, dso::sinex::SolutionEstimate &est,
-    const dso::datetime<dso::seconds> &sinex_data_start) noexcept {
+    const dso::datetime<dso::nanoseconds> &sinex_data_start) noexcept {
 
   int error = 0, j;
   const char *end = line + std::strlen(line);
 
   /* parameter index */
-  auto cv = std::from_chars(skipws(line), end, est.m_index);
+  auto cv = std::from_chars(skipws(line), end, est.index());
   error += (cv.ec != std::errc{});
 
   /* parameter type */
   int index;
   if (dso::sinex::parameter_type_exists<ParameterMatchPolicyType::NonStrict>(
           skipws(line + 7), index)) {
-    est.m_parameter_type = dso::sinex::parameter_types[index];
+    est.set_parameter_type(dso::sinex::parameter_types[index]);
   } else {
     fprintf(stderr,
             "[ERROR] Failed matching parameter type in SINEX line \"%s\" "
@@ -41,7 +41,7 @@ int parse_solution_estimate_line(
   std::memcpy(est.point_code(), line + 19, 2);
   std::memcpy(est.soln_id(), line + 22, 4);
 
-  j = dso::sinex::parse_sinex_date(line + 27, sinex_data_start, est.m_epoch);
+  j = dso::sinex::parse_sinex_date(line + 27, sinex_data_start, est.epoch());
   if (j) {
     fprintf(stderr,
             "[ERROR] Failed parsing date in SINEX line \"%s\" "
@@ -52,7 +52,7 @@ int parse_solution_estimate_line(
 
   std::memcpy(est.units(), line + 40, 4);
   try {
-    est.m_constraint = dso::sinex::char_to_SinexConstraintCode(line[45]);
+    est.constraint() = dso::sinex::char_to_SinexConstraintCode(line[45]);
   } catch (std::exception &) {
     fprintf(stderr,
             "[ERROR] Failed to match SINEX constraint code in line \"%s\" "
@@ -62,9 +62,9 @@ int parse_solution_estimate_line(
   }
 
   j = 0;
-  cv = std::from_chars(skipws(line + 47), end, est.m_estimate);
+  cv = std::from_chars(skipws(line + 47), end, est.estimate());
   j += (cv.ec != std::errc{});
-  cv = std::from_chars(skipws(line + 69), end, est.m_std_deviation);
+  cv = std::from_chars(skipws(line + 69), end, est.std_deviation());
   j += (cv.ec != std::errc{});
   if (j) {
     fprintf(stderr,
@@ -151,7 +151,7 @@ int dso::Sinex::parse_block_solution_estimate(
 
 int dso::Sinex::parse_block_solution_estimate(
     const std::vector<sinex::SiteId> &site_vec,
-    const dso::datetime<dso::seconds> &t, bool allow_extrapolation,
+    const dso::datetime<dso::nanoseconds> &t, bool allow_extrapolation,
     std::vector<sinex::SolutionEstimate> &est_vec) noexcept {
 
   /* first off, get the solution id's (SOLUTION/EPOCH block) vaild for this

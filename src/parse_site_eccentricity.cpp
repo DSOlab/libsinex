@@ -16,8 +16,8 @@ const char *skip_ws(const char *line) noexcept {
  */
 int parse_eccentricity_line(
     const char *line, dso::sinex::SiteEccentricity &ecc,
-    const dso::datetime<dso::seconds> &sinex_data_start,
-    const dso::datetime<dso::seconds> &sinex_data_stop) noexcept {
+    const dso::datetime<dso::nanoseconds> &sinex_data_start,
+    const dso::datetime<dso::nanoseconds> &sinex_data_stop) noexcept {
   /* don't even bother for sizes < 70 */
   const int sz = std::strlen(line);
   if (sz < 70)
@@ -64,7 +64,7 @@ int parse_eccentricity_line(
 
 int dso::Sinex::parse_block_site_eccentricity(
     const std::vector<sinex::SiteId> &site_vec,
-    const dso::datetime<dso::seconds> &t,
+    const dso::datetime<dso::nanoseconds> &t,
     std::vector<sinex::SiteEccentricity> &out_vec) noexcept {
 
   /* clear the vector, and allocate */
@@ -94,7 +94,7 @@ int dso::Sinex::parse_block_site_eccentricity(
   auto tstop = t;
   if (tstop > m_data_stop) {
     auto ExtrapolateAfter(m_data_stop);
-    ExtrapolateAfter.remove_seconds(dso::seconds(1));
+    ExtrapolateAfter.remove_seconds(dso::nanoseconds(1));
     tstop = ExtrapolateAfter;
   }
 

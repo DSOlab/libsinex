@@ -131,7 +131,7 @@ int dso::Sinex::parse_first_line() noexcept {
 
   std::memcpy(m_agency, line + 11, 3);
 
-  if (sinex::parse_sinex_date(line + 14, dso::datetime<dso::seconds>::min(),
+  if (sinex::parse_sinex_date(line + 14, dso::datetime<dso::nanoseconds>::min(),
                               m_created_at)) {
     fprintf(stderr,
             "[ERROR] Invalid first SINEX line from %s (traceback: %s)\n",
@@ -145,9 +145,9 @@ int dso::Sinex::parse_first_line() noexcept {
   std::memcpy(m_data_agency, line + 28, 3);
 
   int j = 0;
-  j += sinex::parse_sinex_date(line + 31, dso::datetime<dso::seconds>::min(),
+  j += sinex::parse_sinex_date(line + 31, dso::datetime<dso::nanoseconds>::min(),
                                m_data_start);
-  j += sinex::parse_sinex_date(line + 44, dso::datetime<dso::seconds>::max(),
+  j += sinex::parse_sinex_date(line + 44, dso::datetime<dso::nanoseconds>::max(),
                                m_data_stop);
   if (error) {
     fprintf(stderr,

@@ -35,10 +35,10 @@ int main(int argc, char *argv[]) {
     /* random datetime interval; collect data rejection periods that fall within
      * this interval
      */
-    const auto t1 = dso::datetime<dso::seconds>(
-        dso::year(2020), dso::month(1), dso::day_of_month(1), dso::seconds(0));
-    const auto t2 = dso::datetime<dso::seconds>(
-        dso::year(2020), dso::month(2), dso::day_of_month(1), dso::seconds(0));
+    const auto t1 = dso::datetime<dso::nanoseconds>(
+        dso::year(2020), dso::month(1), dso::day_of_month(1), dso::nanoseconds(0));
+    const auto t2 = dso::datetime<dso::nanoseconds>(
+        dso::year(2020), dso::month(2), dso::day_of_month(1), dso::nanoseconds(0));
     /* get data rejection info */
     if (snx.parse_block_data_reject(siteids, rej, t1, t2)) {
       fprintf(stderr, "Failed collecting data rejection info\n");
@@ -55,10 +55,10 @@ int main(int argc, char *argv[]) {
 
   {
     /* datetime interval; DIOA is rejected within this period */
-    const auto t1 = dso::datetime<dso::seconds>(
-        dso::year(2005), dso::day_of_year(349), dso::seconds(0));
-    const auto t2 = dso::datetime<dso::seconds>(
-        dso::year(2005), dso::day_of_year(351), dso::seconds(0));
+    const auto t1 = dso::datetime<dso::nanoseconds>(
+        dso::year(2005), dso::day_of_year(349), dso::nanoseconds(0));
+    const auto t2 = dso::datetime<dso::nanoseconds>(
+        dso::year(2005), dso::day_of_year(351), dso::nanoseconds(0));
     /* get data rejection info */
     if (snx.parse_block_data_reject(siteids, rej, t1, t2)) {
       fprintf(stderr, "Failed collecting data rejection info\n");
@@ -77,8 +77,8 @@ int main(int argc, char *argv[]) {
     /* datetime interval; DIOA is rejected from start of this period to
      * 06:136:86399
      */
-    const auto t1 = dso::datetime<dso::seconds>(
-        dso::year(2005), dso::day_of_year(350), dso::seconds(0));
+    const auto t1 = dso::datetime<dso::nanoseconds>(
+        dso::year(2005), dso::day_of_year(350), dso::nanoseconds(0));
     /* get data rejection info */
     if (snx.parse_block_data_reject(siteids, rej, t1)) {
       fprintf(stderr, "Failed collecting data rejection info\n");
@@ -97,11 +97,11 @@ int main(int argc, char *argv[]) {
     /* datetime interval; DIOA is rejected only at the last day of the given
      * interval
      */
-    const auto t2 = dso::datetime<dso::seconds>(
-        dso::year(2005), dso::day_of_year(350), dso::seconds(0));
+    const auto t2 = dso::datetime<dso::nanoseconds>(
+        dso::year(2005), dso::day_of_year(350), dso::nanoseconds(0));
     /* get data rejection info */
     if (snx.parse_block_data_reject(siteids, rej,
-                                    dso::datetime<dso::seconds>::min(), t2)) {
+                                    dso::datetime<dso::nanoseconds>::min(), t2)) {
       fprintf(stderr, "Failed collecting data rejection info\n");
       return 1;
     }

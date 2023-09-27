@@ -4,8 +4,8 @@ namespace {
 constexpr int max_lines_in_block = 10000;
 
 int parse_epoch_line(const char *line,
-                     const dso::datetime<dso::seconds> &sinex_data_start,
-                     const dso::datetime<dso::seconds> &sinex_data_end,
+                     const dso::datetime<dso::nanoseconds> &sinex_data_start,
+                     const dso::datetime<dso::nanoseconds> &sinex_data_end,
                      dso::sinex::SolutionEpoch &entry) noexcept {
   int error = 0;
   std::memcpy(entry.site_code(), line + 1, 4);
@@ -25,7 +25,7 @@ int parse_epoch_line(const char *line,
   error +=
       dso::sinex::parse_sinex_date(line + 29, sinex_data_end, entry.m_stop);
   error += dso::sinex::parse_sinex_date(
-      line + 42, dso::datetime<dso::seconds>::min(), entry.m_mean);
+      line + 42, dso::datetime<dso::nanoseconds>::min(), entry.m_mean);
   if (error) {
     fprintf(stderr,
             "[ERROR] Failed to parse date from line: \"%s\" (traceback: %s)\n",
@@ -38,7 +38,7 @@ int parse_epoch_line(const char *line,
 
 int dso::Sinex::parse_solution_epoch_noextrapolate(
     const std::vector<sinex::SiteId> &site_vec,
-    const dso::datetime<dso::seconds> &t,
+    const dso::datetime<dso::nanoseconds> &t,
     std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept {
   /* clear the vector; allocate storage */
   if (!out_vec.empty())
@@ -112,7 +112,7 @@ int dso::Sinex::parse_solution_epoch_noextrapolate(
 
 int dso::Sinex::parse_solution_epoch_extrapolate(
     const std::vector<sinex::SiteId> &site_vec,
-    const dso::datetime<dso::seconds> &t,
+    const dso::datetime<dso::nanoseconds> &t,
     std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept {
   /* clear the vector; allocate storage */
   if (!out_vec.empty())

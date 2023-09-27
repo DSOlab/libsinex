@@ -36,12 +36,12 @@ int main(int argc, char *argv[]) {
   }
   for (auto const &e : estimates)
     printf("%s %s %.5f +/- %.5f\n", e.parameter_type(), e.site_code(),
-           e.m_estimate, e.m_std_deviation);
+           e.estimate(), e.std_deviation());
 
   { /* filter estimates based on date */
     printf("-------------------------------------------------------------\n");
-    const auto t = dso::datetime<dso::seconds>(
-        dso::year(2007), dso::day_of_year(304), dso::seconds(0));
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(2007), dso::day_of_year(304), dso::nanoseconds(0));
     if (snx.parse_block_solution_estimate(siteids, t, /*extrapolation*/ false,
                                           estimates)) {
       fprintf(stderr, "ERROR Failed filtering solution estimates\n");
@@ -49,13 +49,13 @@ int main(int argc, char *argv[]) {
     }
     for (auto const &e : estimates)
       printf("%s %s %.5f +/- %.5f\n", e.parameter_type(), e.site_code(),
-             e.m_estimate, e.m_std_deviation);
+             e.estimate(), e.std_deviation());
   }
 
   { /* filter estimates based on date */
     printf("-------------------------------------------------------------\n");
-    const auto t = dso::datetime<dso::seconds>(
-        dso::year(2007), dso::day_of_year(305), dso::seconds(0));
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(2007), dso::day_of_year(305), dso::nanoseconds(0));
     if (snx.parse_block_solution_estimate(siteids, t, /*extrapolation*/ false,
                                           estimates)) {
       fprintf(stderr, "ERROR Failed filtering solution estimates\n");
@@ -63,13 +63,13 @@ int main(int argc, char *argv[]) {
     }
     for (auto const &e : estimates)
       printf("%s %s %.5f +/- %.5f\n", e.parameter_type(), e.site_code(),
-             e.m_estimate, e.m_std_deviation);
+             e.estimate(), e.std_deviation());
   }
 
   { /* filter estimates based on date */
     printf("-------------------------------------------------------------\n");
-    const auto t = dso::datetime<dso::seconds>(
-        dso::year(2030), dso::day_of_year(305), dso::seconds(0));
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(2030), dso::day_of_year(305), dso::nanoseconds(0));
     if (snx.parse_block_solution_estimate(siteids, t, /*extrapolation*/ false,
                                           estimates)) {
       fprintf(stderr, "ERROR Failed filtering solution estimates\n");
@@ -77,13 +77,13 @@ int main(int argc, char *argv[]) {
     }
     for (auto const &e : estimates)
       printf("%s %s %.5f +/- %.5f\n", e.parameter_type(), e.site_code(),
-             e.m_estimate, e.m_std_deviation);
+             e.estimate(), e.std_deviation());
   }
 
   { /* filter estimates based on date */
     printf("-------------------------------------------------------------\n");
-    const auto t = dso::datetime<dso::seconds>(
-        dso::year(2030), dso::day_of_year(305), dso::seconds(0));
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(2030), dso::day_of_year(305), dso::nanoseconds(0));
     if (snx.parse_block_solution_estimate(siteids, t, /*extrapolation*/ true,
                                           estimates)) {
       fprintf(stderr, "ERROR Failed filtering solution estimates\n");
@@ -91,13 +91,13 @@ int main(int argc, char *argv[]) {
     }
     for (auto const &e : estimates)
       printf("%s %s %.5f +/- %.5f\n", e.parameter_type(), e.site_code(),
-             e.m_estimate, e.m_std_deviation);
+             e.estimate(), e.std_deviation());
   }
 
   { /* filter estimates based on date */
     printf("-------------------------------------------------------------\n");
-    const auto t = dso::datetime<dso::seconds>(
-        dso::year(1990), dso::day_of_year(305), dso::seconds(0));
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(1990), dso::day_of_year(305), dso::nanoseconds(0));
     if (snx.parse_block_solution_estimate(siteids, t, /*extrapolation*/ true,
                                           estimates)) {
       fprintf(stderr, "ERROR Failed filtering solution estimates\n");
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
     }
     for (auto const &e : estimates)
       printf("%s %s %.5f +/- %.5f\n", e.parameter_type(), e.site_code(),
-             e.m_estimate, e.m_std_deviation);
+             e.estimate(), e.std_deviation());
   }
 
   return 0;

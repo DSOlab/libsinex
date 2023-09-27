@@ -205,13 +205,13 @@ struct SiteReceiver {
    * 00:000:00000 indicates that the receiver has been operating at least
    * since the "File Epoch Start Time".
    */
-  dso::datetime<dso::seconds> m_start{};
+  dso::datetime<dso::nanoseconds> m_start{};
 
   /* Time: Time until the receiver is operated at a Site/Point. Value
    * 00:000:00000 indicates that the receiver has been operating at least
    * until the "File Epoch End Time"
    */
-  dso::datetime<dso::seconds> m_stop{};
+  dso::datetime<dso::nanoseconds> m_stop{};
 
   /* Observation Code: Identification of the observation technique used [A1] */
   SinexObservationCode m_obscode;
@@ -256,35 +256,55 @@ struct SiteAntenna {
    * 00:000:00000 indicates that the antenna has been installed at least since
    * the "File Epoch Start Time".
    */
-  dso::datetime<dso::seconds> m_start{};
+  dso::datetime<dso::nanoseconds> m_start{};
 
   /* Time: Time until the antenna is installed at a Site/Point. Value
    * 00:000:00000 indicates that the antenna has been installed at least until
    * the "File Epoch End Time".
    */
-  dso::datetime<dso::seconds> m_stop{};
+  dso::datetime<dso::nanoseconds> m_stop{};
 
   /* Observation Code: Identification of the observation technique used [A1] */
   SinexObservationCode m_obscode;
 }; /* SiteAntenna */
 
 /* @class Hold a record line from block SOLUTION/ESTIMATE */
-struct SolutionEstimate {
+class SolutionEstimate {
   static constexpr const int site_code_at = 0;  /* [0,4] including NULL */
   static constexpr const int point_code_at = 5; /* [5,7] including NULL */
   static constexpr const int soln_id_at = 8;    /* [8,12] including NULL */
   static constexpr const int units_at = 13;     /* [13,17] including NULL */
   char charbuf__[32] = {'\0'};
+  const char *m_parameter_type;
 
   /* Estimated Parameters Index: Index of estimated parameters. [I5] */
   int m_index;
+  
+  /* Constraint Code: Constraint applied to the parameter. [A1]*/
+  SinexConstraintCode m_constraint;
 
+  /* Parameter Estimate: Estimated value of the parameter. */
+  double m_estimate;
+
+  /* Parameter Standard Deviation: Estimated standard deviation for the
+   * parameter.
+   */
+  double m_std_deviation;
+
+  /* Time: Epoch at which the estimated parameter is valid. */
+  dso::datetime<dso::nanoseconds> m_epoch{};
+
+public:  
   /* Parameter Type: Identification of the type of parameter. [A6]
    * This is a pointer to the respective type in the
    * dso::sinex::parameter_types[] array
    */
-  const char *m_parameter_type;
-  const char *parameter_type() const { return m_parameter_type; }
+  const char *parameter_type() const noexcept { return m_parameter_type; }
+  void set_parameter_type(const char *s) noexcept {m_parameter_type=s;}
+
+  /* @brief Get constraint code */
+  SinexConstraintCode constraint() const noexcept {return m_constraint;}
+  SinexConstraintCode &constraint() noexcept {return m_constraint;}
 
   /* Site Code: Site code for which some parameters are estimated. [A4] */
   char *site_code() noexcept { return charbuf__ + site_code_at; }
@@ -319,19 +339,45 @@ struct SolutionEstimate {
   char *units() noexcept { return charbuf__ + units_at; }
   const char *units() const noexcept { return charbuf__ + units_at; }
 
-  /* Constraint Code: Constraint applied to the parameter. [A1]*/
-  SinexConstraintCode m_constraint;
+  /* @brief Return the estimated value */
+  double estimate() const noexcept {return m_estimate;}
+  double &estimate() noexcept {return m_estimate;}
+  
+  /* @brief Return the std. deviation of the estimate */
+  double std_deviation() const noexcept {return m_std_deviation;}
+  double &std_deviation() noexcept {return m_std_deviation;}
+  
+  /* @brief Return the estimation epoch */
+  dso::datetime<dso::nanoseconds> epoch() const noexcept {return m_epoch;}
+  dso::datetime<dso::nanoseconds> &epoch() noexcept {return m_epoch;}
 
-  /* Parameter Estimate: Estimated value of the parameter. */
-  double m_estimate;
+  /* @brief Return the index */
+  int index() const noexcept {return m_index;}
+  int &index() noexcept {return m_index;}
 
-  /* Parameter Standard Deviation: Estimated standard deviation for the
-   * parameter.
+  /* @brief Check if two SolutionEstimate instances describe the same site
+   * A site is consdered a match, if 
+   * 1. the SITE CODE's,
+   * 2. the POINT CODE'd
+   * 3. the SOLUTION ID's
+   * are exactly the same.
+   * @return True if the sites are exact match; false otherwise.
    */
-  double m_std_deviation;
-
-  /* Time: Epoch at which the estimated parameter is valid. */
-  dso::datetime<dso::seconds> m_epoch{};
+  bool match_site(const SolutionEstimate &se) const noexcept {
+    return (!std::strcmp(site_code(), se.site_code())) &&
+           (!std::strcmp(point_code(), se.point_code())) &&
+           (!std::strcmp(soln_id(), se.soln_id()));
+  }
+  
+  /* @brief Check if the instance's site matches a given SiteId
+   * A site is consdered a match, if both the SITE CODE and the POINT CODE are
+   * exactly the same.
+   * @return True if the sites are exact match; false otherwise.
+   */
+  bool match_site(const SiteId &s) const noexcept {
+    return (!std::strcmp(site_code(), s.site_code())) &&
+           (!std::strcmp(point_code(), s.point_code()));
+  }
 }; /* SolutionEstimate */
 
 /* @class Hold a record line from block SOLUTION/EPOCH */
@@ -360,22 +406,22 @@ struct SolutionEpoch {
   /* Time: Start time for which the solution identified (SPNO) has
    * observations
    */
-  dso::datetime<dso::seconds> m_start{};
+  dso::datetime<dso::nanoseconds> m_start{};
 
   /* Time: End time for which the solution identified (SPNO) has
    * observations
    */
-  dso::datetime<dso::seconds> m_stop{};
+  dso::datetime<dso::nanoseconds> m_stop{};
 
   /* Time: Mean time of the observations for which the solution (SPNO) is
    * derived.
    */
-  dso::datetime<dso::seconds> m_mean{};
+  dso::datetime<dso::nanoseconds> m_mean{};
 
   /* Observation Code: Identification of the observation technique used [A1] */
   SinexObservationCode m_obscode;
 
-  /* @brief Check if two SolutioEpoch instances describe the same site
+  /* @brief Check if two SolutionEpoch instances describe the same site
    * A site is consdered a match, if both the SITE CODE and the POINT CODE are
    * exactly the same.
    * @return True if the sites are exact match; false otherwise.
@@ -384,7 +430,7 @@ struct SolutionEpoch {
     return (!std::strcmp(site_code(), se.site_code())) &&
            (!std::strcmp(point_code(), se.point_code()));
   }
-}; /* SolutionEstimate */
+}; /* SolutionEpoch */
 
 /* @class Hold a record line from block SOLUTION/DATA_REJECT.
  *
@@ -433,10 +479,10 @@ struct DataReject {
   const char *comment() const noexcept { return charbuf__ + comment_at; }
 
   /* Time: start of rejection period */
-  dso::datetime<dso::seconds> start;
+  dso::datetime<dso::nanoseconds> start;
 
   /* Time: end of rejection period */
-  dso::datetime<dso::seconds> stop;
+  dso::datetime<dso::nanoseconds> stop;
 
   /* Observation Code: Identification of the observation technique used [A1] */
   SinexObservationCode m_obscode;
@@ -466,13 +512,13 @@ public:
    * 00:000:00000 indicates that the antenna has been installed at least since
    * the "File Epoch Start Time".
    */
-  dso::datetime<dso::seconds> start;
+  dso::datetime<dso::nanoseconds> start;
 
   /* Time: Time until the antenna is installed at a Site/Point. Value
    * 00:000:00000 indicates that the antenna has been installed at least until
    * the "File Epoch End Time".
    */
-  dso::datetime<dso::seconds> stop;
+  dso::datetime<dso::nanoseconds> stop;
 
   /* Observation Code: Identification of the observation technique used [A1] */
   SinexObservationCode m_obscode;
@@ -527,8 +573,8 @@ public:
  * @return Anything other than zero denotes an error
  */
 int parse_sinex_date(const char *dtstr,
-                     const dso::datetime<dso::seconds> &tdefault,
-                     dso::datetime<dso::seconds> &t) noexcept;
+                     const dso::datetime<dso::nanoseconds> &tdefault,
+                     dso::datetime<dso::nanoseconds> &t) noexcept;
 
 } /* namespace sinex */
 } /* namespace dso */

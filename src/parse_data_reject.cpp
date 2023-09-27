@@ -25,8 +25,8 @@ constexpr const int scomments_start = 46;
 
 int parse_data_reject_line(
     const char *line, dso::sinex::DataReject &rintrv,
-    const dso::datetime<dso::seconds> &sinex_data_start,
-    const dso::datetime<dso::seconds> &sinex_data_stop) noexcept {
+    const dso::datetime<dso::nanoseconds> &sinex_data_start,
+    const dso::datetime<dso::nanoseconds> &sinex_data_stop) noexcept {
   int error = 0;
   std::memcpy(rintrv.site_code(), line + scode_start, 4);
   std::memcpy(rintrv.point_code(), line + spt_start, 2);
@@ -61,8 +61,8 @@ int parse_data_reject_line(
 int dso::Sinex::parse_block_data_reject(
     const std::vector<sinex::SiteId> &site_vec,
     std::vector<sinex::DataReject> &out_vec,
-    const dso::datetime<dso::seconds> from,
-    const dso::datetime<dso::seconds> to) noexcept {
+    const dso::datetime<dso::nanoseconds> from,
+    const dso::datetime<dso::nanoseconds> to) noexcept {
 
   /* clear the vector, allocate storage */
   if (!out_vec.empty())
@@ -110,7 +110,7 @@ int dso::Sinex::parse_block_data_reject(
             parse_data_reject_line(line, drIntrvl, m_data_start, m_data_stop);
         /* if the record's interval is whithin limits (ranges overlap) */
         if (dso::intervals_overlap<
-                dso::seconds,
+                dso::nanoseconds,
                 dso::datetime_ranges::OverlapComparissonType::Strict>(
                 from, to, drIntrvl.start, drIntrvl.stop)) {
           /* add to list */

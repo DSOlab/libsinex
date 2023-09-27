@@ -35,11 +35,11 @@ private:
   /* Solution Contents */
   char m_sol_contents[6] = {'\0'};
   /* Creation time of this SINEX file */
-  dso::datetime<dso::seconds> m_created_at;
+  dso::datetime<dso::nanoseconds> m_created_at;
   /* Start time of the data used in the SINEX solution */
-  dso::datetime<dso::seconds> m_data_start;
+  dso::datetime<dso::nanoseconds> m_data_start;
   /* End time of the data used in the SINEX solution */
-  dso::datetime<dso::seconds> m_data_stop;
+  dso::datetime<dso::nanoseconds> m_data_stop;
   /* Technique(s) used to generate the SINEX solution */
   sinex::SinexObservationCode m_obscode;
   /* Single character indicating the constraint in the SINEX solution. */
@@ -118,7 +118,7 @@ private:
    */
   int parse_solution_epoch_noextrapolate(
       const std::vector<sinex::SiteId> &site_vec,
-      const dso::datetime<dso::seconds> &t,
+      const dso::datetime<dso::nanoseconds> &t,
       std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept;
 
   /* @brief Parse the SINEX block SOLUTION/EPOCHS and return a vector of
@@ -145,7 +145,7 @@ private:
    */
   int parse_solution_epoch_extrapolate(
       const std::vector<sinex::SiteId> &site_vec,
-      const dso::datetime<dso::seconds> &t,
+      const dso::datetime<dso::nanoseconds> &t,
       std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept;
 
 public:
@@ -228,7 +228,7 @@ public:
    */
   int parse_block_solution_estimate(
       const std::vector<sinex::SiteId> &sites_vec,
-      const dso::datetime<dso::seconds> &t, bool allow_extrapolation,
+      const dso::datetime<dso::nanoseconds> &t, bool allow_extrapolation,
       std::vector<sinex::SolutionEstimate> &estimates_vec) noexcept;
 
   /* @brief Parse the SOLUTION/DATA_REJECT Block for given sites and date.
@@ -268,10 +268,10 @@ public:
    */
   int parse_block_data_reject(const std::vector<sinex::SiteId> &site_vec,
                               std::vector<sinex::DataReject> &out_vec,
-                              const dso::datetime<dso::seconds> from =
-                                  dso::datetime<dso::seconds>::min(),
-                              const dso::datetime<dso::seconds> to =
-                                  dso::datetime<dso::seconds>::max()) noexcept;
+                              const dso::datetime<dso::nanoseconds> from =
+                                  dso::datetime<dso::nanoseconds>::min(),
+                              const dso::datetime<dso::nanoseconds> to =
+                                  dso::datetime<dso::nanoseconds>::max()) noexcept;
 
   /* @brief Read and parse the SITE/ECCENTRICITY block off from the SINEX
    * instance.
@@ -293,7 +293,7 @@ public:
    */
   int parse_block_site_eccentricity(
       const std::vector<sinex::SiteId> &site_vec,
-      const dso::datetime<dso::seconds> &t,
+      const dso::datetime<dso::nanoseconds> &t,
       std::vector<sinex::SiteEccentricity> &out_vec) noexcept;
 
   /* @brief Parse the SINEX block SOLUTION/EPOCHS and return a vector of
@@ -316,7 +316,7 @@ public:
    */
   int parse_solution_epoch(
       const std::vector<sinex::SiteId> &site_vec,
-      const dso::datetime<dso::seconds> &t, bool allow_extrapolation,
+      const dso::datetime<dso::nanoseconds> &t, bool allow_extrapolation,
       std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept {
     return (allow_extrapolation)
                ? this->parse_solution_epoch_extrapolate(site_vec, t, out_vec)
@@ -324,8 +324,21 @@ public:
   }
 
   int get_solution_estimate(const char *site_codes[],
-                            const dso::datetime<dso::seconds> &t,
+                            const dso::datetime<dso::nanoseconds> &t,
                             bool error_if_missing = false) noexcept;
+
+  struct SiteCoordinateResults {
+    sinex::SiteId msite;
+    double x,y,z; /* coordinates in [m] in [X,Y,Z] components */
+    SiteCoordinateResults(const sinex::SiteId &s, double mx, double my,
+                          double mz) noexcept
+        : msite(s), x(mx), y(my), z(mz){};
+  };/* SiteCoordinateResults */
+
+  int linear_extrapolate_coordinates(
+    const std::vector<sinex::SiteId> &sites,
+    const dso::datetime<dso::nanoseconds> &t,
+    std::vector<SiteCoordinateResults> &crd) noexcept;
 
   /* @brief Constructor (may throw). This will:
    * 1. Assign filename,
