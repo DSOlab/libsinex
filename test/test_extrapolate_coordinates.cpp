@@ -30,7 +30,6 @@ int main(int argc, char *argv[]) {
   std::vector<dso::Sinex::SiteCoordinateResults> crd;
 
   { /* filter estimates based on date */
-    printf("-------------------------------------------------------------\n");
     const auto t = dso::datetime<dso::nanoseconds>(
         dso::year(2007), dso::day_of_year(304), dso::nanoseconds(0));
     if (snx.linear_extrapolate_coordinates(siteids, t, crd)) {
@@ -38,65 +37,91 @@ int main(int argc, char *argv[]) {
       return 1;
     }
     for (auto const &e : crd)
-      printf("%s %s %+.5f %+.5f %+.5f\n", e.msite.site_code(),
+      printf("%s %s %+.15f %+.15f %+.15f\n", e.msite.site_code(),
+             e.msite.point_code(), e.x, e.y, e.z);
+  }
+  { /* filter estimates based on date */
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(2007), dso::day_of_year(305), dso::nanoseconds(0));
+    if (snx.linear_extrapolate_coordinates(siteids, t, crd)) {
+      fprintf(stderr, "ERROR Failed extrapolating coordinate estimates\n");
+      return 1;
+    }
+    for (auto const &e : crd)
+      printf("%s %s %+.15f %+.15f %+.15f\n", e.msite.site_code(),
+             e.msite.point_code(), e.x, e.y, e.z);
+  }
+  { /* filter estimates based on date */
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(2030), dso::day_of_year(305), dso::nanoseconds(0));
+    if (snx.linear_extrapolate_coordinates(siteids, t, crd)) {
+      fprintf(stderr, "ERROR Failed extrapolating coordinate estimates\n");
+      return 1;
+    }
+    for (auto const &e : crd)
+      printf("%s %s %+.15f %+.15f %+.15f\n", e.msite.site_code(),
+             e.msite.point_code(), e.x, e.y, e.z);
+  }
+  { /* filter estimates based on date */
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(1990), dso::day_of_year(305), dso::nanoseconds(0));
+    if (snx.linear_extrapolate_coordinates(siteids, t, crd)) {
+      fprintf(stderr, "ERROR Failed extrapolating coordinate estimates\n");
+      return 1;
+    }
+    for (auto const &e : crd)
+      printf("%s %s %+.15f %+.15f %+.15f\n", e.msite.site_code(),
+             e.msite.point_code(), e.x, e.y, e.z);
+  }
+  { /* filter estimates based on date */
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(1990), dso::day_of_year(305),
+        dso::nanoseconds(3 * 3600L * 1'000'000'000L));
+    if (snx.linear_extrapolate_coordinates(siteids, t, crd)) {
+      fprintf(stderr, "ERROR Failed extrapolating coordinate estimates\n");
+      return 1;
+    }
+    for (auto const &e : crd)
+      printf("%s %s %+.15f %+.15f %+.15f\n", e.msite.site_code(),
+             e.msite.point_code(), e.x, e.y, e.z);
+  }
+  { /* filter estimates based on date */
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(1990), dso::day_of_year(305),
+        dso::nanoseconds(6 * 3600L * 1'000'000'000L));
+    if (snx.linear_extrapolate_coordinates(siteids, t, crd)) {
+      fprintf(stderr, "ERROR Failed extrapolating coordinate estimates\n");
+      return 1;
+    }
+    for (auto const &e : crd)
+      printf("%s %s %+.15f %+.15f %+.15f\n", e.msite.site_code(),
+             e.msite.point_code(), e.x, e.y, e.z);
+  }
+  { /* filter estimates based on date */
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(1990), dso::day_of_year(305),
+        dso::nanoseconds(9 * 3600L * 1'000'000'000L));
+    if (snx.linear_extrapolate_coordinates(siteids, t, crd)) {
+      fprintf(stderr, "ERROR Failed extrapolating coordinate estimates\n");
+      return 1;
+    }
+    for (auto const &e : crd)
+      printf("%s %s %+.15f %+.15f %+.15f\n", e.msite.site_code(),
+             e.msite.point_code(), e.x, e.y, e.z);
+  }
+  { /* filter estimates based on date */
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(1990), dso::day_of_year(305),
+        dso::nanoseconds(12 * 3600L * 1'000'000'000L));
+    if (snx.linear_extrapolate_coordinates(siteids, t, crd)) {
+      fprintf(stderr, "ERROR Failed extrapolating coordinate estimates\n");
+      return 1;
+    }
+    for (auto const &e : crd)
+      printf("%s %s %+.15f %+.15f %+.15f\n", e.msite.site_code(),
              e.msite.point_code(), e.x, e.y, e.z);
   }
 
-  //{ /* filter estimates based on date */
-  //  printf("-------------------------------------------------------------\n");
-  //  const auto t = dso::datetime<dso::nanoseconds>(
-  //      dso::year(2007), dso::day_of_year(305), dso::nanoseconds(0));
-  //  if (snx.parse_block_solution_estimate(siteids, t, /*extrapolation*/ false,
-  //                                        estimates)) {
-  //    fprintf(stderr, "ERROR Failed filtering solution estimates\n");
-  //    return 1;
-  //  }
-  //  for (auto const &e : estimates)
-  //    printf("%s %s %.5f +/- %.5f\n", e.parameter_type(), e.site_code(),
-  //           e.estimate(), e.std_deviation());
-  //}
-
-  //{ /* filter estimates based on date */
-  //  printf("-------------------------------------------------------------\n");
-  //  const auto t = dso::datetime<dso::nanoseconds>(
-  //      dso::year(2030), dso::day_of_year(305), dso::nanoseconds(0));
-  //  if (snx.parse_block_solution_estimate(siteids, t, /*extrapolation*/ false,
-  //                                        estimates)) {
-  //    fprintf(stderr, "ERROR Failed filtering solution estimates\n");
-  //    return 1;
-  //  }
-  //  for (auto const &e : estimates)
-  //    printf("%s %s %.5f +/- %.5f\n", e.parameter_type(), e.site_code(),
-  //           e.estimate(), e.std_deviation());
-  //}
-
-  //{ /* filter estimates based on date */
-  //  printf("-------------------------------------------------------------\n");
-  //  const auto t = dso::datetime<dso::nanoseconds>(
-  //      dso::year(2030), dso::day_of_year(305), dso::nanoseconds(0));
-  //  if (snx.parse_block_solution_estimate(siteids, t, /*extrapolation*/ true,
-  //                                        estimates)) {
-  //    fprintf(stderr, "ERROR Failed filtering solution estimates\n");
-  //    return 1;
-  //  }
-  //  for (auto const &e : estimates)
-  //    printf("%s %s %.5f +/- %.5f\n", e.parameter_type(), e.site_code(),
-  //           e.estimate(), e.std_deviation());
-  //}
-
-  //{ /* filter estimates based on date */
-  //  printf("-------------------------------------------------------------\n");
-  //  const auto t = dso::datetime<dso::nanoseconds>(
-  //      dso::year(1990), dso::day_of_year(305), dso::nanoseconds(0));
-  //  if (snx.parse_block_solution_estimate(siteids, t, /*extrapolation*/ true,
-  //                                        estimates)) {
-  //    fprintf(stderr, "ERROR Failed filtering solution estimates\n");
-  //    return 1;
-  //  }
-  //  for (auto const &e : estimates)
-  //    printf("%s %s %.5f +/- %.5f\n", e.parameter_type(), e.site_code(),
-  //           e.estimate(), e.std_deviation());
-  //}
 
   return 0;
 }

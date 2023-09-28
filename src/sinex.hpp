@@ -215,21 +215,38 @@ public:
       const std::vector<sinex::SiteId> &sites_vec,
       std::vector<sinex::SolutionEstimate> &estimates_vec) noexcept;
 
-  /* @brief Parse the whole SOLUTION/ESTIMATE Block off from the SINEX
-   * instance and collect sinex::SolutionEstimate records for the SITES of
-   * interest. The sites of interest are the ones included in the sites_vec
-   * (input) vector. Any SOLUTION/ESTIMATE line for which we have a matching
-   * SITE ID and POINT ID will be collected.
-   * @param[in] site_vec A vector of sinex::SolutionEstimate instances, one
-   *               entry for each block line.
-   * @param[in] sites_vec A vector of sinex::SiteId instances to match against,
+  /* Parse the SOLUTION/ESTIMATE Block off from the SINEX instance and collect 
+   * sinex::SolutionEstimate records for the sites of interest valid (in some 
+   * way) at a given epoch.
+   *
+   * @param[in] sites A vector of sinex::SiteId instances to match against,
    *               using the SITE CODE and POINT CODE fields.
+   * @param[in] t The epoch to extract solutions/estimates for. Depending on 
+   *               the parameter @p allow_extrapolation the epoch is used to 
+   *               check if a record is temporaly valid.
+   * @param[in] allow_extrpolation This parameter signals what we mean by the 
+   *               phrase "a solution/estimate is valid at t". I.e.
+   *               * if set to false, then for a SOLUTION/ESTIMATE record to 
+   *                 be valid at the given t, the record's data start and data 
+   *                 stop entries should include t, i.e. the condition
+   *                 data_start <= t <= data_stop should be met. In any other 
+   *                 occasion, the record will not be collected (not considered 
+   *                 a match).
+   *               * if set to true, the then condition 
+   *                 data_start <= t <= data_stop is not a prerequisite for a 
+   *                 SOLUTION/ESTIMATE record to be considered a match. The 
+   *                 function will actually parse all SOLUTION/ESTIMATE records 
+   *                 for a given site, and collect the one closest to t. That 
+   *                 is, it will assume that the SOLUTION/ESTIMATE record is 
+   *                 valid forwaard/backward in time.
+   * @param[in] estimates The collected SOLUTION/ESTIMATE records for the 
+   *                 given site list, valid (in some way) at epoch t.
    * @return Anything other than zero denotes an error
    */
   int parse_block_solution_estimate(
-      const std::vector<sinex::SiteId> &sites_vec,
+      const std::vector<sinex::SiteId> &sites,
       const dso::datetime<dso::nanoseconds> &t, bool allow_extrapolation,
-      std::vector<sinex::SolutionEstimate> &estimates_vec) noexcept;
+      std::vector<sinex::SolutionEstimate> &estimates) noexcept;
 
   /* @brief Parse the SOLUTION/DATA_REJECT Block for given sites and date.
    *
@@ -323,6 +340,7 @@ public:
                : this->parse_solution_epoch_noextrapolate(site_vec, t, out_vec);
   }
 
+  /* TODO obsolete */
   int get_solution_estimate(const char *site_codes[],
                             const dso::datetime<dso::nanoseconds> &t,
                             bool error_if_missing = false) noexcept;
@@ -335,6 +353,28 @@ public:
         : msite(s), x(mx), y(my), z(mz){};
   };/* SiteCoordinateResults */
 
+  /* @brief Extrpolate coordinate estimates for a given epoch.
+   *
+   * For the list of sites given, find their solutions/estimates valid for the
+   * given epoch, and extrapolate the solution to epoch (t). SITE IDs and 
+   * POINT IDs will be used to match given sites. If there are multiple
+   * solutions for a given site (with different data periods), the function 
+   * will collect the solution with data span closest to (or valid at) the 
+   * given epoch, but note that it is allowed to extrapolate both forward and 
+   * backwards in time.
+   * The parameters to be collected are "STAX", "VELX", "STAY", "VELY", "STAZ"
+   * and "VELZ", and all of them should be present in the SINEX file. A strict 
+   * linear model is assumed here (e.g. PDS parameters will not be considered 
+   * even if present).
+   *
+   * @param[in] sites A vector of sinex::SiteId instances to match against,
+   *               using the SITE CODE and POINT CODE fields.
+   * @param[in] t The epoch to extract solutions/estimates for. Note that if 
+   *               multiple solutions/estimates for a given site are present, 
+   *               then we will be chosing the one closest to @p t.
+   * @param[out] crd A vector holding extrapolation results
+   * @return Anything other than zero denotes an error.             
+   */
   int linear_extrapolate_coordinates(
     const std::vector<sinex::SiteId> &sites,
     const dso::datetime<dso::nanoseconds> &t,
