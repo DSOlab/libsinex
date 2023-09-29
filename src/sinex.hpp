@@ -1,4 +1,4 @@
-/** @file 
+/** @file
  * Public interface for interacting with SINEX files.
  */
 
@@ -99,9 +99,9 @@ private:
   }
 
   /** @brief Get SOLUTION/EPOCHS for given sites and epoch
-   * 
-   * Parse the SINEX block SOLUTION/EPOCHS and return a vector of 
-   * sinex::SolutionEpoch instances for the sites included in site_vec, valid 
+   *
+   * Parse the SINEX block SOLUTION/EPOCHS and return a vector of
+   * sinex::SolutionEpoch instances for the sites included in site_vec, valid
    * at the epoch t.
    * The sites of interest are the ones included in the sites_vec (input)
    * vector. Any SOLUTION/EPOCHS line for which we have a matching SITE ID and
@@ -125,9 +125,9 @@ private:
       const dso::datetime<dso::nanoseconds> &t,
       std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept;
 
-  /** @brief Get SOLUTION/EPOCHS records 
+  /** @brief Get SOLUTION/EPOCHS records
    *
-   * Parse the SINEX block SOLUTION/EPOCHS and return a vector of 
+   * Parse the SINEX block SOLUTION/EPOCHS and return a vector of
    * sinex::SolutionEpoch instances for the sites included in site_vec.
    *
    * The sites of interest are the ones included in the sites_vec (input)
@@ -160,7 +160,7 @@ public:
 
   /** @brief Get SITE/ID records for given sites.
    *
-   * Parse the SITE/ID block of the SINEX file and collect info for given 
+   * Parse the SITE/ID block of the SINEX file and collect info for given
    * sites.
    * This function will search through the SITE/ID block, and collect all
    * infor for the sites that are included in the sites vector. Matching of
@@ -213,7 +213,7 @@ public:
   int parse_block_site_antenna(
       std::vector<sinex::SiteAntenna> &site_vec) noexcept;
 
-  /** @brief Get SOLUTION/ESTIMATE records for given sites. 
+  /** @brief Get SOLUTION/ESTIMATE records for given sites.
    *
    * Parse the whole SOLUTION/ESTIMATE Block off from the SINEX
    * instance and collect sinex::SolutionEstimate records for the SITES of
@@ -334,7 +334,7 @@ public:
 
   /** @brief SOLUTION/EPOCHS for given sites and epoch.
    *
-   * Parse the SINEX block SOLUTION/EPOCHS and return a vector of 
+   * Parse the SINEX block SOLUTION/EPOCHS and return a vector of
    * sinex::SolutionEpoch instances for the sites included in site_vec.
    *
    * @param[in] site_vec A list of SITE/ID instances that shall be considered.

@@ -187,14 +187,14 @@ inline bool parameter_type_exists_impl(const char *ptype, int &index,
 enum class ParameterMatchPolicyType { Strict, NonStrict };
 
 /** @class ParameterMatchPolicy
- * Dummy class to enable tag-dispatch for parameter_type_exists function 
+ * Dummy class to enable tag-dispatch for parameter_type_exists function
  * based on ParameterMatchPolicyType
  */
 template <ParameterMatchPolicyType T>
 struct ParameterMatchPolicy : std::false_type {};
 
 /** @class ParameterMatchPolicy
- * Dummy class to enable tag-dispatch for parameter_type_exists function based 
+ * Dummy class to enable tag-dispatch for parameter_type_exists function based
  * on ParameterMatchPolicyType. Specialization for Strict string comparisson.
  */
 template <>
@@ -205,14 +205,14 @@ struct ParameterMatchPolicy<ParameterMatchPolicyType::Strict> : std::true_type {
 enum class SiteMatchPolicyType { USEDOMES, IGNOREDOMES };
 
 /** @class SiteMatchPolicy
- * Dummy class to enable tag-dispatch for functions comparing site names, 
+ * Dummy class to enable tag-dispatch for functions comparing site names,
  * based on SiteMatchPolicyType
  */
 template <SiteMatchPolicyType T> struct SiteMatchPolicy : std::false_type {};
 
 /** @class SiteMatchPolicy
- * Dummy class to enable tag-dispatch for functions comparing site names, 
- * based on SiteMatchPolicyType. Specialization for USEDOMES string 
+ * Dummy class to enable tag-dispatch for functions comparing site names,
+ * based on SiteMatchPolicyType. Specialization for USEDOMES string
  * comparisson.
  */
 template <>
