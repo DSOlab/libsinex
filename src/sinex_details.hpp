@@ -1,4 +1,4 @@
-/* @file
+/** @file
  * A list of commonly used parameters, constants and functions commonly used
  * to interact with SINEX file. Most of the defined parameters & functions are
  * wrapped around the dso::sinex namespace; they should act in the
@@ -15,10 +15,10 @@
 
 namespace dso::sinex {
 
-/* @brief Max characters in a SINEX line */
+/** @brief Max characters in a SINEX line */
 constexpr int max_sinex_chars = 128;
 
-/* @brief Blocks allowed in a SINEX file */
+/** @brief Blocks allowed in a SINEX file */
 const char *const block_names[] = {
     "FILE/REFERENCE", "FILE/COMMENT", "INPUT/HISTORY", "INPUT/FILES",
     "INPUT/ACKNOWLEDGEMENTS", "NUTATION/DATA", "PRECESSION/DATA", "SOURCE/ID",
@@ -41,10 +41,10 @@ const char *const block_names[] = {
     //----------------------------------------------------------------------//
     "SOLUTION/DISCONTINUITY", "SOLUTION/DATA_REJECT", "STATION/TO_BE_UPDATED"};
 
-/* @brief Number of different blocks in block_names */
+/** @brief Number of different blocks in block_names */
 constexpr int block_names_size = sizeof(block_names) / sizeof(char *);
 
-/* @brief Parameter types allowed in SINEX files */
+/** @brief Parameter types allowed in SINEX files */
 const char *const parameter_types[] = {
     "STAX",   /* station X coordinate, m */
     "STAY",   /* station Y coordinate, m */
@@ -121,11 +121,12 @@ const char *const parameter_types[] = {
     "TLOG_U",
 };
 
-/* @brief Number of different parameter types in parameter_types */
+/** @brief Number of different parameter types in parameter_types */
 constexpr int parameter_types_size = sizeof(parameter_types) / sizeof(char *);
 
 namespace details {
-/* @brief Match a given string to any string in parameter_types array
+
+/** @brief Match a given string to any string in parameter_types array
  *
  * @param[in] ptype String to match (does not have to be null-terminated).
  * @param[out] index The index of the parameter (in the parameter_types array)
@@ -156,7 +157,7 @@ inline bool parameter_type_exists_impl(const char *ptype, int &index,
   return true;
 }
 
-/* @brief Match a given string to any string in parameter_types array
+/** @brief Match a given string to any string in parameter_types array
  *
  * @param[in] ptype String to match (null-terminiated)
  * @param[out] index The index of the parameter (in the parameter_types array)
@@ -182,20 +183,19 @@ inline bool parameter_type_exists_impl(const char *ptype, int &index,
   return true;
 }
 
-/* @enum Choose a policy for comparing strings against parameter_type */
+/** @brief Choose a policy for comparing strings against parameter_type */
 enum class ParameterMatchPolicyType { Strict, NonStrict };
 
-/* @class ParameterMatchPolicy
- * @brief Dummy class to enable tag-dispatch for parameter_type_exists
- *        function based on ParameterMatchPolicyType
+/** @class ParameterMatchPolicy
+ * Dummy class to enable tag-dispatch for parameter_type_exists function 
+ * based on ParameterMatchPolicyType
  */
 template <ParameterMatchPolicyType T>
 struct ParameterMatchPolicy : std::false_type {};
 
-/* @class ParameterMatchPolicy
- * @brief Dummy class to enable tag-dispatch for parameter_type_exists
- *      function based on ParameterMatchPolicyType. Specialization
- *      for Strict string comparisson.
+/** @class ParameterMatchPolicy
+ * Dummy class to enable tag-dispatch for parameter_type_exists function based 
+ * on ParameterMatchPolicyType. Specialization for Strict string comparisson.
  */
 template <>
 struct ParameterMatchPolicy<ParameterMatchPolicyType::Strict> : std::true_type {
@@ -204,23 +204,23 @@ struct ParameterMatchPolicy<ParameterMatchPolicyType::Strict> : std::true_type {
 /* @enum Choose a policy for matching sites (see dso::sinex::SiteId::issame */
 enum class SiteMatchPolicyType { USEDOMES, IGNOREDOMES };
 
-/* @class SiteMatchPolicy
- * @brief Dummy class to enable tag-dispatch for functions comparing site
- *        names, based on SiteMatchPolicyType
+/** @class SiteMatchPolicy
+ * Dummy class to enable tag-dispatch for functions comparing site names, 
+ * based on SiteMatchPolicyType
  */
 template <SiteMatchPolicyType T> struct SiteMatchPolicy : std::false_type {};
 
-/* @class SiteMatchPolicy
- * @brief Dummy class to enable tag-dispatch for functions comparing site
- *        names, based on SiteMatchPolicyType. Specialization for USEDOMES
- *        string comparisson.
+/** @class SiteMatchPolicy
+ * Dummy class to enable tag-dispatch for functions comparing site names, 
+ * based on SiteMatchPolicyType. Specialization for USEDOMES string 
+ * comparisson.
  */
 template <>
 struct SiteMatchPolicy<SiteMatchPolicyType::USEDOMES> : std::true_type {};
 
 } /* namespace details */
 
-/* @brief Match a given string to any string in parameter_types array
+/** @brief Match a given string to any string in parameter_types array
  *
  * @param[in] ptype String to match
  * @tparam Policy Choose between Strict (aka the input string but be an exact

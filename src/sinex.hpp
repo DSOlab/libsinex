@@ -1,4 +1,5 @@
-/* @file Public interface for interacting with SINEX files.
+/** @file 
+ * Public interface for interacting with SINEX files.
  */
 
 #ifndef __SINEX_FILE_PARSER_HPP__
@@ -23,31 +24,31 @@ class Sinex {
 private:
   using pos_t = std::ifstream::pos_type;
 
-  /* SINEX filename */
+  /** SINEX filename */
   std::string m_filename;
-  /* input stream (opened at c'tor) */
+  /** input stream (opened at c'tor) */
   std::ifstream m_stream;
-  /* format version */
+  /** format version */
   float m_version;
-  /* agency creating the file [A3] */
+  /** agency creating the file [A3] */
   char m_agency[4] = {'\0'};
-  /* Identify the agency providing the data in the SINEX file [A3] */
+  /** Identify the agency providing the data in the SINEX file [A3] */
   char m_data_agency[4] = {'\0'};
-  /* Solution Contents */
+  /** Solution Contents */
   char m_sol_contents[6] = {'\0'};
-  /* Creation time of this SINEX file */
+  /** Creation time of this SINEX file */
   dso::datetime<dso::nanoseconds> m_created_at;
-  /* Start time of the data used in the SINEX solution */
+  /** Start time of the data used in the SINEX solution */
   dso::datetime<dso::nanoseconds> m_data_start;
-  /* End time of the data used in the SINEX solution */
+  /** End time of the data used in the SINEX solution */
   dso::datetime<dso::nanoseconds> m_data_stop;
-  /* Technique(s) used to generate the SINEX solution */
+  /** Technique(s) used to generate the SINEX solution */
   sinex::SinexObservationCode m_obscode;
-  /* Single character indicating the constraint in the SINEX solution. */
+  /** Single character indicating the constraint in the SINEX solution. */
   sinex::SinexConstraintCode m_constraint_code;
-  /* Number of parameters estimated in this SINEX file */
+  /** Number of parameters estimated in this SINEX file */
   long m_num_estimates;
-  /* Markers for easily accesing blocks. The entries here mark SINEX
+  /** Markers for easily accesing blocks. The entries here mark SINEX
    * block-positions and block-types. When placing the stream at a the
    * m_blocks[n], that means that:
    * We place the (input) stream poisition at m_blocks[n].mpos, i.e. the end
@@ -58,11 +59,11 @@ private:
    */
   std::vector<sinex::SinexBlockPosition> m_blocks;
 
-  /* @brief Parse first SINEX line (header) and assign instance's member vars
+  /** @brief Parse first SINEX line (header) and assign instance's member vars
    */
   int parse_first_line() noexcept;
 
-  /* @brief Read the SINEX file through, and mark all positions of interest
+  /** @brief Read the SINEX file through, and mark all positions of interest
    *       (i.e. start of blocks).
    * This function will fill in the m_blocks vector and perform a basic
    * sanity check of the SINEX file. Note that m_blocks does not contain
@@ -72,7 +73,7 @@ private:
    */
   int mark_blocks() noexcept;
 
-  /* @brief Go (i.e. place the stream) at the the start of a block in a SINEX
+  /** @brief Go (i.e. place the stream) at the the start of a block in a SINEX
    *        instance.
    * Asserts that the mark_blocks() function has already been called. Example:
    * if (goto_block("SOLUTION/EPOCHS")) return 1;
@@ -83,7 +84,7 @@ private:
    */
   int goto_block(const char *block) noexcept;
 
-  /* @brief Given a block name, find the relevant entry in the m_blocks
+  /** @brief Given a block name, find the relevant entry in the m_blocks
    *        vector.
    * @param[in] blk A valid SINEX block name (C-string), e.g. "SOLUTION/EPOCHS"
    * @return An iterator to the relevant entry in m_blocks (or m_blocks.cend()
@@ -97,9 +98,11 @@ private:
                         });
   }
 
-  /* @brief Parse the SINEX block SOLUTION/EPOCHS and return a vector of
-   *        sinex::SolutionEpoch instances for the sites included in site_vec,
-   *        valid at the epoch t.
+  /** @brief Get SOLUTION/EPOCHS for given sites and epoch
+   * 
+   * Parse the SINEX block SOLUTION/EPOCHS and return a vector of 
+   * sinex::SolutionEpoch instances for the sites included in site_vec, valid 
+   * at the epoch t.
    * The sites of interest are the ones included in the sites_vec (input)
    * vector. Any SOLUTION/EPOCHS line for which we have a matching SITE ID and
    * POINT ID will be inspected. If the input time t matches (ie lies within)
@@ -122,8 +125,10 @@ private:
       const dso::datetime<dso::nanoseconds> &t,
       std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept;
 
-  /* @brief Parse the SINEX block SOLUTION/EPOCHS and return a vector of
-   *        sinex::SolutionEpoch instances for the sites included in site_vec.
+  /** @brief Get SOLUTION/EPOCHS records 
+   *
+   * Parse the SINEX block SOLUTION/EPOCHS and return a vector of 
+   * sinex::SolutionEpoch instances for the sites included in site_vec.
    *
    * The sites of interest are the ones included in the sites_vec (input)
    * vector. Any SOLUTION/EPOCHS line for which we have a matching SITE ID and
@@ -150,11 +155,13 @@ private:
       std::vector<dso::sinex::SolutionEpoch> &out_vec) noexcept;
 
 public:
-  /* return the SINEX filename */
+  /** return the SINEX filename */
   std::string filename() const noexcept { return m_filename; }
 
-  /* @brief Parse the SITE/ID block of the SINEX file and collect info for
-   *        given sites
+  /** @brief Get SITE/ID records for given sites.
+   *
+   * Parse the SITE/ID block of the SINEX file and collect info for given 
+   * sites.
    * This function will search through the SITE/ID block, and collect all
    * infor for the sites that are included in the sites vector. Matching of
    * stations can be parformed in two ways:
@@ -181,7 +188,7 @@ public:
                           bool use_domes,
                           std::vector<sinex::SiteId> &site_vec) noexcept;
 
-  /* @brief Parse the (whole) SITE/ID block of the SINEX and return all info
+  /** @brief Parse the (whole) SITE/ID block of the SINEX and return all info
    * @param[out] site_vec A vector containing one SiteId entry for each of the
    *            the sites that are included in the block.
    * @return Anything other than 0 denotes an error
@@ -190,22 +197,30 @@ public:
     return parse_block_site_id(std::vector<const char *>(), false, site_vec);
   }
 
-  /* @brief Parse the whole SITE/RECEIVER Block off from the SINEX instance.
-   * @param[inout] site_vec A vector of sinex::SiteReceiver instances, one
+  /** @brief Parse the whole SITE/RECEIVER Block off from the SINEX instance.
+   * @param[out] site_vec A vector of sinex::SiteReceiver instances, one
    *               entry for each block line.
    * @return Anything other than zero denotes an error
    */
   int parse_block_site_receiver(
       std::vector<sinex::SiteReceiver> &site_vec) noexcept;
 
+  /** @brief Parse the whole SITE/ANTENNA Block off from the SINEX instance.
+   * @param[out] site_vec A vector of sinex::SiteAntenna instances, one
+   *               entry for each block line.
+   * @return Anything other than zero denotes an error
+   */
   int parse_block_site_antenna(
       std::vector<sinex::SiteAntenna> &site_vec) noexcept;
 
-  /* @brief Parse the whole SOLUTION/ESTIMATE Block off from the SINEX
+  /** @brief Get SOLUTION/ESTIMATE records for given sites. 
+   *
+   * Parse the whole SOLUTION/ESTIMATE Block off from the SINEX
    * instance and collect sinex::SolutionEstimate records for the SITES of
    * interest. The sites of interest are the ones included in the sites_vec
    * (input) vector. Any SOLUTION/ESTIMATE line for which we have a matching
    * SITE ID and POINT ID will be collected.
+   *
    * @param[in] site_vec A vector of sinex::SolutionEstimate instances, one
    *               entry for each block line.
    * @param[in] sites_vec A vector of sinex::SiteId instances to match against,
@@ -216,7 +231,9 @@ public:
       const std::vector<sinex::SiteId> &sites_vec,
       std::vector<sinex::SolutionEstimate> &estimates_vec) noexcept;
 
-  /* Parse the SOLUTION/ESTIMATE Block off from the SINEX instance and collect
+  /** Get SOLUTION/ESTIMATE records for given sites and epoch.
+   *
+   * Parse the SOLUTION/ESTIMATE Block off from the SINEX instance and collect
    * sinex::SolutionEstimate records for the sites of interest valid (in some
    * way) at a given epoch.
    *
@@ -249,7 +266,7 @@ public:
       const dso::datetime<dso::nanoseconds> &t, bool allow_extrapolation,
       std::vector<sinex::SolutionEstimate> &estimates) noexcept;
 
-  /* @brief Parse the SOLUTION/DATA_REJECT Block for given sites and date.
+  /** @brief Parse the SOLUTION/DATA_REJECT Block for given sites and date.
    *
    * Parse the whole SOLUTION/DATA_REJECT Block off from the SINEX instance
    * and collect sinex::DataReject instances for the SITES of interest. The
@@ -292,7 +309,7 @@ public:
       const dso::datetime<dso::nanoseconds> to =
           dso::datetime<dso::nanoseconds>::max()) noexcept;
 
-  /* @brief Read and parse the SITE/ECCENTRICITY block off from the SINEX
+  /** @brief Read and parse the SITE/ECCENTRICITY block off from the SINEX
    * instance.
    *
    * @param[in] site_vec A list of SITE/ID instances that shall be considered.
@@ -315,8 +332,10 @@ public:
       const dso::datetime<dso::nanoseconds> &t,
       std::vector<sinex::SiteEccentricity> &out_vec) noexcept;
 
-  /* @brief Parse the SINEX block SOLUTION/EPOCHS and return a vector of
-   *        sinex::SolutionEpoch instances for the sites included in site_vec.
+  /** @brief SOLUTION/EPOCHS for given sites and epoch.
+   *
+   * Parse the SINEX block SOLUTION/EPOCHS and return a vector of 
+   * sinex::SolutionEpoch instances for the sites included in site_vec.
    *
    * @param[in] site_vec A list of SITE/ID instances that shall be considered.
    *              We will be matching records according to SITE CODE and
@@ -355,7 +374,7 @@ public:
         : msite(s), x(mx), y(my), z(mz){};
   }; /* SiteCoordinateResults */
 
-  /* @brief Extrpolate coordinate estimates for a given epoch.
+  /** @brief Extrpolate coordinate estimates for a given epoch.
    *
    * For the list of sites given, find their solutions/estimates valid for the
    * given epoch, and extrapolate the solution to epoch (t). SITE IDs and
@@ -382,7 +401,7 @@ public:
       const dso::datetime<dso::nanoseconds> &t,
       std::vector<SiteCoordinateResults> &crd) noexcept;
 
-  /* @brief Constructor (may throw). This will:
+  /** @brief Constructor (may throw). This will:
    * 1. Assign filename,
    * 2. open the stream,
    * 3. parse_first_line() to assign member vars,
@@ -390,13 +409,13 @@ public:
    */
   Sinex(const char *fn);
 
-  /* @brief Copy not allowed */
+  /** @brief Copy not allowed */
   Sinex(const Sinex &) = delete;
 
-  /* @brief Assignment not allowed */
+  /** @brief Assignment not allowed */
   Sinex &operator=(const Sinex &) = delete;
 
-  /* @brief Destructor */
+  /** @brief Destructor */
   ~Sinex() noexcept {
     if (m_stream.is_open())
       m_stream.close();
