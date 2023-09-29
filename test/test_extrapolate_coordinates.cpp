@@ -122,6 +122,5 @@ int main(int argc, char *argv[]) {
              e.msite.point_code(), e.x, e.y, e.z);
   }
 
-
   return 0;
 }

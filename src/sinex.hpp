@@ -14,7 +14,8 @@
 
 namespace dso {
 
-/* @class An (input) SINEX class
+/** An (input) SINEX class
+ *
  * This class acts as an interface for reading/parsing SINEX files and
  * extracting all relevant information
  */
@@ -215,31 +216,31 @@ public:
       const std::vector<sinex::SiteId> &sites_vec,
       std::vector<sinex::SolutionEstimate> &estimates_vec) noexcept;
 
-  /* Parse the SOLUTION/ESTIMATE Block off from the SINEX instance and collect 
-   * sinex::SolutionEstimate records for the sites of interest valid (in some 
+  /* Parse the SOLUTION/ESTIMATE Block off from the SINEX instance and collect
+   * sinex::SolutionEstimate records for the sites of interest valid (in some
    * way) at a given epoch.
    *
    * @param[in] sites A vector of sinex::SiteId instances to match against,
    *               using the SITE CODE and POINT CODE fields.
-   * @param[in] t The epoch to extract solutions/estimates for. Depending on 
-   *               the parameter @p allow_extrapolation the epoch is used to 
+   * @param[in] t The epoch to extract solutions/estimates for. Depending on
+   *               the parameter @p allow_extrapolation the epoch is used to
    *               check if a record is temporaly valid.
-   * @param[in] allow_extrpolation This parameter signals what we mean by the 
+   * @param[in] allow_extrpolation This parameter signals what we mean by the
    *               phrase "a solution/estimate is valid at t". I.e.
-   *               * if set to false, then for a SOLUTION/ESTIMATE record to 
-   *                 be valid at the given t, the record's data start and data 
+   *               * if set to false, then for a SOLUTION/ESTIMATE record to
+   *                 be valid at the given t, the record's data start and data
    *                 stop entries should include t, i.e. the condition
-   *                 data_start <= t <= data_stop should be met. In any other 
-   *                 occasion, the record will not be collected (not considered 
+   *                 data_start <= t <= data_stop should be met. In any other
+   *                 occasion, the record will not be collected (not considered
    *                 a match).
-   *               * if set to true, the then condition 
-   *                 data_start <= t <= data_stop is not a prerequisite for a 
-   *                 SOLUTION/ESTIMATE record to be considered a match. The 
-   *                 function will actually parse all SOLUTION/ESTIMATE records 
-   *                 for a given site, and collect the one closest to t. That 
-   *                 is, it will assume that the SOLUTION/ESTIMATE record is 
+   *               * if set to true, the then condition
+   *                 data_start <= t <= data_stop is not a prerequisite for a
+   *                 SOLUTION/ESTIMATE record to be considered a match. The
+   *                 function will actually parse all SOLUTION/ESTIMATE records
+   *                 for a given site, and collect the one closest to t. That
+   *                 is, it will assume that the SOLUTION/ESTIMATE record is
    *                 valid forwaard/backward in time.
-   * @param[in] estimates The collected SOLUTION/ESTIMATE records for the 
+   * @param[in] estimates The collected SOLUTION/ESTIMATE records for the
    *                 given site list, valid (in some way) at epoch t.
    * @return Anything other than zero denotes an error
    */
@@ -283,12 +284,13 @@ public:
    *             this date will not be considered (inclusive).
    * @return Anything other than zero denotes an error
    */
-  int parse_block_data_reject(const std::vector<sinex::SiteId> &site_vec,
-                              std::vector<sinex::DataReject> &out_vec,
-                              const dso::datetime<dso::nanoseconds> from =
-                                  dso::datetime<dso::nanoseconds>::min(),
-                              const dso::datetime<dso::nanoseconds> to =
-                                  dso::datetime<dso::nanoseconds>::max()) noexcept;
+  int parse_block_data_reject(
+      const std::vector<sinex::SiteId> &site_vec,
+      std::vector<sinex::DataReject> &out_vec,
+      const dso::datetime<dso::nanoseconds> from =
+          dso::datetime<dso::nanoseconds>::min(),
+      const dso::datetime<dso::nanoseconds> to =
+          dso::datetime<dso::nanoseconds>::max()) noexcept;
 
   /* @brief Read and parse the SITE/ECCENTRICITY block off from the SINEX
    * instance.
@@ -347,38 +349,38 @@ public:
 
   struct SiteCoordinateResults {
     sinex::SiteId msite;
-    double x,y,z; /* coordinates in [m] in [X,Y,Z] components */
+    double x, y, z; /* coordinates in [m] in [X,Y,Z] components */
     SiteCoordinateResults(const sinex::SiteId &s, double mx, double my,
                           double mz) noexcept
         : msite(s), x(mx), y(my), z(mz){};
-  };/* SiteCoordinateResults */
+  }; /* SiteCoordinateResults */
 
   /* @brief Extrpolate coordinate estimates for a given epoch.
    *
    * For the list of sites given, find their solutions/estimates valid for the
-   * given epoch, and extrapolate the solution to epoch (t). SITE IDs and 
+   * given epoch, and extrapolate the solution to epoch (t). SITE IDs and
    * POINT IDs will be used to match given sites. If there are multiple
-   * solutions for a given site (with different data periods), the function 
-   * will collect the solution with data span closest to (or valid at) the 
-   * given epoch, but note that it is allowed to extrapolate both forward and 
+   * solutions for a given site (with different data periods), the function
+   * will collect the solution with data span closest to (or valid at) the
+   * given epoch, but note that it is allowed to extrapolate both forward and
    * backwards in time.
    * The parameters to be collected are "STAX", "VELX", "STAY", "VELY", "STAZ"
-   * and "VELZ", and all of them should be present in the SINEX file. A strict 
-   * linear model is assumed here (e.g. PDS parameters will not be considered 
+   * and "VELZ", and all of them should be present in the SINEX file. A strict
+   * linear model is assumed here (e.g. PDS parameters will not be considered
    * even if present).
    *
    * @param[in] sites A vector of sinex::SiteId instances to match against,
    *               using the SITE CODE and POINT CODE fields.
-   * @param[in] t The epoch to extract solutions/estimates for. Note that if 
-   *               multiple solutions/estimates for a given site are present, 
+   * @param[in] t The epoch to extract solutions/estimates for. Note that if
+   *               multiple solutions/estimates for a given site are present,
    *               then we will be chosing the one closest to @p t.
    * @param[out] crd A vector holding extrapolation results
-   * @return Anything other than zero denotes an error.             
+   * @return Anything other than zero denotes an error.
    */
   int linear_extrapolate_coordinates(
-    const std::vector<sinex::SiteId> &sites,
-    const dso::datetime<dso::nanoseconds> &t,
-    std::vector<SiteCoordinateResults> &crd) noexcept;
+      const std::vector<sinex::SiteId> &sites,
+      const dso::datetime<dso::nanoseconds> &t,
+      std::vector<SiteCoordinateResults> &crd) noexcept;
 
   /* @brief Constructor (may throw). This will:
    * 1. Assign filename,

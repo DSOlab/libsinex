@@ -145,10 +145,10 @@ int dso::Sinex::parse_first_line() noexcept {
   std::memcpy(m_data_agency, line + 28, 3);
 
   int j = 0;
-  j += sinex::parse_sinex_date(line + 31, dso::datetime<dso::nanoseconds>::min(),
-                               m_data_start);
-  j += sinex::parse_sinex_date(line + 44, dso::datetime<dso::nanoseconds>::max(),
-                               m_data_stop);
+  j += sinex::parse_sinex_date(
+      line + 31, dso::datetime<dso::nanoseconds>::min(), m_data_start);
+  j += sinex::parse_sinex_date(
+      line + 44, dso::datetime<dso::nanoseconds>::max(), m_data_stop);
   if (error) {
     fprintf(stderr,
             "[ERROR] Invalid first SINEX line from %s (traceback: %s)\n",

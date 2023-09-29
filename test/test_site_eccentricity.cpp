@@ -33,7 +33,8 @@ int main(int argc, char *argv[]) {
   {
     /* random date, for which we want eccentricities */
     const auto t = dso::datetime<dso::nanoseconds>(
-        dso::year(2020), dso::month(1), dso::day_of_month(1), dso::nanoseconds(0));
+        dso::year(2020), dso::month(1), dso::day_of_month(1),
+        dso::nanoseconds(0));
     /* get the eccentricities */
     if (snx.parse_block_site_eccentricity(siteids, t, ecc)) {
       fprintf(stderr, "Failed collecting site eccentricities\n");
@@ -49,7 +50,8 @@ int main(int argc, char *argv[]) {
   {
     /* reset random date, way into the future */
     const auto t = dso::datetime<dso::nanoseconds>(
-        dso::year(2030), dso::month(1), dso::day_of_month(1), dso::nanoseconds(0));
+        dso::year(2030), dso::month(1), dso::day_of_month(1),
+        dso::nanoseconds(0));
     /* get the eccentricities */
     if (snx.parse_block_site_eccentricity(siteids, t, ecc)) {
       fprintf(stderr, "Failed collecting site eccentricities\n");
@@ -81,7 +83,8 @@ int main(int argc, char *argv[]) {
   {
     /* reset random date, into the past (first day of DIOA) */
     const auto t = dso::datetime<dso::nanoseconds>(
-        dso::year(1993), dso::month(1), dso::day_of_month(3), dso::nanoseconds(0));
+        dso::year(1993), dso::month(1), dso::day_of_month(3),
+        dso::nanoseconds(0));
     /* get the eccentricities */
     if (snx.parse_block_site_eccentricity(siteids, t, ecc)) {
       fprintf(stderr, "Failed collecting site eccentricities\n");

@@ -36,9 +36,11 @@ int main(int argc, char *argv[]) {
      * this interval
      */
     const auto t1 = dso::datetime<dso::nanoseconds>(
-        dso::year(2020), dso::month(1), dso::day_of_month(1), dso::nanoseconds(0));
+        dso::year(2020), dso::month(1), dso::day_of_month(1),
+        dso::nanoseconds(0));
     const auto t2 = dso::datetime<dso::nanoseconds>(
-        dso::year(2020), dso::month(2), dso::day_of_month(1), dso::nanoseconds(0));
+        dso::year(2020), dso::month(2), dso::day_of_month(1),
+        dso::nanoseconds(0));
     /* get data rejection info */
     if (snx.parse_block_data_reject(siteids, rej, t1, t2)) {
       fprintf(stderr, "Failed collecting data rejection info\n");
@@ -100,8 +102,8 @@ int main(int argc, char *argv[]) {
     const auto t2 = dso::datetime<dso::nanoseconds>(
         dso::year(2005), dso::day_of_year(350), dso::nanoseconds(0));
     /* get data rejection info */
-    if (snx.parse_block_data_reject(siteids, rej,
-                                    dso::datetime<dso::nanoseconds>::min(), t2)) {
+    if (snx.parse_block_data_reject(
+            siteids, rej, dso::datetime<dso::nanoseconds>::min(), t2)) {
       fprintf(stderr, "Failed collecting data rejection info\n");
       return 1;
     }

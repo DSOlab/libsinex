@@ -279,7 +279,7 @@ class SolutionEstimate {
 
   /* Estimated Parameters Index: Index of estimated parameters. [I5] */
   int m_index;
-  
+
   /* Constraint Code: Constraint applied to the parameter. [A1]*/
   SinexConstraintCode m_constraint;
 
@@ -294,17 +294,17 @@ class SolutionEstimate {
   /* Time: Epoch at which the estimated parameter is valid. */
   dso::datetime<dso::nanoseconds> m_epoch{};
 
-public:  
+public:
   /* Parameter Type: Identification of the type of parameter. [A6]
    * This is a pointer to the respective type in the
    * dso::sinex::parameter_types[] array
    */
   const char *parameter_type() const noexcept { return m_parameter_type; }
-  void set_parameter_type(const char *s) noexcept {m_parameter_type=s;}
+  void set_parameter_type(const char *s) noexcept { m_parameter_type = s; }
 
   /* @brief Get constraint code */
-  SinexConstraintCode constraint() const noexcept {return m_constraint;}
-  SinexConstraintCode &constraint() noexcept {return m_constraint;}
+  SinexConstraintCode constraint() const noexcept { return m_constraint; }
+  SinexConstraintCode &constraint() noexcept { return m_constraint; }
 
   /* Site Code: Site code for which some parameters are estimated. [A4] */
   char *site_code() noexcept { return charbuf__ + site_code_at; }
@@ -340,23 +340,23 @@ public:
   const char *units() const noexcept { return charbuf__ + units_at; }
 
   /* @brief Return the estimated value */
-  double estimate() const noexcept {return m_estimate;}
-  double &estimate() noexcept {return m_estimate;}
-  
+  double estimate() const noexcept { return m_estimate; }
+  double &estimate() noexcept { return m_estimate; }
+
   /* @brief Return the std. deviation of the estimate */
-  double std_deviation() const noexcept {return m_std_deviation;}
-  double &std_deviation() noexcept {return m_std_deviation;}
-  
+  double std_deviation() const noexcept { return m_std_deviation; }
+  double &std_deviation() noexcept { return m_std_deviation; }
+
   /* @brief Return the estimation epoch */
-  dso::datetime<dso::nanoseconds> epoch() const noexcept {return m_epoch;}
-  dso::datetime<dso::nanoseconds> &epoch() noexcept {return m_epoch;}
+  dso::datetime<dso::nanoseconds> epoch() const noexcept { return m_epoch; }
+  dso::datetime<dso::nanoseconds> &epoch() noexcept { return m_epoch; }
 
   /* @brief Return the index */
-  int index() const noexcept {return m_index;}
-  int &index() noexcept {return m_index;}
+  int index() const noexcept { return m_index; }
+  int &index() noexcept { return m_index; }
 
   /* @brief Check if two SolutionEstimate instances describe the same site
-   * A site is consdered a match, if 
+   * A site is consdered a match, if
    * 1. the SITE CODE's,
    * 2. the POINT CODE'd
    * 3. the SOLUTION ID's
@@ -368,7 +368,7 @@ public:
            (!std::strcmp(point_code(), se.point_code())) &&
            (!std::strcmp(soln_id(), se.soln_id()));
   }
-  
+
   /* @brief Check if the instance's site matches a given SiteId
    * A site is consdered a match, if both the SITE CODE and the POINT CODE are
    * exactly the same.
