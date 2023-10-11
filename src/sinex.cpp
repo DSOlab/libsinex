@@ -50,7 +50,7 @@ int dso::Sinex::mark_blocks() noexcept {
   while (m_stream.getline(line, sinex::max_sinex_chars) &&
          (linec++ < max_sinex_lines) && (!error)) {
     /* end of file; break */
-    if (!std::strcmp(line, "%ENDSNX"))
+    if (!std::strncmp(line, "%ENDSNX", 7))
       break;
     /* encounter start of block */
     if (*line == '+') {
@@ -78,19 +78,22 @@ int dso::Sinex::mark_blocks() noexcept {
 
   /* check for errors */
   if ((!m_stream.good()) || error || (linec >= max_sinex_lines)) {
-    if (!m_stream.good())
+    if (!m_stream.good()) {
       fprintf(stderr,
               "[ERROR] Seems SINEX was not read till EOF! (traceback: %s)\n",
               __func__);
-    if (error)
+    }
+    if (error) {
       fprintf(
           stderr,
           "[ERROR] Error occured while parsing SINEX file (traceback: %s)\n",
           __func__);
-    if (linec >= max_sinex_lines)
+    }
+    if (linec >= max_sinex_lines) {
       fprintf(stderr,
               "[ERROR] SINEX file has too many lines! (traceback: %s)\n",
               __func__);
+    }
     ++error;
   }
 
