@@ -94,7 +94,7 @@ int dso::Sinex::parse_block_site_eccentricity(
   auto tstop = t;
   if (tstop > m_data_stop) {
     auto ExtrapolateAfter(m_data_stop);
-    ExtrapolateAfter.remove_seconds(dso::nanoseconds(1));
+    ExtrapolateAfter.add_seconds(dso::nanoseconds(-1));
     tstop = ExtrapolateAfter;
   }
 

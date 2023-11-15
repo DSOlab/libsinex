@@ -69,9 +69,7 @@ int dso::Sinex::linear_extrapolate_coordinates(
         const double x0 = xit->estimate();
         const double vx = vit->estimate();
         const auto dt =
-            dso::date_diff<dso::DateTimeDifferenceType::FractionalDays>(
-                t, xit->epoch()) /
-            365.25e0;
+            t.diff<dso::DateTimeDifferenceType::FractionalYears>(xit->epoch());
         auto val = x0 + vx * dt;
         xyz[xcomponent / 2] = val;
       }

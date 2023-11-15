@@ -1,5 +1,6 @@
 #include "datetime/datetime_write.hpp"
 #include "sinex.hpp"
+#include <datetime/datetime_io_core.hpp>
 #include <iostream>
 #include <vector>
 
@@ -49,8 +50,12 @@ int main(int argc, char *argv[]) {
     /* report results */
     char b1[64], b2[64];
     for (const auto &d : rej) {
-      dso::strftime_ymd_hmfs(d.start, b1);
-      dso::strftime_ymd_hmfs(d.stop, b2);
+      // dso::strftime_ymd_hmfs(d.start, b1);
+      dso::to_char<dso::YMDFormat::YYYYMMDD, dso::HMSFormat::HHMMSSF>(d.start,
+                                                                      b1);
+      // dso::strftime_ymd_hmfs(d.stop, b2);
+      dso::to_char<dso::YMDFormat::YYYYMMDD, dso::HMSFormat::HHMMSSF>(d.stop,
+                                                                      b2);
       printf("%s %s %s %s\n", d.site_code(), b1, b2, d.comment());
     }
   }
@@ -69,8 +74,10 @@ int main(int argc, char *argv[]) {
     /* report results */
     char b1[64], b2[64];
     for (const auto &d : rej) {
-      dso::strftime_ymd_hmfs(d.start, b1);
-      dso::strftime_ymd_hmfs(d.stop, b2);
+      dso::to_char<dso::YMDFormat::YYYYMMDD, dso::HMSFormat::HHMMSSF>(d.start,
+                                                                      b1);
+      dso::to_char<dso::YMDFormat::YYYYMMDD, dso::HMSFormat::HHMMSSF>(d.stop,
+                                                                      b2);
       printf("%s %s %s %s\n", d.site_code(), b1, b2, d.comment());
     }
   }
@@ -89,8 +96,10 @@ int main(int argc, char *argv[]) {
     /* report results */
     char b1[64], b2[64];
     for (const auto &d : rej) {
-      dso::strftime_ymd_hmfs(d.start, b1);
-      dso::strftime_ymd_hmfs(d.stop, b2);
+      dso::to_char<dso::YMDFormat::YYYYMMDD, dso::HMSFormat::HHMMSSF>(d.start,
+                                                                      b1);
+      dso::to_char<dso::YMDFormat::YYYYMMDD, dso::HMSFormat::HHMMSSF>(d.stop,
+                                                                      b2);
       printf("%s %s %s %s\n", d.site_code(), b1, b2, d.comment());
     }
   }
@@ -110,8 +119,10 @@ int main(int argc, char *argv[]) {
     /* report results */
     char b1[64], b2[64];
     for (const auto &d : rej) {
-      dso::strftime_ymd_hmfs(d.start, b1);
-      dso::strftime_ymd_hmfs(d.stop, b2);
+      dso::to_char<dso::YMDFormat::YYYYMMDD, dso::HMSFormat::HHMMSSF>(d.start,
+                                                                      b1);
+      dso::to_char<dso::YMDFormat::YYYYMMDD, dso::HMSFormat::HHMMSSF>(d.stop,
+                                                                      b2);
       printf("%s %s %s %s\n", d.site_code(), b1, b2, d.comment());
     }
   }
