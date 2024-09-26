@@ -1,13 +1,9 @@
 #include "sinex.hpp"
 #include <iostream>
 #include <stdexcept>
+#include <fstream>
 
-/* Test program: Creating SINEX files
- *
- * Given valid SINEX file, this program should return 0
- * Given any non-SINEX file (including non-existent) it should throw and
- * return 1.
- */
+/* Test program: Creating SINEX files */
 
 int main(int argc, char *argv[]) {
   if (argc != 2) {
@@ -18,12 +14,28 @@ int main(int argc, char *argv[]) {
   /* create an instance; could throw */
   try {
     dso::Sinex snx(argv[1]);
-    return 0;
   } catch (std::exception &e) {
     fprintf(stderr, "ERROR. Failed to create SINEX instance from file %s\n",
             argv[1]);
     fprintf(stderr, "%s\n", e.what());
     return 1;
+  }
+  
+  /* create an instance; should throw */
+  try {
+    dso::Sinex snx("foobar");
+    return 1;
+  } catch (std::exception &e) {
+    ;
+  }
+
+  std::ofstream fout("deleteme");
+  fout << "This is not\na SINEX file!";
+  try {
+    dso::Sinex snx("deleteme");
+    return 1;
+  } catch (std::exception &e) {
+    ;
   }
 
   /* all done */

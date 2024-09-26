@@ -1,14 +1,19 @@
 #include "sinex.hpp"
 #include <iostream>
 #include <vector>
+#include <cstdio>
+#include <cstring>
 
-/*
- * Latest log file for DIONYSOS is available at:
- * https://ids-doris.org/network/sitelogs/station.html?code=DIONYSOS
+/* DIOA  A    1 D 93:003:00000 06:136:86399 UNE   0.5100   0.0000   0.0000
+ * DIOB  A    1 D 06:137:00000 22:365:86399 UNE   0.4870   0.0000   0.0000
+ * 135/2006 is Tuesday,  May  16,  2006
  *
- * Name  Start         Stop
- * DIOA  15/02/1989    16/05/2006
- * DIOB  17/05/2006    -
+ MANB  A    1 D 03:056:00000 04:192:86399 UNE   0.4870   0.0000   0.0000
+ MANB  A    2 D 04:193:00000 10:027:67773 UNE   0.4870   0.0000   0.0000
+ MANB  A    3 D 10:027:67774 12:168:80327 UNE   0.4870   0.0000   0.0000
+ MANB  A    4 D 12:168:80328 17:223:19705 UNE   0.4870   0.0000   0.0000
+ MANB  A    5 D 17:223:19706 20:359:85421 UNE   0.4870   0.0000   0.0000
+ MANB  A    6 D 20:359:85422 22:365:86399 UNE   0.4870   0.0000   0.0000
  */
 
 int main(int argc, char *argv[]) {
@@ -51,9 +56,20 @@ int main(int argc, char *argv[]) {
     }
     /* report results */
     for (const auto &e : ecc) {
-      printf("%s %.6f %.6f %.6f\n", e.site_code(), e.eccentricity(0),
+      printf("[1] %s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
              e.eccentricity(1), e.eccentricity(2));
     }
+    /* should print
+     * DIOA 0.5100 0.0000 0.0000
+     * MANB 0.4870 0.0000 0.0000
+     */
+    assert(ecc.size() == 2);
+    assert(!std::strcmp(ecc[0].point_code(), "A"));
+    assert(!std::strcmp(ecc[1].point_code(), "A"));
+    assert(!std::strcmp(ecc[0].soln_id(), "1"));
+    assert(!std::strcmp(ecc[1].soln_id(), "5"));
+    assert(!std::strcmp(ecc[0].ref_system(), "UNE"));
+    assert(!std::strcmp(ecc[1].ref_system(), "UNE"));
   }
 
   {
@@ -68,13 +84,23 @@ int main(int argc, char *argv[]) {
     }
     /* report results */
     for (const auto &e : ecc) {
-      printf("%s %.6f %.6f %.6f\n", e.site_code(), e.eccentricity(0),
+      printf("[2] %s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
              e.eccentricity(1), e.eccentricity(2));
     }
+    /* should print
+     * DIOB 0.4870   0.0000   0.0000
+     * MANB 0.4870   0.0000   0.0000
+     */
+    assert(ecc.size() == 2);
+    assert(!std::strcmp(ecc[0].point_code(), "A"));
+    assert(!std::strcmp(ecc[1].point_code(), "A"));
+    assert(!std::strcmp(ecc[0].soln_id(), "1"));
+    assert(!std::strcmp(ecc[1].soln_id(), "6"));
+    assert(!std::strcmp(ecc[0].ref_system(), "UNE"));
+    assert(!std::strcmp(ecc[1].ref_system(), "UNE"));
   }
 
   {
-    /* reset random date, neither DIOA nor DIOB present */
     const auto t = dso::datetime<dso::nanoseconds>(
         dso::year(2005), dso::day_of_year(349), dso::nanoseconds(0));
     /* get the eccentricities */
@@ -84,9 +110,20 @@ int main(int argc, char *argv[]) {
     }
     /* report results */
     for (const auto &e : ecc) {
-      printf("%s %.6f %.6f %.6f\n", e.site_code(), e.eccentricity(0),
+      printf("[3] %s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
              e.eccentricity(1), e.eccentricity(2));
     }
+    /* should print
+     * DIOA 0.5100   0.0000   0.0000  
+     * MANB 0.4870   0.0000   0.0000
+     */
+    assert(ecc.size() == 2);
+    assert(!std::strcmp(ecc[0].point_code(), "A"));
+    assert(!std::strcmp(ecc[1].point_code(), "A"));
+    assert(!std::strcmp(ecc[0].soln_id(), "1"));
+    assert(!std::strcmp(ecc[1].soln_id(), "2"));
+    assert(!std::strcmp(ecc[0].ref_system(), "UNE"));
+    assert(!std::strcmp(ecc[1].ref_system(), "UNE"));
   }
 
   {
@@ -101,9 +138,16 @@ int main(int argc, char *argv[]) {
     }
     /* report results */
     for (const auto &e : ecc) {
-      printf("%s %.6f %.6f %.6f\n", e.site_code(), e.eccentricity(0),
+      printf("[4] %s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
              e.eccentricity(1), e.eccentricity(2));
     }
+    /* should print
+     * DIOA 0.5100   0.0000   0.0000
+     */
+    assert(ecc.size() == 1);
+    assert(!std::strcmp(ecc[0].point_code(), "A"));
+    assert(!std::strcmp(ecc[0].soln_id(), "1"));
+    assert(!std::strcmp(ecc[0].ref_system(), "UNE"));
   }
 
   {
@@ -117,9 +161,20 @@ int main(int argc, char *argv[]) {
     }
     /* report results */
     for (const auto &e : ecc) {
-      printf("%s %.6f %.6f %.6f\n", e.site_code(), e.eccentricity(0),
+      printf("[5] %s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
              e.eccentricity(1), e.eccentricity(2));
     }
+    /* shuod print
+     * DIOB 0.4870 0.0000 0.0000
+     * MANB 0.4870 0.0000 0.0000
+     */
+    assert(ecc.size() == 2);
+    assert(!std::strcmp(ecc[0].point_code(), "A"));
+    assert(!std::strcmp(ecc[1].point_code(), "A"));
+    assert(!std::strcmp(ecc[0].soln_id(), "1"));
+    assert(!std::strcmp(ecc[1].soln_id(), "2"));
+    assert(!std::strcmp(ecc[0].ref_system(), "UNE"));
+    assert(!std::strcmp(ecc[1].ref_system(), "UNE"));
   }
 
   return 0;
