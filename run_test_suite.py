@@ -7,7 +7,6 @@ import argparse
 import ftplib
 import importlib.util
 
-
 def runtime_load_progs(pyfile):
     spec = importlib.util.spec_from_file_location("bar.baz", pyfile)
     foo = importlib.util.module_from_spec(spec)
@@ -103,9 +102,11 @@ if __name__ == '__main__':
 # temporary file for logging/output
     temp_fn = '.testemp'
 
-    # call each of the test programs with siutable args
+    print("{:>40s} {:>5s} {:>8s} {:} ".format("Test", "Exit", "Status", "Args"))
+    print("{:>40s} {:>5s} {:>8s} {:} ".format("-", "-", "-", "-"))
+# call each of the test programs with suitable args
     for dct in progs:
-        # test-program (executable)
+# test-program (executable)
         exe = os.path.join(args.progs_dir, dct['name']) + '.out'
 # check that the program is where expected
         if not os.path.isfile(exe):
@@ -118,8 +119,7 @@ if __name__ == '__main__':
 # replace DATA_DIR with the actual data_dir in any of the arguments
         cmdargs = [x.replace('DATA_DIR', args.data_dir) for x in dct['args']]
 # run the command, catch output and exit code
-        verboseprint('Running command: {:}'.format([exe] + cmdargs))
-        result = subprocess.run([exe] + cmdargs, stdout=ftmp, check=False)
+        result = subprocess.run([exe] + cmdargs, stdout=ftmp, stderr=subprocess.DEVNULL, check=False)
         ftmp.close()
 # check the return code
         if result.returncode != dct['exit']:
@@ -127,12 +127,18 @@ if __name__ == '__main__':
                 dct['exit'], result.returncode, exe), file=sys.stderr)
             sys.exit(2)
         else:
-            verboseprint('\tExit Code OK')
+            pass
 # check the output against the should-be output
         if 'sout' in dct:
             if check_file_vs_str(temp_fn, dct['sout']):
-                verboseprint('\tCommand Output OK')
+                print("{:>40s} {:>5s} {:>8s} {:} ".format(os.path.basename(exe), "ok", "pass", cmdargs))
             else:
-                print(
-                    'ERROR Program\'s {:} output different than expected'.format(exe),
-                    file=sys.stderr)
+                print("{:>40s} {:>5s} {:>8s} {:} ".format(os.path.basename(exe), "ok", "error", cmdargs))
+                if args.verbose:
+                    print("Failure Details:")
+                    print("Expected string:")
+                    print(dct['sout'])
+                    print("Produced string:")
+                    with open(temp_fn, "r") as f: d = f.read()
+                    print(d)
+                    sys.exit(2)

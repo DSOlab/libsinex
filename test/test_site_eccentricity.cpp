@@ -2,6 +2,15 @@
 #include <iostream>
 #include <vector>
 
+/*
+ * Latest log file for DIONYSOS is available at:
+ * https://ids-doris.org/network/sitelogs/station.html?code=DIONYSOS
+ *
+ * Name  Start         Stop
+ * DIOA  15/02/1989    16/05/2006
+ * DIOB  17/05/2006    -
+ */
+
 int main(int argc, char *argv[]) {
 
   if (argc < 3) {

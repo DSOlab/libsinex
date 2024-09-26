@@ -9,7 +9,7 @@
 #ifndef __SINEX_FILE_BLOCK_CLASSES_HPP__
 #define __SINEX_FILE_BLOCK_CLASSES_HPP__
 
-#include "sinex_details.hpp"
+#include "core/sinex_details.hpp"
 #include <fstream>
 #include <type_traits>
 #include <vector>
