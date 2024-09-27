@@ -316,21 +316,28 @@ public:
    *            We will be matching records according to SITE CODE and
    *            POINT CODE.
    * @param[in] t  The time at which we want the eccentricities. If later
-   *            than the instance's DATA STOP time, then we will be assuming
-   *            that the validity intervals that end at DATA STOP time are
-   *            valid internaly in the future.Hence, if DATA STOP = 2022/365
-   *            and t = 2023/001 and we encounter a record with data
-   *            stop = "00:000:00000", then it is presumed that this record is
-   *            valid for the given t.
+   *            than the instance's DATA STOP time, then we will act according 
+   *            to the allow_extrapolation variable. If set to false, then no
+   *            extrapolation is performed and if t is later than the record's 
+   *            Data End field, the record will not be collected.
+   *            If set to true, we will be assuming that the validity 
+   *            intervals that end later than (DATA_STOP-allowed_offset) are
+   *            valid internaly in the future. 
    * @param[out] out_vec A vector of sinex::SiteEccentricity for some or all
    *            of the sites contained in site_vec, valid for the time given
    *            (ie t)
+   * @param[in] allow_extrapolation Allow extrapolation of eccentricity after 
+   *            DATA_STOP, in case a record is valid up to 
+   *            (DATA_STOP-allowed_offset). See \t t.
+   * @param[in] allowed_offset See \t t and \t allow_extrapolation
    * @return Anything other than 0 denotes an error
    */
   int parse_block_site_eccentricity(
       const std::vector<sinex::SiteId> &site_vec,
       const dso::datetime<dso::nanoseconds> &t,
-      std::vector<sinex::SiteEccentricity> &out_vec) noexcept;
+      std::vector<sinex::SiteEccentricity> &out_vec,
+      bool allow_extrapolation = true,
+      FractionalSeconds allowed_offset = FractionalSeconds(2e0)) noexcept;
 
   /** @brief SOLUTION/EPOCHS for given sites and epoch.
    *

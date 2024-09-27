@@ -60,18 +60,24 @@ int parse_eccentricity_line(
 
   return error;
 }
+
 } /* unnamed namespace */
 
 int dso::Sinex::parse_block_site_eccentricity(
     const std::vector<sinex::SiteId> &site_vec,
     const dso::datetime<dso::nanoseconds> &t,
-    std::vector<sinex::SiteEccentricity> &out_vec) noexcept {
+    std::vector<sinex::SiteEccentricity> &out_vec,
+    bool allow_extrapolation,
+    dso::FractionalSeconds fsec) noexcept {
 
   /* clear the vector, and allocate */
   if (!out_vec.empty())
     out_vec.clear();
   if (out_vec.capacity() < site_vec.size())
     out_vec.reserve(out_vec.size());
+    
+  /* quick return */
+  if (t>m_data_stop && (!allow_extrapolation)) return 0;
 
   /* go to SOLUTION/ECCENTRICITY block */
   if (goto_block("SITE/ECCENTRICITY"))
@@ -87,18 +93,7 @@ int dso::Sinex::parse_block_site_eccentricity(
     return 1;
   }
 
-  /* define a datetime for comparing eccentricity validity intervals. If the
-   * requested t (at input) is later than the SINEX's stop date, then this
-   * datetime is one second prior to the SINEX's stop date
-   */
-  auto tstop = t;
-  if (tstop > m_data_stop) {
-    auto ExtrapolateAfter(m_data_stop);
-    ExtrapolateAfter.add_seconds(dso::nanoseconds(-1));
-    tstop = ExtrapolateAfter;
-  }
-
-  /* read in Eccentricities untill end of block */
+  /* read in Eccentricities until end of block */
   std::size_t ln_count = 0;
   constexpr const int max_lines_in_block = 5000;
   int error = 0;
@@ -120,7 +115,12 @@ int dso::Sinex::parse_block_site_eccentricity(
       }
 
       /* check eccentricity validity interval */
-      if (t >= secc.start && tstop < secc.stop) {
+      if (t >= secc.start &&
+          ((t < secc.stop) ||
+           ((t >= secc.stop) &&
+            (m_data_stop.diff<dso::DateTimeDifferenceType::FractionalSeconds>(
+                 secc.stop) < fsec) &&
+            (allow_extrapolation)))) {
 
         /* check if the site is of interest, aka included in site_vec */
         auto it = std::find_if(
