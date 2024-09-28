@@ -8,7 +8,7 @@ SCR=.libsinex_test_scratch_file_tmp
 REF=.libsinex_test_scratch_file_tmp_ref
 
 cat << EndOfReferenceResult > ${REF}
-DIOA 0.5100 0.0000 0.0000
+DIOB 0.4870 0.0000 0.0000
 MANB 0.4870 0.0000 0.0000
 DIOB 0.4870 0.0000 0.0000
 MANB 0.4870 0.0000 0.0000

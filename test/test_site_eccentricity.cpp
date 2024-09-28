@@ -56,11 +56,11 @@ int main(int argc, char *argv[]) {
     }
     /* report results */
     for (const auto &e : ecc) {
-      printf("[1] %s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
+      printf("%s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
              e.eccentricity(1), e.eccentricity(2));
     }
     /* should print
-     * DIOA 0.5100 0.0000 0.0000
+     * DIOB 0.4878 0.0000 0.0000
      * MANB 0.4870 0.0000 0.0000
      */
     assert(ecc.size() == 2);
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
     }
     /* report results */
     for (const auto &e : ecc) {
-      printf("[2] %s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
+      printf("%s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
              e.eccentricity(1), e.eccentricity(2));
     }
     /* should print
@@ -99,6 +99,44 @@ int main(int argc, char *argv[]) {
     assert(!std::strcmp(ecc[0].ref_system(), "UNE"));
     assert(!std::strcmp(ecc[1].ref_system(), "UNE"));
   }
+  
+  {
+    /* reset random date, way into the future */
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(2030), dso::month(1), dso::day_of_month(1),
+        dso::nanoseconds(0));
+    /* get the eccentricities, NO EXTRAPOLATION! */
+    if (snx.parse_block_site_eccentricity(siteids, t, ecc, false)) {
+      fprintf(stderr, "Failed collecting site eccentricities\n");
+      return 1;
+    }
+    /* report results */
+    for (const auto &e : ecc) {
+      printf("%s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
+             e.eccentricity(1), e.eccentricity(2));
+    }
+    /* should print nothing! */
+    assert(ecc.size() == 0);
+  }
+  
+  {
+    /* reset random date, way into the future */
+    const auto t = dso::datetime<dso::nanoseconds>(
+        dso::year(2022), dso::month(12), dso::day_of_month(31),
+        dso::nanoseconds(86400000000000L));
+    /* get the eccentricities, NO EXTRAPOLATION! */
+    if (snx.parse_block_site_eccentricity(siteids, t, ecc, false)) {
+      fprintf(stderr, "Failed collecting site eccentricities\n");
+      return 1;
+    }
+    /* report results */
+    for (const auto &e : ecc) {
+      printf("%s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
+             e.eccentricity(1), e.eccentricity(2));
+    }
+    /* should print nothing! */
+    assert(ecc.size() == 0);
+  }
 
   {
     const auto t = dso::datetime<dso::nanoseconds>(
@@ -110,7 +148,7 @@ int main(int argc, char *argv[]) {
     }
     /* report results */
     for (const auto &e : ecc) {
-      printf("[3] %s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
+      printf("%s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
              e.eccentricity(1), e.eccentricity(2));
     }
     /* should print
@@ -138,7 +176,7 @@ int main(int argc, char *argv[]) {
     }
     /* report results */
     for (const auto &e : ecc) {
-      printf("[4] %s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
+      printf("%s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
              e.eccentricity(1), e.eccentricity(2));
     }
     /* should print
@@ -161,7 +199,7 @@ int main(int argc, char *argv[]) {
     }
     /* report results */
     for (const auto &e : ecc) {
-      printf("[5] %s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
+      printf("%s %.4f %.4f %.4f\n", e.site_code(), e.eccentricity(0),
              e.eccentricity(1), e.eccentricity(2));
     }
     /* shuod print

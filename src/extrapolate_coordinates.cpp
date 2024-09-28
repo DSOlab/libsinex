@@ -70,7 +70,7 @@ int dso::Sinex::linear_extrapolate_coordinates(
         const double vx = vit->estimate();
         const auto dt =
             t.diff<dso::DateTimeDifferenceType::FractionalYears>(xit->epoch());
-        auto val = x0 + vx * dt;
+        auto val = x0 + vx * dt.years();
         xyz[xcomponent / 2] = val;
       }
     } /* end looping components for the site */
