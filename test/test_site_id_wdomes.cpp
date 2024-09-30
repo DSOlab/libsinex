@@ -43,6 +43,22 @@ int main(int argc, char *argv[]) {
     for (const auto &site : sitesids) {
       printf("%s %s %s\n", site.site_code(), site.point_code(), site.domes());
     }
+    /* expected output for input:
+     * KOKO 123 FOO 91301S004 CRQC 91301S004 CRRC 91301S005 CRRC 91301S00 \ 
+     * DAKA 34101S004 EASA 1703S008 EASA 41703S008 XAN 123 EASB 41703S009 \
+     * EVEB 21501S001 EVEB 21501M001 DIOB 12602S012 DIOA 12602S011 DJIA 39901S002 \
+     * DIOA 12602S011 DJIC 39901S002 DJIB 39901S003 DIOA 12602S012
+     * CRQC  A 91301S004
+     * CRRC  A 91301S005
+     * DAKA  A 34101S004
+     * DIOA  A 12602S011
+     * DIOB  A 12602S012
+     * DJIA  A 39901S002
+     * DJIB  A 39901S003
+     * EASA  A 41703S008
+     * EASB  A 41703S009
+     * EVEB  A 21501S001
+     */
   }
 
   return 0;

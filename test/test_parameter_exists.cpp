@@ -1,5 +1,6 @@
 #include "sinex.hpp"
 #include <vector>
+#include <cassert>
 
 using namespace dso;
 
@@ -33,20 +34,22 @@ int main() {
   sv2.emplace_back(p9);
 
   int index;
+  /* should identify all parameters in sv1 (Policy=Strict) */
   for (auto const &str : sv1) {
     if (!sinex::parameter_type_exists(str, index)) {
       fprintf(stderr, "[ERROR] Failed to recognize parameter type \"%s\"\n",
               str);
       fprintf(stderr, "Policy = strict\n");
-      return 1;
+      assert(1==2);
     }
   }
 
+  /* should not identify parameters in sv2 (Policy=Strict) */
   for (auto const &str : sv2) {
     if (sinex::parameter_type_exists(str, index)) {
       fprintf(stderr, "[ERROR] Matched erronuous parameter type \"%s\"\n", str);
       fprintf(stderr, "Policy = strict\n");
-      return 1;
+      assert(1==2);
     }
   }
 
@@ -66,22 +69,24 @@ int main() {
   sv2.emplace_back(p8);
   sv2.emplace_back(p10);
 
+  /* should identify all parameters in sv1 */
   for (auto const &str : sv1) {
     if (!sinex::parameter_type_exists<
             sinex::details::ParameterMatchPolicyType::NonStrict>(str, index)) {
       fprintf(stderr, "[ERROR] Failed to recognize parameter type \"%s\"\n",
               str);
       fprintf(stderr, "Policy = non-strict\n");
-      return 2;
+      assert(1==2);
     }
   }
 
+  /* should identify all parameters in sv2 */
   for (auto const &str : sv2) {
     if (sinex::parameter_type_exists<
             sinex::details::ParameterMatchPolicyType::NonStrict>(str, index)) {
       fprintf(stderr, "[ERROR] Matched erronuous parameter type \"%s\"\n", str);
       fprintf(stderr, "Policy = non-strict\n");
-      return 2;
+      assert(1==2);
     }
   }
 

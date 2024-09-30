@@ -163,7 +163,7 @@ public:
    * Parse the SITE/ID block of the SINEX file and collect info for given
    * sites.
    * This function will search through the SITE/ID block, and collect all
-   * infor for the sites that are included in the sites vector. Matching of
+   * info for the sites that are included in the sites vector. Matching of
    * stations can be parformed in two ways:
    * 1. if use_domes is set to false, then only the SITE CODE is checked, i.e.
    *    each string in the sites vector should contain a 4-char id of the
@@ -206,12 +206,18 @@ public:
       std::vector<sinex::SiteReceiver> &site_vec) noexcept;
 
   /** @brief Parse the whole SITE/ANTENNA Block off from the SINEX instance.
+   *
    * @param[out] site_vec A vector of sinex::SiteAntenna instances, one
    *               entry for each block line.
    * @return Anything other than zero denotes an error
    */
   int parse_block_site_antenna(
-      std::vector<sinex::SiteAntenna> &site_vec) noexcept;
+      const std::vector<sinex::SiteId> &sites_vec,
+      std::vector<sinex::SiteAntenna> &out_vec,
+      const dso::datetime<dso::nanoseconds> from =
+          dso::datetime<dso::nanoseconds>::min(),
+      const dso::datetime<dso::nanoseconds> to =
+          dso::datetime<dso::nanoseconds>::max()) noexcept;
 
   /** @brief Get SOLUTION/ESTIMATE records for given sites.
    *

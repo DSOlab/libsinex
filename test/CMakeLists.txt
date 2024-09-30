@@ -22,3 +22,21 @@ target_link_libraries(test_site_eccentricity PRIVATE sinex)
 find_program(site_eccentricity.sh NAMES bash REQUIRED)
 add_test(NAME site_eccentricity 
          COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/site_eccentricity.sh $<TARGET_FILE:test_site_eccentricity> ${SNX})
+
+add_executable(test_site_id_ndomes test_site_id_ndomes.cpp)
+target_link_libraries(test_site_id_ndomes PRIVATE sinex)
+find_program(site_id_ndomes.sh NAMES bash REQUIRED)
+add_test(NAME site_id_ndomes 
+         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/site_id_ndomes.sh $<TARGET_FILE:test_site_id_ndomes> ${SNX})
+
+add_executable(test_site_id_wdomes test_site_id_wdomes.cpp)
+target_link_libraries(test_site_id_wdomes PRIVATE sinex)
+find_program(site_id_wdomes.sh NAMES bash REQUIRED)
+add_test(NAME site_id_wdomes 
+         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/site_id_wdomes.sh $<TARGET_FILE:test_site_id_ndomes> ${SNX})
+
+add_executable(test_site_antenna test_site_antenna.cpp)
+target_link_libraries(test_site_antenna PRIVATE sinex)
+find_program(site_antenna.sh NAMES bash REQUIRED)
+add_test(NAME site_antenna 
+         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/site_antenna.sh $<TARGET_FILE:test_site_antenna> ${SNX})
