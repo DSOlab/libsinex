@@ -8,7 +8,6 @@ Latest version handled is
 [Version 2.02 (December 01, 2006)](https://www.iers.org/SharedDocs/Publikationen/EN/IERS/Documents/ac/sinex/sinex_v202_pdf.pdf;jsessionid=D3307FA604FD12ACBE02A30C3D9AFC30.live1?__blob=publicationFile&v=2)
 
 
-[![CI test](https://github.com/xanthospap/libsinex/actions/workflows/test-libsinex.yml/badge.svg)](https://github.com/xanthospap/libsinex/actions/workflows/test-libsinex.yml)
 [![clang-format Check](https://github.com/xanthospap/libsinex/actions/workflows/clang-format-check.yml/badge.svg)](https://github.com/xanthospap/libsinex/actions/workflows/clang-format-check.yml)
 [![Linux CI build](https://github.com/xanthospap/libsinex/actions/workflows/cpp-linux-build.yml/badge.svg)](https://github.com/xanthospap/libsinex/actions/workflows/cpp-linux-build.yml)
 
@@ -47,8 +46,8 @@ directory tree. Then, you can use `ctest --test-dir build` to run the tests.
 
 ## ToDo
 
-[] More tests (e.g. get_solution, extrapolate_coordinates, etc)
-[] Handle Psd
-[] Handle harmonic signals
-[] Handle geocenter motion model
-[] Adapt ITRF2020
+- [] More tests (e.g. get_solution, extrapolate_coordinates, etc)
+- [] Handle Psd
+- [] Handle harmonic signals
+- [] Handle geocenter motion model
+- [] Adapt ITRF2020
