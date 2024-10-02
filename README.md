@@ -19,26 +19,16 @@ To install and use the library, you will need:
 * [ggeodesy](https://github.com/xanthospap/ggeodesy)
 
 ## Installation
-Installation is straightforward, using the [scons](https://scons.org/) build 
-system. You will need a C++17 compliant compiler. 
-To install, just type:
-```
-## build ...
-scons
-## install ...
-sudo scons install
-```
 
-When building, you can use the `debug=1` option to trigger a `DEBUG` build:
 ```
-scons debug=1
+## to build in a folder named "build":
+$> cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+$> cmake --build build --target all --config Release
+## (Optional) run tests, see section Testing below
+$> ctest --test-dir build
+## Install, system-wide (needs root)
+$> cd build && sudo make install
 ```
-to build the `DEBUG` version.
-
-## Examples
-Consult the test programs source code in the 
-[test folder](https://github.com/xanthospap/libsinex/tree/main/test) 
-for examples on how to use the library.
 
 ## Developers
 Take a look at the [LLVM Coding Standards](https://llvm.org/docs/CodingStandards.html) 
@@ -50,13 +40,15 @@ code format, the CI system will fail.
 
 ### Testing
 Test source code is found in [test folder](https://github.com/xanthospap/libsinex/tree/main/test). 
-To automatically run all tests, use the Python script 
-[run_test_suite.py](https://github.com/xanthospap/libsinex/blob/main/run_test_suite.py). 
-Note that to be able to run the scipt, you will have to compile using the 
-`test=1` option, i.e.
-```
-## build project and tests
-scons test=1
-## run tests
-./run_test_suite.py --progs-dir=test
-```
+To run the tests (via `ctest`) you will need the `dpod2020_023.snx` file. For 
+more information, including the download links, see the relevant [IDS page](https://ids-doris.org/combination/dpod.html). 
+Download the sinex file, and place it in a folder named `data` under at the main 
+directory tree. Then, you can use `ctest --test-dir build` to run the tests.
+
+## ToDo
+
+[] More tests (e.g. get_solution, extrapolate_coordinates, etc)
+[] Handle Psd
+[] Handle harmonic signals
+[] Handle geocenter motion model
+[] Adapt ITRF2020
