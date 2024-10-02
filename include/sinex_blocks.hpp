@@ -4,6 +4,10 @@
  * information that such a block line holds.
  * For example the class dso::sinex::SiteId should hold one individual record
  * line of the SINEX block SITE/ID.
+ *
+ * References:
+ * [1] SINEX - Solution (Software/technique) INdependent EXchange Format 
+ * Version 2.02 (December 01, 2006)
  */
 
 #ifndef __SINEX_FILE_BLOCK_CLASSES_HPP__
@@ -101,7 +105,7 @@ private:
                              std::true_type) const noexcept {
     return (std::strlen(siteid) >= 14)
                ? ((!std::strncmp(siteid, site_code(), 4)) &&
-                  (!std::strncmp(siteid + 5, domes(), 10)))
+                  (!std::strncmp(siteid + 5, domes(), 9)))
                : false;
   }
 
@@ -132,7 +136,7 @@ public:
   double &latitude() noexcept { return m_lat; }
 
   /** @brief Get longitude in [rad] */
-  double longitude() const noexcept { return m_lat; }
+  double longitude() const noexcept { return m_lon; }
   double &longitude() noexcept { return m_lon; }
 
   /** @brief Get height in [m] */
@@ -142,6 +146,9 @@ public:
   /** @brief Get observation code */
   sinex::SinexObservationCode obscode() const noexcept { return m_obscode; }
   sinex::SinexObservationCode &obscode() noexcept { return m_obscode; }
+
+  /** @brief Convert to null terminated C-string, according to [1] */
+  const char *to_str(char *buf) const noexcept;
 
   /** @brief Match a given site to this instance's site
    * @param[in] str Given site (as string) to match against. Does not have to

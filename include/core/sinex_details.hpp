@@ -18,6 +18,12 @@ namespace dso::sinex {
 /** @brief Max characters in a SINEX line */
 constexpr int max_sinex_chars = 128;
 
+/** @brief Number of characters in a DOMES (no  null-terminating char 
+ *         included), see
+ * https://itrf.ign.fr/en/network/domes/description
+ */
+constexpr const int max_domes_chars = 9;
+
 /** @brief Blocks allowed in a SINEX file */
 const char *const block_names[] = {
     "FILE/REFERENCE", "FILE/COMMENT", "INPUT/HISTORY", "INPUT/FILES",
