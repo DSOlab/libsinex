@@ -180,11 +180,11 @@ inline bool parameter_type_exists_impl(const char *ptype, int &index,
  */
 inline const char *ltrim_cpy(char *__restrict__ dest,
                              const char *__restrict__ src,
-                             int max_chars) noexcept {
+                             int count) noexcept {
   const char *c = src;
   while (*c && *c == ' ')
     ++c;
-  std::memcpy(dest, c, max_chars - (c - src));
+  std::memcpy(dest, c, count - (c - src));
   return dest;
 }
 

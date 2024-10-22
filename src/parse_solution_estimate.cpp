@@ -17,6 +17,8 @@ int parse_solution_estimate_line(
     const char *line, dso::sinex::SolutionEstimate &est,
     const dso::datetime<dso::nanoseconds> &sinex_data_start) noexcept {
 
+  using dso::sinex::details::ltrim_cpy;
+
   int error = 0, j;
   const char *end = line + std::strlen(line);
 
@@ -37,9 +39,12 @@ int parse_solution_estimate_line(
     ++error;
   }
 
-  std::memcpy(est.site_code(), line + 14, 4);
-  std::memcpy(est.point_code(), line + 19, 2);
-  std::memcpy(est.soln_id(), line + 22, 4);
+  //std::memcpy(est.site_code(), line + 14, 4);
+  //std::memcpy(est.point_code(), line + 19, 2);
+  //std::memcpy(est.soln_id(), line + 22, 4);
+  ltrim_cpy(est.site_code(), line + 14, 4);
+  ltrim_cpy(est.point_code(), line + 19, 2);
+  ltrim_cpy(est.soln_id(), line + 22, 4);
 
   j = dso::sinex::parse_sinex_date(line + 27, sinex_data_start, est.epoch());
   if (j) {
