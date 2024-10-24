@@ -46,3 +46,7 @@ target_link_libraries(test_get_solution PRIVATE sinex)
 find_program(get_solution.sh NAMES bash REQUIRED)
 add_test(NAME get_solution
          COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/get_solution.sh $<TARGET_FILE:test_get_solution> ${SNX})
+
+add_executable(test_real_harmonics test_real_harmonics.cpp)
+target_link_libraries(test_real_harmonics PRIVATE sinex)
+add_test(NAME real_harmonics COMMAND test_real_harmonics)

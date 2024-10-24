@@ -11,6 +11,12 @@ find_package(Eigen3 3.3 REQUIRED)
 find_package(datetime 1 REQUIRED)
 find_package(geodesy 1 REQUIRED)
 
+# Enable clang-tidy option
+option(ENABLE_CLANG_TIDY "Enable clang-tidy checks" OFF)
+
+# Define an option for building tests (defaults to ON)
+option(BUILD_TESTING "Enable building of tests" ON)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 set(CMAKE_CXX_EXTENSIONS Off)
@@ -30,6 +36,23 @@ add_compile_definitions(
   $<$<CONFIG:Debug>:DEBUG>
 )
 
+# clang-tidy (targets that follow will be checked)
+if(ENABLE_CLANG_TIDY)
+  set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=bugprone-*,\
+  clang-analyzer-*,\
+  cppcoreguidelines-*,\
+  llvm-*,\
+  modernize-*,\
+  performance-*,\
+  -modernize-use-trailing-return-type,\
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,\
+  -cppcoreguidelines-pro-bounds-constant-array-index,\
+  -cppcoreguidelines-pro-type-vararg")
+  message(STATUS "clang-tidy is enabled.")
+else()
+  message(STATUS "clang-tidy is disabled. To enable it, use -DENABLE_CLANG_TIDY=ON.")
+endif()
+
 add_library(sinex)
 target_include_directories(sinex PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
@@ -38,10 +61,16 @@ target_include_directories(sinex PUBLIC
 
 add_subdirectory(src)
 
+# disable clang-tidy (targets that follow will not be checked)
+set(CMAKE_CXX_CLANG_TIDY "")
+
 # The tests
-include(CTest)
-add_subdirectory(test)
-enable_testing()
+if(BUILD_TESTING)
+# The tests
+  include(CTest)
+  add_subdirectory(test)
+  enable_testing()
+endif()
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
 	DESTINATION include/sinex

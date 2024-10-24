@@ -46,7 +46,7 @@ directory tree. Then, you can use `ctest --test-dir build` to run the tests.
 
 ## ToDo
 
-- [] More tests (e.g. get_solution, extrapolate_coordinates, etc)
+- [] More tests (e.g. extrapolate_coordinates, etc)
 - [] Handle Psd
 - [] Handle harmonic signals
 - [] Handle geocenter motion model
