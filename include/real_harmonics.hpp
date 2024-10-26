@@ -14,6 +14,9 @@
 namespace dso {
 
 class RealHarmonics {
+  static constexpr const int MIN_HARMONIC_TERMS = 2;
+  static constexpr const int DBLS_IN_TERM = 3;
+
 private:
   /** @brief Number of harmonics/frequencies currently stored. */
   int m_num_harmonics{0};
@@ -31,8 +34,8 @@ private:
     if (num_harmonics <= m_capacity) {
       return (m_num_harmonics = num_harmonics);
     } else {
-      m_mem = (double *)std::realloc((void *)m_mem,
-                                     num_harmonics * 3 * sizeof(double));
+      m_mem = (double *)std::realloc(
+          (void *)m_mem, num_harmonics * DBLS_IN_TERM * sizeof(double));
       return (m_num_harmonics = m_capacity = num_harmonics);
     }
   }
@@ -48,9 +51,9 @@ public:
     else
       ++m_num_harmonics;
     /* note that m_num_harmonics has changed to a new value (from resize). */
-    m_mem[(m_num_harmonics - 1) * 3 + 0] = freq;
-    m_mem[(m_num_harmonics - 1) * 3 + 1] = amp_sin;
-    m_mem[(m_num_harmonics - 1) * 3 + 2] = amp_cos;
+    m_mem[(m_num_harmonics - 1) * DBLS_IN_TERM + 0] = freq;
+    m_mem[(m_num_harmonics - 1) * DBLS_IN_TERM + 1] = amp_sin;
+    m_mem[(m_num_harmonics - 1) * DBLS_IN_TERM + 2] = amp_cos;
     return m_num_harmonics;
   }
 
@@ -61,9 +64,9 @@ public:
   double value(double t) const noexcept {
     double sum = 0e0;
     for (int j = 0; j < m_num_harmonics; j++) {
-      const double f = m_mem[j * 3 + 0];
-      const double As = m_mem[j * 3 + 1];
-      const double Ac = m_mem[j * 3 + 2];
+      const double f = m_mem[j * DBLS_IN_TERM + 0];
+      const double As = m_mem[j * DBLS_IN_TERM + 1];
+      const double Ac = m_mem[j * DBLS_IN_TERM + 2];
       const double s = std::sin(2e0 * M_PI * f * t);
       const double c = std::cos(2e0 * M_PI * f * t);
       sum += As * s + Ac * c;
@@ -72,21 +75,29 @@ public:
   }
 
   int num_harmonics() const noexcept { return m_num_harmonics; }
-  const double *operator()(int i) const noexcept {return m_mem+i*3;}
-  double *operator()(int i) noexcept {return m_mem+i*3;}
+  const double *operator()(int i) const noexcept {
+    return m_mem + i * DBLS_IN_TERM;
+  }
+  double *operator()(int i) noexcept { return m_mem + i * DBLS_IN_TERM; }
 
   /** @brief Construct instance given the number of harmonics. */
   RealHarmonics(int num_harmonics = 0) noexcept
       : m_num_harmonics(num_harmonics),
-        m_capacity(num_harmonics > 2 ? num_harmonics : 2),
-        m_mem((double *)std::malloc(m_capacity * 3 * sizeof(double))) {};
+        m_capacity(num_harmonics > MIN_HARMONIC_TERMS ? num_harmonics
+                                                      : MIN_HARMONIC_TERMS),
+        m_mem((double *)std::malloc(m_capacity * DBLS_IN_TERM *
+                                    sizeof(double))) {};
 
   /** @brief Copy constructor. */
   RealHarmonics(const RealHarmonics &rh) noexcept
       : m_num_harmonics(rh.m_num_harmonics),
-        m_capacity(rh.m_num_harmonics > 2 ? rh.m_num_harmonics : 2),
-        m_mem((double *)std::malloc(m_capacity * 3 * sizeof(double))) {
-    std::memcpy(m_mem, rh.m_mem, rh.m_num_harmonics * 3 * sizeof(double));
+        m_capacity(rh.m_num_harmonics > MIN_HARMONIC_TERMS
+                       ? rh.m_num_harmonics
+                       : MIN_HARMONIC_TERMS),
+        m_mem(
+            (double *)std::malloc(m_capacity * DBLS_IN_TERM * sizeof(double))) {
+    std::memcpy(m_mem, rh.m_mem,
+                rh.m_num_harmonics * DBLS_IN_TERM * sizeof(double));
   };
 
   /** @brief Move constructor. */
@@ -104,14 +115,17 @@ public:
       /* do we need to allocate more space? */
       if (this->m_capacity < rh.m_capacity) {
         if (this->m_capacity == 0) {
-          m_mem = (double *)std::malloc(rh.m_capacity * 3 * sizeof(double));
+          m_mem = (double *)std::malloc(rh.m_capacity * DBLS_IN_TERM *
+                                        sizeof(double));
         } else {
-          m_mem = (double *)std::realloc(m_mem, rh.m_capacity * 3 * sizeof(double));
+          m_mem = (double *)std::realloc(m_mem, rh.m_capacity * DBLS_IN_TERM *
+                                                    sizeof(double));
         }
         m_capacity = rh.m_capacity;
       }
       m_num_harmonics = rh.m_num_harmonics;
-      std::memcpy(m_mem, rh.m_mem, rh.m_capacity * 3 * sizeof(double));
+      std::memcpy(m_mem, rh.m_mem,
+                  rh.m_capacity * DBLS_IN_TERM * sizeof(double));
     }
     return *this;
   }
@@ -121,7 +135,8 @@ public:
     if (this != &rh) {
       m_num_harmonics = rh.m_num_harmonics;
       m_capacity = rh.m_capacity;
-      if (m_capacity) std::free(m_mem);
+      if (m_capacity)
+        std::free(m_mem);
       m_mem = rh.m_mem;
       rh.m_num_harmonics = 0;
       rh.m_capacity = 0;

@@ -10,48 +10,48 @@ int main() {
     
     h.add_harmonic(1,1,1);
     assert(h.num_harmonics() ==1);
-    assert(h(0) == 1);
-    assert(h(0)+1 == 1);
-    assert(h(0)+2 == 1);
+    assert(*(h(0)+0) == 1);
+    assert(*(h(0)+1) == 1);
+    assert(*(h(0)+2) == 1);
     
     h.add_harmonic(2,2,2);
     assert(h.num_harmonics() ==2);
-    assert(h(1) == 2);
-    assert(h(1)+1 == 2);
-    assert(h(1)+2 == 2);
+    assert(*(h(1)+0) == 2);
+    assert(*(h(1)+1) == 2);
+    assert(*(h(1)+2) == 2);
 
     
     h.add_harmonic(3.5,3.5,3.5);
     assert(h.num_harmonics() ==3);
-    assert(h(2) == 3.5);
-    assert(h(2)+1 == 3.5);
-    assert(h(2)+2 == 3.5);
+    assert(*(h(2)+0) == 3.5);
+    assert(*(h(2)+1) == 3.5);
+    assert(*(h(2)+2) == 3.5);
 
     for (int i = 0; i < 5; i++) {
       h.add_harmonic(i * .1, i * .2, i * .4);
       assert(h.num_harmonics() == 4 + i);
-      assert(h(i) == i * .1);
-      assert(h(i) + 1 == i * .2);
-      assert(h(i) + 2 == i * .4);
+      assert(*(h(i) + 0) == i * .1);
+      assert(*(h(i) + 1) == i * .2);
+      assert(*(h(i) + 2) == i * .4);
     }
 
     h(1)[0] = 2.1;
     h(1)[1] = 2.2;
     h(1)[2] = 2.3;
-    assert(h(1)+0 == 2.1);
-    assert(h(1)+1 == 2.2);
-    assert(h(1)+2 == 2.3);
+    assert(*(h(1)+0) == 2.1);
+    assert(*(h(1)+1) == 2.2);
+    assert(*(h(1)+2) == 2.3);
 
     auto rh = h;
-    assert(h(0) == 1);
-    assert(h(0)+1 == 1);
-    assert(h(0)+2 == 1);
-    assert(h(1)+0 == 2.1);
-    assert(h(1)+1 == 2.2);
-    assert(h(1)+2 == 2.3);
-    assert(h(2) == 3.5);
-    assert(h(2)+1 == 3.5);
-    assert(h(2)+2 == 3.5);
+    assert(*(h(0)+0) == 1);
+    assert(*(h(0)+1) == 1);
+    assert(*(h(0)+2) == 1);
+    assert(*(h(1)+0) == 2.1);
+    assert(*(h(1)+1) == 2.2);
+    assert(*(h(1)+2) == 2.3);
+    assert(*(h(2)+0) == 3.5);
+    assert(*(h(2)+1) == 3.5);
+    assert(*(h(2)+2) == 3.5);
   }
   
   {
