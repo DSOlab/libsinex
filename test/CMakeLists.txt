@@ -51,6 +51,10 @@ add_executable(test_real_harmonics test_real_harmonics.cpp)
 target_link_libraries(test_real_harmonics PRIVATE sinex)
 add_test(NAME real_harmonics COMMAND test_real_harmonics)
 
+add_executable(test_get_dpod_harmonics test_get_dpod_harmonics.cpp)
+target_link_libraries(test_get_dpod_harmonics PRIVATE sinex)
+add_test(NAME real_harmonics_dpod COMMAND test_get_dpod_harmonics)
+
 add_executable(test_site_psd test_site_psd.cpp)
 target_link_libraries(test_site_psd PRIVATE sinex)
 add_test(NAME site_psd COMMAND test_site_psd)
