@@ -21,7 +21,7 @@ To install and use the library, you will need:
 
 ```
 ## to build in a folder named "build":
-$> cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+$> cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local/lib
 $> cmake --build build --target all --config Release
 ## (Optional) run tests, see section Testing below
 $> ctest --test-dir build
