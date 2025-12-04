@@ -69,9 +69,9 @@ int dso::Sinex::parse_block_site_antenna(
           out_vec.emplace_back(sinex::SiteAntenna{});
           auto vecit = out_vec.end() - 1;
 
-          ltrim_cpy(vecit->site_code(),  line + 1, 4);
+          ltrim_cpy(vecit->site_code(), line + 1, 4);
           ltrim_cpy(vecit->point_code(), line + 6, 2);
-          ltrim_cpy(vecit->soln_id(),    line + 9, 4);
+          ltrim_cpy(vecit->soln_id(), line + 9, 4);
           try {
             vecit->m_obscode =
                 dso::sinex::char_to_SinexObservationCode(line[14]);
@@ -84,7 +84,7 @@ int dso::Sinex::parse_block_site_antenna(
             ++error;
           }
 
-          ltrim_cpy(vecit->ant_type(),   line + 42, 20);
+          ltrim_cpy(vecit->ant_type(), line + 42, 20);
           ltrim_cpy(vecit->ant_serial(), line + 63, 5);
         } /* intervals overlap */
       } /* station in the list */

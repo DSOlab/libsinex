@@ -1,6 +1,6 @@
 #include "sinex.hpp"
 #include "sinex_blocks.hpp"
-#include <datetime/calendar.hpp>
+#include "datetime/calendar.hpp"
 #include <limits>
 
 constexpr const double EMPTY = std::numeric_limits<double>::min();
@@ -31,6 +31,7 @@ int dso::Sinex::linear_extrapolate_coordinates(
   for (const auto &site : sites) {
     /* initialize coordinates to a dummy value */
     xyz[0] = xyz[1] = xyz[2] = EMPTY;
+    char solnid[5] = {'\0'};
     /* loop through site components */
     for (int xcomponent = 0; xcomponent < 6; xcomponent += 2) {
       const char *sta = p[xcomponent];
@@ -64,6 +65,12 @@ int dso::Sinex::linear_extrapolate_coordinates(
                 vel, sta, site.site_code(), site.point_code(),
                 m_filename.c_str(), __func__);
         return 1;
+      } else if (std::strcmp(xit->soln_id(), vit->soln_id())) {
+        /* solution IDs should be the same */
+          fprintf(stderr, "[ERROR] Solution IDs for position and velocity do not match! Got \'%s\' vs \'%s\' for site %s, %s, components %s, %s. SINEX: %s (traceback: %s)\n", xit->soln_id(), vit->soln_id(), site.site_code(), site.point_code(), sta, vel, m_filename.c_str(), __func__);
+          return 1;
+      } else if (solnid[0] && (std::strcmp(xit->soln_id(), solnid))) {
+        fprintf(stderr, "[ERROR] Solution IDs do not match for different components! Got \'%s\' vs \'%s\' for site %s, %s, components %s, %s. SINEX: %s (traceback: %s)\n", xit->soln_id(), solnid, site.site_code(), site.point_code(), sta, vel, m_filename.c_str(), __func__);
       } else {
         /* ok, we have coordinates and velocity for component */
         const double x0 = xit->estimate();
@@ -72,6 +79,7 @@ int dso::Sinex::linear_extrapolate_coordinates(
             t.diff<dso::DateTimeDifferenceType::FractionalYears>(xit->epoch());
         auto val = x0 + vx * dt.years();
         xyz[xcomponent / 2] = val;
+        std::strcpy(solnid, xit->soln_id());
       }
     } /* end looping components for the site */
 
@@ -88,7 +96,7 @@ int dso::Sinex::linear_extrapolate_coordinates(
 
     /* append to result vector */
     crd.emplace_back(
-        dso::Sinex::SiteCoordinateResults(site, xyz[0], xyz[1], xyz[2]));
+        dso::Sinex::SiteCoordinateResults(site, solnid, xyz[0], xyz[1], xyz[2]));
   } /* end looping sites */
 
   return 0;

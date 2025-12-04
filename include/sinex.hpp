@@ -322,18 +322,18 @@ public:
    *            We will be matching records according to SITE CODE and
    *            POINT CODE.
    * @param[in] t  The time at which we want the eccentricities. If later
-   *            than the instance's DATA STOP time, then we will act according 
+   *            than the instance's DATA STOP time, then we will act according
    *            to the allow_extrapolation variable. If set to false, then no
-   *            extrapolation is performed and if t is later than the record's 
+   *            extrapolation is performed and if t is later than the record's
    *            Data End field, the record will not be collected.
-   *            If set to true, we will be assuming that the validity 
+   *            If set to true, we will be assuming that the validity
    *            intervals that end later than (DATA_STOP-allowed_offset) are
-   *            valid internaly in the future. 
+   *            valid internaly in the future.
    * @param[out] out_vec A vector of sinex::SiteEccentricity for some or all
    *            of the sites contained in site_vec, valid for the time given
    *            (ie t)
-   * @param[in] allow_extrapolation Allow extrapolation of eccentricity after 
-   *            DATA_STOP, in case a record is valid up to 
+   * @param[in] allow_extrapolation Allow extrapolation of eccentricity after
+   *            DATA_STOP, in case a record is valid up to
    *            (DATA_STOP-allowed_offset). See \t t.
    * @param[in] allowed_offset See \t t and \t allow_extrapolation
    * @return Anything other than 0 denotes an error
@@ -381,10 +381,18 @@ public:
 
   struct SiteCoordinateResults {
     sinex::SiteId msite;
-    double x, y, z; /* coordinates in [m] in [X,Y,Z] components */
-    SiteCoordinateResults(const sinex::SiteId &s, double mx, double my,
+    /* null-terminated string of solution id, with size 4+1 characters. this
+     * should correspond to the solution/estimate solution id that this 
+     * instance was constructed from.
+     */
+    char msolnid[5] = {'\0'};
+    /* coordinates in [m] in [X,Y,Z] components */
+    double x, y, z; 
+    SiteCoordinateResults(const sinex::SiteId &s, const char *solnid, double mx, double my,
                           double mz) noexcept
-        : msite(s), x(mx), y(my), z(mz){};
+        : msite(s), x(mx), y(my), z(mz) {
+          std::strcpy(msolnid,solnid);
+          }
   }; /* SiteCoordinateResults */
 
   /** @brief Extrpolate coordinate estimates for a given epoch.

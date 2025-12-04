@@ -39,9 +39,9 @@ int parse_solution_estimate_line(
     ++error;
   }
 
-  //std::memcpy(est.site_code(), line + 14, 4);
-  //std::memcpy(est.point_code(), line + 19, 2);
-  //std::memcpy(est.soln_id(), line + 22, 4);
+  // std::memcpy(est.site_code(), line + 14, 4);
+  // std::memcpy(est.point_code(), line + 19, 2);
+  // std::memcpy(est.soln_id(), line + 22, 4);
   ltrim_cpy(est.site_code(), line + 14, 4);
   ltrim_cpy(est.point_code(), line + 19, 2);
   ltrim_cpy(est.soln_id(), line + 22, 4);

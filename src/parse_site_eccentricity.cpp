@@ -66,8 +66,7 @@ int parse_eccentricity_line(
 int dso::Sinex::parse_block_site_eccentricity(
     const std::vector<sinex::SiteId> &site_vec,
     const dso::datetime<dso::nanoseconds> &t,
-    std::vector<sinex::SiteEccentricity> &out_vec,
-    bool allow_extrapolation,
+    std::vector<sinex::SiteEccentricity> &out_vec, bool allow_extrapolation,
     dso::FractionalSeconds fsec) noexcept {
 
   /* clear the vector, and allocate */
@@ -75,9 +74,10 @@ int dso::Sinex::parse_block_site_eccentricity(
     out_vec.clear();
   if (out_vec.capacity() < site_vec.size())
     out_vec.reserve(out_vec.size());
-    
+
   /* quick return */
-  if (t>m_data_stop && (!allow_extrapolation)) return 0;
+  if (t > m_data_stop && (!allow_extrapolation))
+    return 0;
 
   /* go to SOLUTION/ECCENTRICITY block */
   if (goto_block("SITE/ECCENTRICITY"))
@@ -134,7 +134,7 @@ int dso::Sinex::parse_block_site_eccentricity(
           out_vec.push_back(secc);
         }
       } /* validity interval ok */
-    }   /* non-comment line */
+    } /* non-comment line */
 
     ++ln_count;
   } /* end of block */

@@ -1,5 +1,5 @@
-#include "sinex_blocks.hpp"
 #include "geodesy/units.hpp"
+#include "sinex_blocks.hpp"
 #include <cstdio>
 
 const char *dso::sinex::SiteId::to_str(char *buf) const noexcept {

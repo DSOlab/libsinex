@@ -18,7 +18,7 @@ namespace dso::sinex {
 /** @brief Max characters in a SINEX line */
 constexpr int max_sinex_chars = 128;
 
-/** @brief Number of characters in a DOMES (no  null-terminating char 
+/** @brief Number of characters in a DOMES (no  null-terminating char
  *         included), see
  * https://itrf.ign.fr/en/network/domes/description
  */
@@ -165,22 +165,21 @@ inline bool parameter_type_exists_impl(const char *ptype, int &index,
 
 /** Copy src to dest, ommiting leading whitespaces (if any)
  *
- * Copies count chars from the object pointed to by src to the object pointed 
+ * Copies count chars from the object pointed to by src to the object pointed
  * to by dest. Note that we start counting from the first char of src, NOT the
  * first non-whitespace character.
- * This function actually calls std::memcpy, hence if the objects overlap, the 
+ * This function actually calls std::memcpy, hence if the objects overlap, the
  * behavior is undefined.
- * If either dest or src is an invalid or null pointer, the behavior is 
- * undefined, even if count is zero. 
+ * If either dest or src is an invalid or null pointer, the behavior is
+ * undefined, even if count is zero.
  *
- * @param[in] dest  pointer to the memory location to copy to 
- * @param[in] src   pointer to the memory location to copy from 
- * @param[in] count number of bytes to copy 
+ * @param[in] dest  pointer to the memory location to copy to
+ * @param[in] src   pointer to the memory location to copy from
+ * @param[in] count number of bytes to copy
  * @return pointer to dest
  */
 inline const char *ltrim_cpy(char *__restrict__ dest,
-                             const char *__restrict__ src,
-                             int count) noexcept {
+                             const char *__restrict__ src, int count) noexcept {
   const char *c = src;
   while (*c && *c == ' ')
     ++c;

@@ -1,4 +1,5 @@
 #include "dpod.hpp"
+#include "sinex.hpp"
 #include <charconv>
 #include <cstdio>
 #include <fstream>
@@ -10,8 +11,7 @@ namespace {
  *
  * Returns the same string starting from the first non-whitespace character.
  */
-const char* skipws(const char* str) noexcept
-{
+const char *skipws(const char *str) noexcept {
   while (*str && *str == ' ')
     ++str;
   return str;
@@ -34,8 +34,8 @@ const char* skipws(const char* str) noexcept
  *         (indeed it represented a 'frequency line') and the variables
  *         num_freq and freq_days hold the 'data' of the frequency.
  */
-int is_new_frequency_line(const char* line, int& num_freq, double& freq_days) noexcept
-{
+int is_new_frequency_line(const char *line, int &num_freq,
+                          double &freq_days) noexcept {
   if (line[0] != '#')
     return 0;
   /* se if we can match the string 'Frequency' after some whitespaces */
@@ -46,10 +46,11 @@ int is_new_frequency_line(const char* line, int& num_freq, double& freq_days) no
     return 0;
   /* string, matched; what is the frequency index ? */
   const int sz = std::strlen(line);
-  const char* str = line + ofst + 11;
+  const char *str = line + ofst + 11;
   auto res = std::from_chars(skipws(str), line + sz, num_freq);
-  if (res.ec != std::errc {}) {
-    // fprintf(stderr, "[ERROR] Failed resolving num freq from line %s (traceback: %s)\n", line, __func__);
+  if (res.ec != std::errc{}) {
+    // fprintf(stderr, "[ERROR] Failed resolving num freq from line %s
+    // (traceback: %s)\n", line, __func__);
     return 0;
   }
   str = res.ptr + 1;
@@ -61,8 +62,9 @@ int is_new_frequency_line(const char* line, int& num_freq, double& freq_days) no
   /* and now the frequency in days */
   ++str;
   res = std::from_chars(skipws(str), line + sz, freq_days);
-  if (res.ec != std::errc {}) {
-    // fprintf(stderr, "[ERROR] Failed resolving freq from line %s (traceback: %s)\n", line, __func__);
+  if (res.ec != std::errc{}) {
+    // fprintf(stderr, "[ERROR] Failed resolving freq from line %s (traceback:
+    // %s)\n", line, __func__);
     return 0;
   }
   /* good, we matched/resolved everyting! */
@@ -84,14 +86,21 @@ constexpr const int sdata_start = 27;
 /**
  * #CODE PT __DOMES__SOLN_XYZ_COSAMP__COSSTD__SINAMP__SINSTD
  *  ADEA  A 91501S001  1   X   1.221   0.089  -1.066   0.088
+ * 012345678901234567890123456789012345678901234567890123456789
+ *           10        20        30        40        50
  */
-int resolve_psd_cor_data_line(const char* line, double* data) noexcept
-{
-  const char* str = line + 27;
+int resolve_freq_cor_data_line(const char *line, char cmp, double *data) noexcept {
+  /* get component (one char) */
+  cmp = line[24];
+  if ((cmp != 'X' && cmp != 'Y') && (cmp != 'Z')) {
+    fprintf(stderr, "[ERROR] Failed resolving dpod/freq line [%s], invalid XYZ field! (traceback: %s)\n", line, __func__);
+    return 1;
+  }
+  const char *str = line + 27;
   int error = 0;
   for (int i = 0; i < 4; i++) {
     auto res = std::from_chars(skipws(str), str + 8, data[i]);
-    if (res.ec != std::errc {})
+    if (res.ec != std::errc{})
       ++error;
     str = res.ptr + 1;
   }
@@ -99,25 +108,35 @@ int resolve_psd_cor_data_line(const char* line, double* data) noexcept
 }
 } /* anonymous namespace */
 
-int dso::parse_dpod_freq_corr(const char* fn,
-    const std::vector<dso::sinex::SiteId>& sites_vec,
-    std::vector<dso::SiteRealHarmonics>& harm) noexcept
-{
+int dso::apply_dpod_freq_corr(
+    const char *fn, 
+    const dso::datetime<dso::nanoseconds> &t,
+    const std::vector<dso::Sinex::SiteCoordinateResults> &sites_crd) noexcept {
+  /* open dpod freq file */
   std::ifstream fin(fn);
   if (!fin.is_open()) {
-    fprintf(stderr, "[ERROR] Failed opening dpod freq_corr file %s (traceback: %s)\n", fn, __func__);
+    fprintf(stderr,
+            "[ERROR] Failed opening dpod freq_corr file %s (traceback: %s)\n",
+            fn, __func__);
     return 1;
   }
 
-  /* pre-allocate vector capacity */
-  harm.reserve(sites_vec.size());
+  /* copy of input coordinates */
+  std::vector<dso::Sinex::SiteCoordinateResults> scpy(sites_crd);
 
-  constexpr const int SZ = 256;
+  /* fractional day of year and phase at epoch */
+  const auto ymd_ = t.as_ydoy();
+  const int idoy_ = ymd_.dy().as_underlying_type();
+  const double fdoy_ = t.fractional_days().days();
+  const double fday = fdoy_ + idoy_;
+
+  constexpr const int SZ = 128;
   char line[SZ];
-
-  int nfreq;
-  double freq = std::numeric_limits<double>::min();
+  double cfreq = 0;
   double data[4];
+  char ccmp;
+  double omega = 0e0;
+  int nfreq=0;
 
   int error = 0;
   while (fin.getline(line, SZ) && (!error)) {
@@ -125,38 +144,42 @@ int dso::parse_dpod_freq_corr(const char* fn,
     if (line[0] != '#') {
       /* first check site name */
       auto it = std::find_if(
-          sites_vec.cbegin(), sites_vec.cend(), [&](const sinex::SiteId& site) {
-            return !std::strncmp(site.site_code(), line + 1, 4) && !std::strncmp(site.point_code(), line + 6, 2);
+          scpy.cbegin(), scpy.cend(), [&](const dso::Sinex::SiteCoordinateResults &site) {
+            return ((!std::strncmp(site.msite.site_code(), line + 1, 4) &&
+                   !std::strncmp(site.msite.point_code(), line + 6, 2)) &&
+                   (!std::strncmp(site.msite.domes(), line + 9, 9) &&
+                   !std::strncmp(site.msolnid, line + 18, 4)));
           });
       /* the station is in the list */
-      if (it != sites_vec.cend()) {
+      if (it != scpy.cend()) {
 
-        error += resolve_psd_cor_data_line(line, data);
+        error += resolve_freq_cor_data_line(line, ccmp, data);
         if (!error) {
-          /* do we already have a SiteRealHarmonics entry for the site */
-          auto hit = std::find_if(
-              harm.begin(), harm.end(), [&](const SiteRealHarmonics& sh) {
-                return !std::strncmp(sh.site_name(), line + 1, 4);
-              });
-
-          /* just make sure we have indeed read a frequency */
-          if (freq == std::numeric_limits<double>::min()) {
-            fprintf(stderr, "[ERROR]. Failed reading frequency in dpod file %s (traceback: %s)\n", fn, __func__);
-            return 9;
-          }
-
-          /* new Harmonics entry */
-          if (hit == harm.end()) {
-            harm.emplace_back(SiteRealHarmonics(line + 1, freq, data[2], data[0]));
-          } else {
-            hit->add_harmonic(freq, data[2], data[0]);
+          const double valmm = data[0] * std::cos(omega) + data[2] * std::sin(omega);
+          switch (ccmp) {
+            case 'X':
+              it->x += valmm*1e-3;
+              break;
+            case 'Y':
+              it->y += valmm*1e-3;
+              break;
+            case 'Z':
+              it->z += valmm*1e-3;
+              break;
+            default:
+              fprintf(stderr, "[ERROR] Invalid component in dpod_freq file %s; expected one of X, Y or Z; line is %s (traceback: %s)\n", fn, line);
+              error += 1;
           }
         } /* no coefficients parsing error */
       } /* if station in list */
-    } /* data line is not a comment */ else {
-      is_new_frequency_line(line, nfreq, freq);
+    } else {
+      /* maybe this is not a comment but a new frequency line */
+      if (is_new_frequency_line(line, nfreq, cfreq)) {
+        omega = 2e0 * M_PI * (fday / cfreq);
+      }
     }
   } /* reading through file entries */
 
-  return 0;
+  /* we should have read at least one list of frequencies */
+  return !((error==0) && (nfreq>=1));
 }

@@ -10,6 +10,8 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <cctype>
+#include <stdexcept>
 
 namespace dso {
 
@@ -75,14 +77,14 @@ public:
   }
 
   int num_harmonics() const noexcept { return m_num_harmonics; }
-  
+
   const double *operator()(int i) const noexcept {
     return m_mem + i * DBLS_IN_TERM;
   }
   double *operator()(int i) noexcept { return m_mem + i * DBLS_IN_TERM; }
 
   /** @brief Construct instance given the number of harmonics. */
-  RealHarmonics(int num_harmonics = 0) noexcept
+  explicit RealHarmonics(int num_harmonics = 0) noexcept
       : m_num_harmonics(num_harmonics),
         m_capacity(num_harmonics > MIN_HARMONIC_TERMS ? num_harmonics
                                                       : MIN_HARMONIC_TERMS),
@@ -90,12 +92,10 @@ public:
                                     sizeof(double))) {};
 
   /** @brief Construct instance given a harmonic. */
-  RealHarmonics(double freq, double amp_sin,
-      double amp_cos) noexcept
-      : m_num_harmonics(1)
-      , m_capacity(MIN_HARMONIC_TERMS)
-      , m_mem((double*)std::malloc(m_capacity * DBLS_IN_TERM * sizeof(double)))
-  {
+  explicit RealHarmonics(double freq, double amp_sin, double amp_cos) noexcept
+      : m_num_harmonics(1), m_capacity(MIN_HARMONIC_TERMS),
+        m_mem(
+            (double *)std::malloc(m_capacity * DBLS_IN_TERM * sizeof(double))) {
     m_mem[0] = freq;
     m_mem[1] = amp_sin;
     m_mem[2] = amp_cos;
@@ -172,30 +172,89 @@ public:
  * id (code) to mark the site name.
  */
 class SiteRealHarmonics {
-  RealHarmonics mhr;
-  char msite[5]={'\0'};
+  /* harmonics for X or N component */
+  RealHarmonics mhr_xn;
+  /* harmonics for Y or E component */
+  RealHarmonics mhr_ye;
+  /* harmonics for Z or U component */
+  RealHarmonics mhr_zu;
+  /* site 4-char id */
+  char msite[5] = {'\0'};
+  /* ref. system: can be either cartesian 'C' or topocentric 'T' */
+  char mrsys = 'C';
+
 public:
-  SiteRealHarmonics(const char *name = nullptr) noexcept : mhr() {
-    if (name) std::strncpy(msite, name, 4);
+  explicit SiteRealHarmonics(const char *name = nullptr) noexcept : mhr_xn(), mhr_ye(), mhr_zu() {
+    if (name)
+      std::strncpy(msite, name, 4);
   }
-  SiteRealHarmonics(const char* name, double freq, double Asin, double Acos) noexcept
-      : mhr(freq, Asin, Acos)
-  {
+  explicit SiteRealHarmonics(char sys_ct, const char *name = nullptr) : 
+  mhr_xn(), mhr_ye(), mhr_zu(), mrsys(std::toupper(sys_ct)) {
+    if (mrsys != 'C' && mrsys != 'T') {
+    std::string errmsg = "[ERROR] Invalid harmonic component " + std::string{sys_ct} + "; can either be \'C\' for cartesian or \'T\' for neu/topocentric (traceback: " + std::string(__func__) + ")\n";
+    throw std::runtime_error(errmsg);
+    }
+    if (name)
+      std::strncpy(msite, name, 4);
+  }
+  SiteRealHarmonics(const char *name, int num_freqs) noexcept
+      : mhr_xn(num_freqs), mhr_ye(num_freqs), mhr_zu(num_freqs) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-truncation"
     if (name)
       std::strncpy(msite, name, 4);
 #pragma GCC diagnostic pop
   }
-  const char *site_name() const noexcept {return msite;}
-  char *site_name() noexcept {return msite;}
-  const RealHarmonics &harmonics() const noexcept {return mhr;}
-  RealHarmonics &harmonics() noexcept {return mhr;}
-  int add_harmonic(double freq, double amp_sin = 0e0,
-      double amp_cos = 0e0) noexcept
-  {
-    return mhr.add_harmonic(freq, amp_sin, amp_cos);
+  const char *site_name() const noexcept { return msite; }
+  char *site_name() noexcept { return msite; }
+  const RealHarmonics &harmonics(char rcmp) const {
+    char cmp =
+        static_cast<char>(std::tolower(static_cast<unsigned char>(rcmp)));
+    switch (mrsys) {
+    case 'C':
+      switch (cmp) {
+        case 'x': return mhr_xn;
+        case 'y': return mhr_ye;
+        case 'z': return mhr_zu;
+      }
+      break;
+    case 'T':
+      switch (cmp) {
+        case 'n': return mhr_xn;
+        case 'e': return mhr_ye;
+        case 'u': return mhr_zu;
+      }
+      break;
+    }
+    std::string errmsg = "[ERROR] Invalid harmonic component " + std::string{rcmp} + " for harmonics of type " + std::string{mrsys} + " (traceback: " + std::string(__func__) + ")\n";
+    throw std::runtime_error(errmsg);
+  }  
+  RealHarmonics &harmonics(char rcmp) {
+    char cmp =
+        static_cast<char>(std::tolower(static_cast<unsigned char>(rcmp)));
+    switch (mrsys) {
+    case 'C':
+      switch (cmp) {
+        case 'x': return mhr_xn;
+        case 'y': return mhr_ye;
+        case 'z': return mhr_zu;
+      }
+      break;
+    case 'T':
+      switch (cmp) {
+        case 'n': return mhr_xn;
+        case 'e': return mhr_ye;
+        case 'u': return mhr_zu;
+      }
+      break;
+    }
+    std::string errmsg = "[ERROR] Invalid harmonic component " + std::string{rcmp} + " for harmonics of type " + std::string{mrsys} + " (traceback: " + std::string(__func__) + ")\n";
+    throw std::runtime_error(errmsg);
   }
+  //int add_harmonic(double freq, double amp_sin = 0e0,
+  //                 double amp_cos = 0e0) noexcept {
+  //  return mhr.add_harmonic(freq, amp_sin, amp_cos);
+  //}
 }; /* class SiteRealHarmonics */
 
 } /* namespace dso */

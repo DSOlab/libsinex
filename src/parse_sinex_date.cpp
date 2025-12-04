@@ -10,7 +10,7 @@ int dso::sinex::parse_sinex_date(
     const char *str, const dso::datetime<dso::nanoseconds> &tdefault,
     dso::datetime<dso::nanoseconds> &t) noexcept {
   int yr, doy;
-  long sec=0;
+  long sec = 0;
   int error = 0;
 
   /* skip leading whitespaces */

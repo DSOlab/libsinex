@@ -83,9 +83,9 @@ int dso::Sinex::parse_solution_epoch_noextrapolate(
           /* append epoch solution */
           out_vec.push_back(entry);
         } /* solution interval ok */
-      }   /* site is in site_vec */
-    }     /* mom-comment line */
-  }       /* end parsing block */
+      } /* site is in site_vec */
+    } /* mom-comment line */
+  } /* end parsing block */
 
   /* check for infinite loop */
   if (ln_count >= max_lines_in_block) {
@@ -184,9 +184,9 @@ int dso::Sinex::parse_solution_epoch_extrapolate(
             }
           }
         } /* error while parsing */
-      }   /* site is in site_vec */
-    }     /* mom-comment line */
-  }       /* end parsing block */
+      } /* site is in site_vec */
+    } /* mom-comment line */
+  } /* end parsing block */
 
   /* check for infinite loop */
   if (ln_count >= max_lines_in_block) {

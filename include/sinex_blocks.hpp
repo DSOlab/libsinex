@@ -6,7 +6,7 @@
  * line of the SINEX block SITE/ID.
  *
  * References:
- * [1] SINEX - Solution (Software/technique) INdependent EXchange Format 
+ * [1] SINEX - Solution (Software/technique) INdependent EXchange Format
  * Version 2.02 (December 01, 2006)
  */
 
@@ -25,7 +25,7 @@ namespace sinex {
 struct SinexBlockPosition {
   std::ifstream::pos_type mpos; /* position from file begining */
   const char *mtype;            /* block description */
-};                              /* SinexBlockPosition */
+}; /* SinexBlockPosition */
 
 /** Enum class to hold SINEX Observation Codes.
  * Within SINEX files, this is a single character indicating the technique(s)
@@ -59,7 +59,62 @@ SinexObservationCode char_to_SinexObservationCode(char c);
 /** @brief char to SinexConstraintCode (may throw) */
 SinexConstraintCode char_to_SinexConstraintCode(char c);
 
-/** @class Hold information stored (per line) in an SITE/ID Block */
+/** @class Hold information stored (per line) in an SITE/ID Block 
+ *
+ * Example snippet:
++SITE/ID
+*CODE PT __DOMES__ T _STATION DESCRIPTION__ APPROX_LON_ APPROX_LAT_ _APP_H_
+ ADEA  A 91501S001 D TERRE ADELIE, ANTARCTI 140 00 05.2 -66 39 45.6     1.8
+ ADEB  A 91501S002 D TERRE ADELIE, ANTARCTI 140 00 07.3 -66 39 54.7    -0.0
+ *
+ * 
+ * see https://ivscc.gsfc.nasa.gov/products-data/sinex_v202.pdf
+ *
+ * |_________________S_I_T_E___I_D___D_A_T_A___L_I_N_E_________________|
+ * |                |                                   |              |
+ * |__Field_________|______Description__________________|___Format_____|
+ * |                |                                   |              |
+ * | [Site Code]    | Call sign for a site.             | 1X,A4        |
+ * |________________|___________________________________|______________|
+ * |                |                                   |              |
+ * | [Point Code]   | Physical monument used at a site  | 1X,A2        |
+ * |________________|___________________________________|______________|
+ * |                |                                   |              |
+ * | Unique Monument| Unique alpha-nummeric monument    | 1X,A9        |
+ * | Identification | identification. For ITRF purposes,|              |
+ * |                | it is a nine character DOMES/DOMEX|              |
+ * |                | number (five/six digits, followed |              |
+ * |                | by the single letter 'M' or 'S',  |              |
+ * |                | followed by four/three digits)    |              |
+ * |________________|___________________________________|______________|
+ * |                |                                   |              |
+ * | [Observation   | Observation technique(s) used.    | 1X,A1        |
+ * | Code]          |                                   |              |
+ * |________________|___________________________________|______________|
+ * |                |                                   |              |
+ * | Station        | Free-format description of the    | 1X,A22       |
+ * | Description    | site, typically the town and/or   |              |
+ * |                | country.                          |              |
+ * |________________|___________________________________|______________|
+ * |                |                                   |              |
+ * | Approximate    | Approximate longitude of the site | 1X,I3,       |
+ * | Longitude      | in degrees(E/+), minutes and      | 1X,I2,       |
+ * |                | seconds.                          | 1X,F4.1      |
+ * |________________|___________________________________|______________|
+ * |                |                                   |              |
+ * | Approximate    | Approximate latitude of the site  | 1X,I3,       |
+ * | Latitude       | in degrees(NS/+-), minutes and    | 1X,I2,       |
+ * |                | seconds.                          | 1X,F4.1      |
+ * |________________|___________________________________|______________|
+ * |                |                                   |              |
+ * | Approximate    | Approximate height of the site in | 1X,F7.1      |
+ * | Height         | metres.                           |              |
+ * |________________|___________________________________|______________|
+ *                                                      |              |
+ *                                                      | 75           |
+ *                                                      |______________|
+ *
+ */
 class SiteId {
 private:
   static constexpr const int site_code_at = 0;    /* [0,4] including NULL */
