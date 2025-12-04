@@ -3,7 +3,7 @@
 #include <charconv>
 #include <cstdio>
 #include <fstream>
-#include <limits>
+#include <stdexcept>
 
 namespace {
 
@@ -89,11 +89,15 @@ constexpr const int sdata_start = 27;
  * 012345678901234567890123456789012345678901234567890123456789
  *           10        20        30        40        50
  */
-int resolve_freq_cor_data_line(const char *line, char cmp, double *data) noexcept {
+int resolve_freq_cor_data_line(const char *line, char cmp,
+                               double *data) noexcept {
   /* get component (one char) */
   cmp = line[24];
   if ((cmp != 'X' && cmp != 'Y') && (cmp != 'Z')) {
-    fprintf(stderr, "[ERROR] Failed resolving dpod/freq line [%s], invalid XYZ field! (traceback: %s)\n", line, __func__);
+    fprintf(stderr,
+            "[ERROR] Failed resolving dpod/freq line [%s], invalid XYZ field! "
+            "(traceback: %s)\n",
+            line, __func__);
     return 1;
   }
   const char *str = line + 27;
@@ -108,21 +112,24 @@ int resolve_freq_cor_data_line(const char *line, char cmp, double *data) noexcep
 }
 } /* anonymous namespace */
 
-int dso::apply_dpod_freq_corr(
-    const char *fn, 
-    const dso::datetime<dso::nanoseconds> &t,
-    const std::vector<dso::Sinex::SiteCoordinateResults> &sites_crd) noexcept {
+std::vector<dso::Sinex::SiteCoordinateResults> dso::get_dpod_freq_corr(
+    const char *fn, const dso::datetime<dso::nanoseconds> &t,
+    const std::vector<dso::Sinex::SiteCoordinateResults> &sites_crd) {
   /* open dpod freq file */
   std::ifstream fin(fn);
   if (!fin.is_open()) {
     fprintf(stderr,
             "[ERROR] Failed opening dpod freq_corr file %s (traceback: %s)\n",
             fn, __func__);
-    return 1;
+    throw std::runtime_error("[ERROR] Failed opening dpod freq_corr file\n");
   }
 
   /* copy of input coordinates */
   std::vector<dso::Sinex::SiteCoordinateResults> scpy(sites_crd);
+
+  /* zero-out (cartesian) positions */
+  for (auto it = scpy.begin(); it != scpy.end(); ++it)
+    it->x = it->y = it->z = 0e0;
 
   /* fractional day of year and phase at epoch */
   const auto ymd_ = t.as_ydoy();
@@ -134,9 +141,9 @@ int dso::apply_dpod_freq_corr(
   char line[SZ];
   double cfreq = 0;
   double data[4];
-  char ccmp;
+  char ccmp = 'Q';
   double omega = 0e0;
-  int nfreq=0;
+  int nfreq = 0;
 
   int error = 0;
   while (fin.getline(line, SZ) && (!error)) {
@@ -144,31 +151,36 @@ int dso::apply_dpod_freq_corr(
     if (line[0] != '#') {
       /* first check site name */
       auto it = std::find_if(
-          scpy.cbegin(), scpy.cend(), [&](const dso::Sinex::SiteCoordinateResults &site) {
+          scpy.begin(), scpy.end(),
+          [&](const dso::Sinex::SiteCoordinateResults &site) {
             return ((!std::strncmp(site.msite.site_code(), line + 1, 4) &&
-                   !std::strncmp(site.msite.point_code(), line + 6, 2)) &&
-                   (!std::strncmp(site.msite.domes(), line + 9, 9) &&
-                   !std::strncmp(site.msolnid, line + 18, 4)));
+                     !std::strncmp(site.msite.point_code(), line + 6, 2)) &&
+                    (!std::strncmp(site.msite.domes(), line + 9, 9) &&
+                     !std::strncmp(site.msolnid, line + 18, 4)));
           });
       /* the station is in the list */
       if (it != scpy.cend()) {
 
         error += resolve_freq_cor_data_line(line, ccmp, data);
         if (!error) {
-          const double valmm = data[0] * std::cos(omega) + data[2] * std::sin(omega);
+          const double valmm =
+              data[0] * std::cos(omega) + data[2] * std::sin(omega);
           switch (ccmp) {
-            case 'X':
-              it->x += valmm*1e-3;
-              break;
-            case 'Y':
-              it->y += valmm*1e-3;
-              break;
-            case 'Z':
-              it->z += valmm*1e-3;
-              break;
-            default:
-              fprintf(stderr, "[ERROR] Invalid component in dpod_freq file %s; expected one of X, Y or Z; line is %s (traceback: %s)\n", fn, line);
-              error += 1;
+          case 'X':
+            it->x += valmm * 1e-3;
+            break;
+          case 'Y':
+            it->y += valmm * 1e-3;
+            break;
+          case 'Z':
+            it->z += valmm * 1e-3;
+            break;
+          default:
+            fprintf(stderr,
+                    "[ERROR] Invalid component in dpod_freq file %s; expected "
+                    "one of X, Y or Z; line is %s (traceback: %s)\n",
+                    fn, line, __func__);
+            error += 1;
           }
         } /* no coefficients parsing error */
       } /* if station in list */
@@ -181,5 +193,45 @@ int dso::apply_dpod_freq_corr(
   } /* reading through file entries */
 
   /* we should have read at least one list of frequencies */
-  return !((error==0) && (nfreq>=1));
+  if (!((error == 0) && (nfreq >= 1))) {
+    fprintf(stderr,
+            "[ERROR] Failed applying parsing/applying frequency corrections "
+            "from dpod file %s (traceback: %s)\n",
+            fn, __func__);
+    throw std::runtime_error(
+        "[ERROR] Failed applying parsing/applying frequency corrections\n");
+  }
+  return scpy;
+}
+
+int dso::apply_dpod_freq_corr(
+    const char *fn, const dso::datetime<dso::nanoseconds> &t,
+    std::vector<dso::Sinex::SiteCoordinateResults> &sites_crd) noexcept {
+  int error = 0;
+  try {
+    const auto cor = dso::get_dpod_freq_corr(fn, t, sites_crd);
+    int idx = 0;
+    for (auto it = sites_crd.begin(); it != sites_crd.end() && (!error); ++it) {
+      /* we assume here 1-to-1 correspondance between sites_crd and cor */
+      auto itc = cor.cbegin() + idx;
+      if ((std::strcmp(itc->msite.site_code(), it->msite.site_code()) ||
+           std::strcmp(itc->msite.point_code(), it->msite.point_code())) ||
+          (std::strcmp(itc->msite.domes(), it->msite.domes()) ||
+           std::strcmp(itc->msolnid, it->msolnid))) {
+        error += 1;
+        fprintf(stderr, "[ERROR] Corrupt(?) parsing of dpod_freq_cor file; expected correction for %s and found %s (traceback: %s)\n", itc->msite.site_code(), it->msite.site_code(), __func__);
+      }
+      it->x += itc->x;
+      it->y += itc->y;
+      it->z += itc->z;
+    }
+  } catch (std::exception &e) {
+    error = 1;
+    fprintf(stderr,
+            "[ERROR] Failed applying dpod frequency corrections from file %s "
+            "(traceback: %s)\n",
+            fn, __func__);
+    fprintf(stderr, "[ERROR] Caught exception %s", e.what());
+  }
+  return error;
 }
