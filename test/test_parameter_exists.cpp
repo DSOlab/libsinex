@@ -1,6 +1,6 @@
 #include "sinex.hpp"
-#include <vector>
 #include <cassert>
+#include <vector>
 
 using namespace dso;
 
@@ -40,7 +40,7 @@ int main() {
       fprintf(stderr, "[ERROR] Failed to recognize parameter type \"%s\"\n",
               str);
       fprintf(stderr, "Policy = strict\n");
-      assert(1==2);
+      assert(1 == 2);
     }
   }
 
@@ -49,7 +49,7 @@ int main() {
     if (sinex::parameter_type_exists(str, index)) {
       fprintf(stderr, "[ERROR] Matched erronuous parameter type \"%s\"\n", str);
       fprintf(stderr, "Policy = strict\n");
-      assert(1==2);
+      assert(1 == 2);
     }
   }
 
@@ -76,7 +76,7 @@ int main() {
       fprintf(stderr, "[ERROR] Failed to recognize parameter type \"%s\"\n",
               str);
       fprintf(stderr, "Policy = non-strict\n");
-      assert(1==2);
+      assert(1 == 2);
     }
   }
 
@@ -86,7 +86,7 @@ int main() {
             sinex::details::ParameterMatchPolicyType::NonStrict>(str, index)) {
       fprintf(stderr, "[ERROR] Matched erronuous parameter type \"%s\"\n", str);
       fprintf(stderr, "Policy = non-strict\n");
-      assert(1==2);
+      assert(1 == 2);
     }
   }
 

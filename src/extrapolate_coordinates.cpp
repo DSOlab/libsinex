@@ -28,28 +28,34 @@ int dso::Sinex::linear_extrapolate_coordinates(
   double xyz[3];
 
   /* loop through all sites (i.e. SiteId's) */
-  for (auto site=sites.cbegin(); site!=sites.end();++site) {
+  for (auto site = sites.cbegin(); site != sites.end(); ++site) {
     /* initialize coordinates to a dummy value */
     xyz[0] = xyz[1] = xyz[2] = EMPTY;
-    char solnid[sinex::SOLN_ID_CHAR_SIZE+1] = {'\0'};
+    char solnid[sinex::SOLN_ID_CHAR_SIZE + 1] = {'\0'};
     /* loop through site components */
     for (int xcomponent = 0; xcomponent < 6; xcomponent += 2) {
       const char *sta = p[xcomponent];     // e.g. "STAX"
       const char *vel = p[xcomponent + 1]; // e.g. "VELX"
       /* find estimates for position component */
-      auto xit = std::find_if(sols.begin(), sols.end(),
-                              [&](const dso::sinex::SolutionEstimate &s) {
-                                return ((!std::strncmp(site->point_code(), s.point_code(), sinex::POINT_CODE_CHAR_SIZE) &&
-                                       !std::strncmp(site->site_code(), s.site_code(), sinex::SITE_CODE_CHAR_SIZE)) &&
-                                       !std::strncmp(sta, s.parameter_type(), sinex::PARAMETER_TYPE_CHAR_SIZE));
-                              });
+      auto xit = std::find_if(
+          sols.begin(), sols.end(), [&](const dso::sinex::SolutionEstimate &s) {
+            return ((!std::strncmp(site->point_code(), s.point_code(),
+                                   sinex::POINT_CODE_CHAR_SIZE) &&
+                     !std::strncmp(site->site_code(), s.site_code(),
+                                   sinex::SITE_CODE_CHAR_SIZE)) &&
+                    !std::strncmp(sta, s.parameter_type(),
+                                  sinex::PARAMETER_TYPE_CHAR_SIZE));
+          });
       /* find estimates for velocity component */
-      auto vit = std::find_if(sols.begin(), sols.end(),
-                              [&](const dso::sinex::SolutionEstimate &s) {
-                                return ((!std::strncmp(site->point_code(), s.point_code(), sinex::POINT_CODE_CHAR_SIZE) &&
-                                       !std::strncmp(site->site_code(), s.site_code(), sinex::SITE_CODE_CHAR_SIZE)) &&
-                                       !std::strncmp(vel, s.parameter_type(), sinex::PARAMETER_TYPE_CHAR_SIZE));
-                              });
+      auto vit = std::find_if(
+          sols.begin(), sols.end(), [&](const dso::sinex::SolutionEstimate &s) {
+            return ((!std::strncmp(site->point_code(), s.point_code(),
+                                   sinex::POINT_CODE_CHAR_SIZE) &&
+                     !std::strncmp(site->site_code(), s.site_code(),
+                                   sinex::SITE_CODE_CHAR_SIZE)) &&
+                    !std::strncmp(vel, s.parameter_type(),
+                                  sinex::PARAMETER_TYPE_CHAR_SIZE));
+          });
       /* we should have both terms of the linear model */
       if (xit == sols.end() || vit == sols.end()) {
         if (xit == sols.end() && vit == sols.end()) {
@@ -58,8 +64,8 @@ int dso::Sinex::linear_extrapolate_coordinates(
               "[ERROR] Failed to find both %s and %s parameter for site %s %s; "
               "SINEX: %s "
               "(traceback: %s)\n",
-              sta, vel, site->site_code(), site->point_code(), m_filename.c_str(),
-              __func__);
+              sta, vel, site->site_code(), site->point_code(),
+              m_filename.c_str(), __func__);
           return 1;
         } else if (xit != sols.end() && vit == sols.end()) {
           fprintf(stderr,

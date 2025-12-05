@@ -1,8 +1,8 @@
 #include "sinex.hpp"
-#include <iostream>
-#include <vector>
 #include <cstdio>
 #include <cstring>
+#include <iostream>
+#include <vector>
 
 /* DIOA  A    1 D 93:003:00000 06:136:86399 UNE   0.5100   0.0000   0.0000
  * DIOB  A    1 D 06:137:00000 22:365:86399 UNE   0.4870   0.0000   0.0000
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
     assert(!std::strcmp(ecc[0].ref_system(), "UNE"));
     assert(!std::strcmp(ecc[1].ref_system(), "UNE"));
   }
-  
+
   {
     /* reset random date, way into the future */
     const auto t = dso::datetime<dso::nanoseconds>(
@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
     /* should print nothing! */
     assert(ecc.size() == 0);
   }
-  
+
   {
     /* reset random date, way into the future */
     const auto t = dso::datetime<dso::nanoseconds>(
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
              e.eccentricity(1), e.eccentricity(2));
     }
     /* should print
-     * DIOA 0.5100   0.0000   0.0000  
+     * DIOA 0.5100   0.0000   0.0000
      * MANB 0.4870   0.0000   0.0000
      */
     assert(ecc.size() == 2);

@@ -72,8 +72,10 @@ int dso::Sinex::parse_solution_epoch_noextrapolate(
       /* check if the site is of interest, aka included in site_vec */
       auto it = std::find_if(
           site_vec.cbegin(), site_vec.cend(), [&](const sinex::SiteId &site) {
-            return !std::strncmp(site.site_code(), line + 1, dso::sinex::SITE_CODE_CHAR_SIZE) &&
-                   !std::strncmp(site.point_code(), line + 6, dso::sinex::POINT_CODE_CHAR_SIZE);
+            return !std::strncmp(site.site_code(), line + 1,
+                                 dso::sinex::SITE_CODE_CHAR_SIZE) &&
+                   !std::strncmp(site.point_code(), line + 6,
+                                 dso::sinex::POINT_CODE_CHAR_SIZE);
           });
       /* site is to be collected; parse line  */
       if (it != site_vec.cend()) {
@@ -146,8 +148,10 @@ int dso::Sinex::parse_solution_epoch_extrapolate(
       /* check if the site is of interest, aka included in site_vec */
       auto it = std::find_if(
           site_vec.cbegin(), site_vec.cend(), [&](const sinex::SiteId &site) {
-            return !std::strncmp(site.site_code(), line + 1, dso::sinex::SITE_CODE_CHAR_SIZE) &&
-                   !std::strncmp(site.point_code(), line + 6, dso::sinex::POINT_CODE_CHAR_SIZE);
+            return !std::strncmp(site.site_code(), line + 1,
+                                 dso::sinex::SITE_CODE_CHAR_SIZE) &&
+                   !std::strncmp(site.point_code(), line + 6,
+                                 dso::sinex::POINT_CODE_CHAR_SIZE);
           });
       /* site is to be collected; parse line  */
       if (it != site_vec.cend()) {

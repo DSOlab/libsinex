@@ -42,9 +42,9 @@ int parse_solution_estimate_line(
   std::memcpy(est.site_code(), line + 14, dso::sinex::SITE_CODE_CHAR_SIZE);
   std::memcpy(est.point_code(), line + 19, dso::sinex::POINT_CODE_CHAR_SIZE);
   std::memcpy(est.soln_id(), line + 22, dso::sinex::SOLN_ID_CHAR_SIZE);
-  //ltrim_cpy(est.site_code(), line + 14, 4);
-  //ltrim_cpy(est.point_code(), line + 19, 2);
-  //ltrim_cpy(est.soln_id(), line + 22, 4);
+  // ltrim_cpy(est.site_code(), line + 14, 4);
+  // ltrim_cpy(est.point_code(), line + 19, 2);
+  // ltrim_cpy(est.soln_id(), line + 22, 4);
 
   j = dso::sinex::parse_sinex_date(line + 27, sinex_data_start, est.epoch());
   if (j) {
@@ -120,8 +120,10 @@ int dso::Sinex::parse_block_solution_estimate(
       /* check if the site is of interest, aka included in site_vec */
       auto it = std::find_if(
           site_vec.cbegin(), site_vec.cend(), [&](const sinex::SiteId &site) {
-            return !std::strncmp(site.site_code(), line + 14, sinex::SITE_CODE_CHAR_SIZE) &&
-                   !std::strncmp(site.point_code(), line + 19, sinex::POINT_CODE_CHAR_SIZE);
+            return !std::strncmp(site.site_code(), line + 14,
+                                 sinex::SITE_CODE_CHAR_SIZE) &&
+                   !std::strncmp(site.point_code(), line + 19,
+                                 sinex::POINT_CODE_CHAR_SIZE);
           });
 
       if (it != site_vec.cend()) { /* parse and collect estimate */
@@ -203,14 +205,17 @@ int dso::Sinex::parse_block_solution_estimate(
 
     if (*line != '*') { /* non-comment line */
 
-      /* check if the site is of interest, and we have identified a 
-       * SOLUTION/EPOCH for it (aka included in solns) 
+      /* check if the site is of interest, and we have identified a
+       * SOLUTION/EPOCH for it (aka included in solns)
        */
       auto it = std::find_if(
           solns.cbegin(), solns.cend(), [&](const sinex::SolutionEpoch &site) {
-            return ((!std::strncmp(site.site_code(), line + 14, sinex::SITE_CODE_CHAR_SIZE) &&
-                   !std::strncmp(site.point_code(), line + 19, sinex::POINT_CODE_CHAR_SIZE)) &&
-                   !std::strncmp(site.soln_id(), line + 22, sinex::SOLN_ID_CHAR_SIZE));
+            return ((!std::strncmp(site.site_code(), line + 14,
+                                   sinex::SITE_CODE_CHAR_SIZE) &&
+                     !std::strncmp(site.point_code(), line + 19,
+                                   sinex::POINT_CODE_CHAR_SIZE)) &&
+                    !std::strncmp(site.soln_id(), line + 22,
+                                  sinex::SOLN_ID_CHAR_SIZE));
           });
 
       if (it != solns.cend()) {

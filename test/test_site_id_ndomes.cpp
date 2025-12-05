@@ -33,17 +33,10 @@ int main(int argc, char *argv[]) {
       printf("%s %s %s\n", site.site_code(), site.point_code(), site.domes());
     }
     /* expected output for input:
-     * KOKO FOO CRQC CRRC DAKA EASA XAN EASB EVEB DIOB DIOA DJIA DIOA DJIC DJIB DIOA
-     * CRQC  A 91301S004
-     * CRRC  A 91301S005
-     * DAKA  A 34101S004
-     * DIOA  A 12602S011
-     * DIOB  A 12602S012
-     * DJIA  A 39901S002
-     * DJIB  A 39901S003
-     * EASA  A 41703S008
-     * EASB  A 41703S009
-     * EVEB  A 21501S001
+     * KOKO FOO CRQC CRRC DAKA EASA XAN EASB EVEB DIOB DIOA DJIA DIOA DJIC DJIB
+     * DIOA CRQC  A 91301S004 CRRC  A 91301S005 DAKA  A 34101S004 DIOA  A
+     * 12602S011 DIOB  A 12602S012 DJIA  A 39901S002 DJIB  A 39901S003 EASA  A
+     * 41703S008 EASB  A 41703S009 EVEB  A 21501S001
      */
   }
 

@@ -1,7 +1,7 @@
 #include "sinex.hpp"
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
-#include <fstream>
 
 /* Test program: Creating SINEX files */
 
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "%s\n", e.what());
     return 1;
   }
-  
+
   /* create an instance; should throw */
   try {
     dso::Sinex snx("foobar");

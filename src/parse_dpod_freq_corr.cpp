@@ -153,30 +153,39 @@ std::vector<dso::Sinex::SiteCoordinateResults> dso::get_dpod_freq_corr(
       auto it = std::find_if(
           scpy.begin(), scpy.end(),
           [&](const dso::Sinex::SiteCoordinateResults &site) {
-            return ((!std::strncmp(site.msite.site_code(), line + 1, sinex::SITE_CODE_CHAR_SIZE) &&
-                     !std::strncmp(site.msite.point_code(), line + 6, sinex::POINT_CODE_CHAR_SIZE)) &&
-                    (!std::strncmp(site.msite.domes(), line + 9, sinex::DOMES_CHAR_SIZE) &&
-                     !std::strncmp(site.soln_id(), line + 18, sinex::SOLN_ID_CHAR_SIZE)));
+            return ((!std::strncmp(site.msite.site_code(), line + 1,
+                                   sinex::SITE_CODE_CHAR_SIZE) &&
+                     !std::strncmp(site.msite.point_code(), line + 6,
+                                   sinex::POINT_CODE_CHAR_SIZE)) &&
+                    (!std::strncmp(site.msite.domes(), line + 9,
+                                   sinex::DOMES_CHAR_SIZE) &&
+                     !std::strncmp(site.soln_id(), line + 18,
+                                   sinex::SOLN_ID_CHAR_SIZE)));
           });
       /* Here is a subtle point:
-       * Sometimes, the SOLN_ID's in the dpod_freq file(s) do not exactly 
+       * Sometimes, the SOLN_ID's in the dpod_freq file(s) do not exactly
        * match the ones given in the respective SINEX file (aka dpod*.snx).
        * For example, in the SINEX file it could be [  1 ] and in the freq_cor
-       * as [   1]. So, if we matched nothing, let's check if we can find 
+       * as [   1]. So, if we matched nothing, let's check if we can find
        * a mathing site comparing the SOLN_ID fields as integers.
        */
       if (it == scpy.end()) {
         int sint = 2 * dso::sinex::NONINT_SOLN_ID;
-        std::from_chars(skipws(line + 18), line+18+sinex::SOLN_ID_CHAR_SIZE, sint);
+        std::from_chars(skipws(line + 18), line + 18 + sinex::SOLN_ID_CHAR_SIZE,
+                        sint);
         it = std::find_if(
-          scpy.begin(), scpy.end(),
-          [&](const dso::Sinex::SiteCoordinateResults &site) {
-            return ((!std::strncmp(site.msite.site_code(), line + 1, sinex::SITE_CODE_CHAR_SIZE) &&
-                     !std::strncmp(site.msite.point_code(), line + 6, sinex::POINT_CODE_CHAR_SIZE)) &&
-                    (!std::strncmp(site.msite.domes(), line + 9, sinex::DOMES_CHAR_SIZE) &&
-                     /*!std::strncmp(site.msolnid, line + 18, sinex::SOLN_ID_CHAR_SIZE)*/
-                     (site.soln_id_int() == sint)));
-          });
+            scpy.begin(), scpy.end(),
+            [&](const dso::Sinex::SiteCoordinateResults &site) {
+              return ((!std::strncmp(site.msite.site_code(), line + 1,
+                                     sinex::SITE_CODE_CHAR_SIZE) &&
+                       !std::strncmp(site.msite.point_code(), line + 6,
+                                     sinex::POINT_CODE_CHAR_SIZE)) &&
+                      (!std::strncmp(site.msite.domes(), line + 9,
+                                     sinex::DOMES_CHAR_SIZE) &&
+                       /*!std::strncmp(site.msolnid, line + 18,
+                          sinex::SOLN_ID_CHAR_SIZE)*/
+                       (site.soln_id_int() == sint)));
+            });
       }
 
       /* the station is in the list */
@@ -233,7 +242,8 @@ int dso::apply_dpod_freq_corr(
   try {
     const auto cor = dso::get_dpod_freq_corr(fn, t, sites_crd);
     int idx = 0;
-    for (auto it = sites_crd.begin(); it != sites_crd.end() && (!error); ++it, ++idx) {
+    for (auto it = sites_crd.begin(); it != sites_crd.end() && (!error);
+         ++it, ++idx) {
       /* we assume here 1-to-1 correspondance between sites_crd and cor */
       auto itc = cor.cbegin() + idx;
       if ((std::strcmp(itc->msite.site_code(), it->msite.site_code()) ||
@@ -241,7 +251,10 @@ int dso::apply_dpod_freq_corr(
           (std::strcmp(itc->msite.domes(), it->msite.domes()) ||
            std::strcmp(itc->msolnid, it->msolnid))) {
         error += 1;
-        fprintf(stderr, "[ERROR] Corrupt(?) parsing of dpod_freq_cor file; expected correction for %s and found %s (traceback: %s)\n", itc->msite.site_code(), it->msite.site_code(), __func__);
+        fprintf(stderr,
+                "[ERROR] Corrupt(?) parsing of dpod_freq_cor file; expected "
+                "correction for %s and found %s (traceback: %s)\n",
+                itc->msite.site_code(), it->msite.site_code(), __func__);
       }
       it->x += itc->x;
       it->y += itc->y;

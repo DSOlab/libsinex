@@ -7,10 +7,10 @@
 #ifndef __DSO_SINEX_HARMONIC_MODEL_HPP__
 #define __DSO_SINEX_HARMONIC_MODEL_HPP__
 
+#include <cctype>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
-#include <cctype>
 #include <stdexcept>
 
 namespace dso {
@@ -184,15 +184,20 @@ class SiteRealHarmonics {
   char mrsys = 'C';
 
 public:
-  explicit SiteRealHarmonics(const char *name = nullptr) noexcept : mhr_xn(), mhr_ye(), mhr_zu() {
+  explicit SiteRealHarmonics(const char *name = nullptr) noexcept
+      : mhr_xn(), mhr_ye(), mhr_zu() {
     if (name)
       std::strncpy(msite, name, 4);
   }
-  explicit SiteRealHarmonics(char sys_ct, const char *name = nullptr) : 
-  mhr_xn(), mhr_ye(), mhr_zu(), mrsys(std::toupper(sys_ct)) {
+  explicit SiteRealHarmonics(char sys_ct, const char *name = nullptr)
+      : mhr_xn(), mhr_ye(), mhr_zu(), mrsys(std::toupper(sys_ct)) {
     if (mrsys != 'C' && mrsys != 'T') {
-    std::string errmsg = "[ERROR] Invalid harmonic component " + std::string{sys_ct} + "; can either be \'C\' for cartesian or \'T\' for neu/topocentric (traceback: " + std::string(__func__) + ")\n";
-    throw std::runtime_error(errmsg);
+      std::string errmsg = "[ERROR] Invalid harmonic component " +
+                           std::string{sys_ct} +
+                           "; can either be \'C\' for cartesian or \'T\' for "
+                           "neu/topocentric (traceback: " +
+                           std::string(__func__) + ")\n";
+      throw std::runtime_error(errmsg);
     }
     if (name)
       std::strncpy(msite, name, 4);
@@ -213,48 +218,66 @@ public:
     switch (mrsys) {
     case 'C':
       switch (cmp) {
-        case 'x': return mhr_xn;
-        case 'y': return mhr_ye;
-        case 'z': return mhr_zu;
+      case 'x':
+        return mhr_xn;
+      case 'y':
+        return mhr_ye;
+      case 'z':
+        return mhr_zu;
       }
       break;
     case 'T':
       switch (cmp) {
-        case 'n': return mhr_xn;
-        case 'e': return mhr_ye;
-        case 'u': return mhr_zu;
+      case 'n':
+        return mhr_xn;
+      case 'e':
+        return mhr_ye;
+      case 'u':
+        return mhr_zu;
       }
       break;
     }
-    std::string errmsg = "[ERROR] Invalid harmonic component " + std::string{rcmp} + " for harmonics of type " + std::string{mrsys} + " (traceback: " + std::string(__func__) + ")\n";
+    std::string errmsg = "[ERROR] Invalid harmonic component " +
+                         std::string{rcmp} + " for harmonics of type " +
+                         std::string{mrsys} +
+                         " (traceback: " + std::string(__func__) + ")\n";
     throw std::runtime_error(errmsg);
-  }  
+  }
   RealHarmonics &harmonics(char rcmp) {
     char cmp =
         static_cast<char>(std::tolower(static_cast<unsigned char>(rcmp)));
     switch (mrsys) {
     case 'C':
       switch (cmp) {
-        case 'x': return mhr_xn;
-        case 'y': return mhr_ye;
-        case 'z': return mhr_zu;
+      case 'x':
+        return mhr_xn;
+      case 'y':
+        return mhr_ye;
+      case 'z':
+        return mhr_zu;
       }
       break;
     case 'T':
       switch (cmp) {
-        case 'n': return mhr_xn;
-        case 'e': return mhr_ye;
-        case 'u': return mhr_zu;
+      case 'n':
+        return mhr_xn;
+      case 'e':
+        return mhr_ye;
+      case 'u':
+        return mhr_zu;
       }
       break;
     }
-    std::string errmsg = "[ERROR] Invalid harmonic component " + std::string{rcmp} + " for harmonics of type " + std::string{mrsys} + " (traceback: " + std::string(__func__) + ")\n";
+    std::string errmsg = "[ERROR] Invalid harmonic component " +
+                         std::string{rcmp} + " for harmonics of type " +
+                         std::string{mrsys} +
+                         " (traceback: " + std::string(__func__) + ")\n";
     throw std::runtime_error(errmsg);
   }
-  //int add_harmonic(double freq, double amp_sin = 0e0,
-  //                 double amp_cos = 0e0) noexcept {
-  //  return mhr.add_harmonic(freq, amp_sin, amp_cos);
-  //}
+  // int add_harmonic(double freq, double amp_sin = 0e0,
+  //                  double amp_cos = 0e0) noexcept {
+  //   return mhr.add_harmonic(freq, amp_sin, amp_cos);
+  // }
 }; /* class SiteRealHarmonics */
 
 } /* namespace dso */

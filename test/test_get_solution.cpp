@@ -45,9 +45,8 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   for (auto const &e : estimates)
-    printf("%s %s %s %.15e %.5e\n", e.parameter_type(), e.site_code(), e.soln_id(),
-           e.estimate(), e.std_deviation());
-
+    printf("%s %s %s %.15e %.5e\n", e.parameter_type(), e.site_code(),
+           e.soln_id(), e.estimate(), e.std_deviation());
 
   return 0;
 }

@@ -59,8 +59,8 @@ SinexObservationCode char_to_SinexObservationCode(char c);
 /** @brief char to SinexConstraintCode (may throw) */
 SinexConstraintCode char_to_SinexConstraintCode(char c);
 
-/** @brief Size (in chars) in various, commonly used fields NOT including 
- * null-terminating character 
+/** @brief Size (in chars) in various, commonly used fields NOT including
+ * null-terminating character
  */
 constexpr const int SITE_CODE_CHAR_SIZE = 4;
 constexpr const int POINT_CODE_CHAR_SIZE = 2;
@@ -68,12 +68,12 @@ constexpr const int DOMES_CHAR_SIZE = 9;
 constexpr const int SOLN_ID_CHAR_SIZE = 4;
 constexpr const int PARAMETER_TYPE_CHAR_SIZE = 6;
 
-/** @brief If a SOLN_ID cannot be transformed to an int, this is what gets 
+/** @brief If a SOLN_ID cannot be transformed to an int, this is what gets
  * returned
  */
 constexpr const int NONINT_SOLN_ID = -999;
 
-/** @class Hold information stored (per line) in an SITE/ID Block 
+/** @class Hold information stored (per line) in an SITE/ID Block
  *
  * Example snippet:
 +SITE/ID
@@ -81,7 +81,7 @@ constexpr const int NONINT_SOLN_ID = -999;
  ADEA  A 91501S001 D TERRE ADELIE, ANTARCTI 140 00 05.2 -66 39 45.6     1.8
  ADEB  A 91501S002 D TERRE ADELIE, ANTARCTI 140 00 07.3 -66 39 54.7    -0.0
  *
- * 
+ *
  * see https://ivscc.gsfc.nasa.gov/products-data/sinex_v202.pdf
  *
  * |_________________S_I_T_E___I_D___D_A_T_A___L_I_N_E_________________|
@@ -346,7 +346,7 @@ struct SiteAntenna {
   SinexObservationCode m_obscode;
 }; /* SiteAntenna */
 
-/** @class Hold a record line from block SOLUTION/ESTIMATE 
+/** @class Hold a record line from block SOLUTION/ESTIMATE
  *
  * see https://ivscc.gsfc.nasa.gov/products-data/sinex_v202.pdf
  *
@@ -359,7 +359,7 @@ struct SiteAntenna {
 |                | parameters.                       |              |
 |________________|___________________________________|______________|
 |                |                                   |              |
-|[Parameter Type]| Identification of the type of     | 1X,A6        | 
+|[Parameter Type]| Identification of the type of     | 1X,A6        |
 |                | parameter.                        |              |
 |________________|___________________________________|______________|
 |                |                                   |              |
@@ -503,7 +503,7 @@ public:
   int &index() noexcept { return m_index; }
 }; /* SolutionEstimate */
 
-/** @class Hold a record line from block SOLUTION/EPOCH 
+/** @class Hold a record line from block SOLUTION/EPOCH
  *
  *
 |____S_O_L_U_T_I_O_N___E_P_O_C_H_S___D_A_T_A___L_I_N_E______________|

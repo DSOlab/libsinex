@@ -11,9 +11,8 @@ const char *ltrim__(const char *str) noexcept {
 
 int soln_id_int_generic(const char *str) noexcept {
   int solnid = 0;
-  const auto [ptr, ec] =
-      std::from_chars(ltrim__(str),
-                      str + dso::sinex::SOLN_ID_CHAR_SIZE, solnid);
+  const auto [ptr, ec] = std::from_chars(
+      ltrim__(str), str + dso::sinex::SOLN_ID_CHAR_SIZE, solnid);
   if (ec != std::errc{}) {
     solnid = dso::sinex::NONINT_SOLN_ID;
     fprintf(stderr,
