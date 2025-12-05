@@ -13,7 +13,6 @@
 #ifndef __DSO_IDS_DPOP_HPP__
 #define __DSO_IDS_DPOP_HPP__
 
-#include "real_harmonics.hpp"
 #include "sinex.hpp"
 #include <cstring>
 
@@ -122,6 +121,12 @@ std::vector<Sinex::SiteCoordinateResults> get_dpod_freq_corr(
 int apply_dpod_freq_corr(
     const char *fn, const datetime<dso::nanoseconds> &t,
     std::vector<Sinex::SiteCoordinateResults> &sites_crd) noexcept;
+
+[[nodiscard]]
+int dpod_extrapolate(const datetime<dso::nanoseconds> &t,
+                          const std::vector<const char *> &sites_4charid,
+                          const char *dpod_snx,
+                          const char *dpod_freq = nullptr) noexcept;
 } /* namespace dso */
 
 #endif

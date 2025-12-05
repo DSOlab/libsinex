@@ -29,6 +29,7 @@ int dso::Sinex::linear_extrapolate_coordinates(
 
   /* loop through all sites (i.e. SiteId's) */
   for (const auto &site : sites) {
+    printf("--> site is %s\n", site.site_code());
     /* initialize coordinates to a dummy value */
     xyz[0] = xyz[1] = xyz[2] = EMPTY;
     char solnid[5] = {'\0'};
@@ -78,6 +79,7 @@ int dso::Sinex::linear_extrapolate_coordinates(
         const auto dt =
             t.diff<dso::DateTimeDifferenceType::FractionalYears>(xit->epoch());
         auto val = x0 + vx * dt.years();
+        printf("--> Component %s/%s computed as %.3f + %.3f * %.3f\n", sta, vel, x0, vx, dt.years());
         xyz[xcomponent / 2] = val;
         std::strcpy(solnid, xit->soln_id());
       }

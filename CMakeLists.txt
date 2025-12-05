@@ -7,9 +7,12 @@ project(
   LANGUAGES CXX
 )
 
-find_package(Eigen3 3.3 REQUIRED)
-find_package(datetime 1 REQUIRED)
-find_package(geodesy 1 REQUIRED)
+find_package(Eigen3   REQUIRED)
+find_package(datetime REQUIRED)
+find_package(geodesy  REQUIRED)
+
+# Pass the library dependencies to subdirectories
+set(PROJECT_DEPENDENCIES Eigen3::Eigen geodesy datetime)
 
 # Enable clang-tidy option
 option(ENABLE_CLANG_TIDY "Enable clang-tidy checks" OFF)

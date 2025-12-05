@@ -207,11 +207,25 @@ std::vector<dso::Sinex::SiteCoordinateResults> dso::get_dpod_freq_corr(
 int dso::apply_dpod_freq_corr(
     const char *fn, const dso::datetime<dso::nanoseconds> &t,
     std::vector<dso::Sinex::SiteCoordinateResults> &sites_crd) noexcept {
+
+  printf("Step1: Input coordinate results:\n");
+  for (auto it=sites_crd.cbegin(); it != sites_crd.cend(); ++it) {
+    printf("%s %s (%.3f, %.3f %.3f)\n", it->msite.site_code(), 
+    it->msite.domes(), it->x, it->y, it->z);
+  }
+
   int error = 0;
   try {
     const auto cor = dso::get_dpod_freq_corr(fn, t, sites_crd);
+
+  printf("Step2: Frequency coordinate results:\n");
+  for (auto it=cor.cbegin(); it != cor.cend(); ++it) {
+    printf("%s %s (%.3f, %.3f %.3f)\n", it->msite.site_code(), 
+    it->msite.domes(), it->x, it->y, it->z);
+  }
+
     int idx = 0;
-    for (auto it = sites_crd.begin(); it != sites_crd.end() && (!error); ++it) {
+    for (auto it = sites_crd.begin(); it != sites_crd.end() && (!error); ++it, ++idx) {
       /* we assume here 1-to-1 correspondance between sites_crd and cor */
       auto itc = cor.cbegin() + idx;
       if ((std::strcmp(itc->msite.site_code(), it->msite.site_code()) ||
