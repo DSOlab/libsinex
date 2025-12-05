@@ -14,4 +14,5 @@ target_sources(sinex PRIVATE
     ${CMAKE_SOURCE_DIR}/src/site_id_str.cpp
     ${CMAKE_SOURCE_DIR}/src/parse_dpod_freq_corr.cpp
     ${CMAKE_SOURCE_DIR}/src/dpod_extrapolate.cpp
+    ${CMAKE_SOURCE_DIR}/src/sinex_blocks_soln_id_int.cpp
 )

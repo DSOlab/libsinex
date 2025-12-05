@@ -39,12 +39,12 @@ int parse_solution_estimate_line(
     ++error;
   }
 
-  // std::memcpy(est.site_code(), line + 14, 4);
-  // std::memcpy(est.point_code(), line + 19, 2);
-  // std::memcpy(est.soln_id(), line + 22, 4);
-  ltrim_cpy(est.site_code(), line + 14, 4);
-  ltrim_cpy(est.point_code(), line + 19, 2);
-  ltrim_cpy(est.soln_id(), line + 22, 4);
+  std::memcpy(est.site_code(), line + 14, dso::sinex::SITE_CODE_CHAR_SIZE);
+  std::memcpy(est.point_code(), line + 19, dso::sinex::POINT_CODE_CHAR_SIZE);
+  std::memcpy(est.soln_id(), line + 22, dso::sinex::SOLN_ID_CHAR_SIZE);
+  //ltrim_cpy(est.site_code(), line + 14, 4);
+  //ltrim_cpy(est.point_code(), line + 19, 2);
+  //ltrim_cpy(est.soln_id(), line + 22, 4);
 
   j = dso::sinex::parse_sinex_date(line + 27, sinex_data_start, est.epoch());
   if (j) {
@@ -120,8 +120,8 @@ int dso::Sinex::parse_block_solution_estimate(
       /* check if the site is of interest, aka included in site_vec */
       auto it = std::find_if(
           site_vec.cbegin(), site_vec.cend(), [&](const sinex::SiteId &site) {
-            return !std::strncmp(site.site_code(), line + 14, 4) &&
-                   !std::strncmp(site.point_code(), line + 19, 2);
+            return !std::strncmp(site.site_code(), line + 14, sinex::SITE_CODE_CHAR_SIZE) &&
+                   !std::strncmp(site.point_code(), line + 19, sinex::POINT_CODE_CHAR_SIZE);
           });
 
       if (it != site_vec.cend()) { /* parse and collect estimate */
@@ -203,30 +203,23 @@ int dso::Sinex::parse_block_solution_estimate(
 
     if (*line != '*') { /* non-comment line */
 
-      /* check if the site is of interest, aka included in site_vec */
+      /* check if the site is of interest, and we have identified a 
+       * SOLUTION/EPOCH for it (aka included in solns) 
+       */
       auto it = std::find_if(
-          site_vec.cbegin(), site_vec.cend(), [&](const sinex::SiteId &site) {
-            return !std::strncmp(site.site_code(), line + 14, 4) &&
-                   !std::strncmp(site.point_code(), line + 19, 2);
+          solns.cbegin(), solns.cend(), [&](const sinex::SolutionEpoch &site) {
+            return ((!std::strncmp(site.site_code(), line + 14, sinex::SITE_CODE_CHAR_SIZE) &&
+                   !std::strncmp(site.point_code(), line + 19, sinex::POINT_CODE_CHAR_SIZE)) &&
+                   !std::strncmp(site.soln_id(), line + 22, sinex::SOLN_ID_CHAR_SIZE));
           });
 
-      if (it != site_vec.cend()) {
+      if (it != solns.cend()) {
         /* parse estimate record line*/
         error = parse_solution_estimate_line(line, est, m_data_start);
-        /* check if the record's dolution id matches the one we have collected
-         * for the given epoch
-         */
-        auto mit = std::find_if(
-            solns.begin(), solns.end(), [&](const sinex::SolutionEpoch &se) {
-              return (!std::strncmp(se.site_code(), est.site_code(), 4)) &&
-                     (!std::strncmp(se.point_code(), est.point_code(), 2)) &&
-                     (!std::strncmp(se.soln_id(), est.soln_id(), 4));
-            });
-        /* if site is of interest and the solution id matches, append */
-        if (mit != solns.end()) {
-          est_vec.push_back(est);
-        }
+        /* since site is of interest and the solution id matches, append */
+        est_vec.push_back(est);
       }
+
     } /* non-comment line */
     ++ln_count;
   } /* end of block */

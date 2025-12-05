@@ -59,6 +59,20 @@ SinexObservationCode char_to_SinexObservationCode(char c);
 /** @brief char to SinexConstraintCode (may throw) */
 SinexConstraintCode char_to_SinexConstraintCode(char c);
 
+/** @brief Size (in chars) in various, commonly used fields NOT including 
+ * null-terminating character 
+ */
+constexpr const int SITE_CODE_CHAR_SIZE = 4;
+constexpr const int POINT_CODE_CHAR_SIZE = 2;
+constexpr const int DOMES_CHAR_SIZE = 9;
+constexpr const int SOLN_ID_CHAR_SIZE = 4;
+constexpr const int PARAMETER_TYPE_CHAR_SIZE = 6;
+
+/** @brief If a SOLN_ID cannot be transformed to an int, this is what gets 
+ * returned
+ */
+constexpr const int NONINT_SOLN_ID = -999;
+
 /** @class Hold information stored (per line) in an SITE/ID Block 
  *
  * Example snippet:
@@ -244,6 +258,7 @@ struct SiteReceiver {
    */
   char *soln_id() noexcept { return charbuf__ + soln_id_at; }
   const char *soln_id() const noexcept { return charbuf__ + soln_id_at; }
+  int soln_id_int() const noexcept;
 
   /** Receiver Type: Receiver Name & model [A20] */
   char *rec_type() noexcept { return charbuf__ + rec_type_at; }
@@ -303,6 +318,7 @@ struct SiteAntenna {
    */
   char *soln_id() noexcept { return charbuf__ + soln_id_at; }
   const char *soln_id() const noexcept { return charbuf__ + soln_id_at; }
+  int soln_id_int() const noexcept;
 
   /** Antenna Type: Antenna name & model. [A20] */
   char *ant_type() noexcept { return charbuf__ + ant_type_at; }
@@ -330,7 +346,75 @@ struct SiteAntenna {
   SinexObservationCode m_obscode;
 }; /* SiteAntenna */
 
-/** @class Hold a record line from block SOLUTION/ESTIMATE */
+/** @class Hold a record line from block SOLUTION/ESTIMATE 
+ *
+ * see https://ivscc.gsfc.nasa.gov/products-data/sinex_v202.pdf
+ *
+|______S_O_L_U_T_I_O_N___E_S_T_I_M_A_T_E___D_A_T_A___L_I_N_E________|
+|                |                                   |              |
+|__Field_________|______Description__________________|___Format_____|
+|                |                                   |              |
+| Estimated Para-| Index of estimated parameters.    | 1X,I5        |
+| meters Index   | values from 1 to the number of    |              |
+|                | parameters.                       |              |
+|________________|___________________________________|______________|
+|                |                                   |              |
+|[Parameter Type]| Identification of the type of     | 1X,A6        | 
+|                | parameter.                        |              |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| [Site Code]    | Site code for which the           | 1X,A4        |
+|                | parameter is estimated.           |              |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| [Point Code]   | Point Code for which the          | 1X,A2        |
+|                | parameter is estimated.           |              |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| [Solution ID]  | Solution ID at a Site/Point       | 1X,A4        |
+|                | code for which the parameter      |              |
+|                | is estimated.                     |              |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| [Time]         | Epoch at which the estimated      | 1X,I2.2,     |
+|                | parameter is valid.               | 1H:,I3.3,    |
+|                | For bias parameters the beginning | 1H:,I5.5     |
+|                | of the pass (identical to the     |              |
+|                | BIAS/EPOCHS block).               |              |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| Parameter Units| Units used for the estimates and  | 1X,A4        |
+|                | sigmas. The notations are:        |              |
+|                | m (metres),                       |              |
+|                | m/y (metres per year),            |              |
+|                | m/s2 (metres per second**2),      |              |
+|                | ppb (parts per billion),          |              |
+|                | ms (milliseconds),                |              |
+|                | msd2 (milliseconds per day**2),   |              |
+|                | mas (milli-arc-seconds),          |              |
+|                | ma/d (milli-arc-seconds / day),   |              |
+|                | rad (radians),                    |              |
+|                | rd/y (radians per year),          |              |
+|                | rd/d (radians per day).           |              |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| [Constraint    | Constraint applied to the parame- | 1X,A1        |
+| Code]          | ter.                              |              |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| Parameter      | Estimated value of the parameter. | 1X,E21.15    |
+| Estimate       |                                   |              |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| Parameter      | Estimated standard deviation for  | 1X,E11.6     |
+| Standard       | the parameter.                    |              |
+| Deviation      |                                   |              |
+|________________|___________________________________|______________|
+                                                     |              |
+                                                     | 80           |
+                                                     |______________|
+ *
+ */
 class SolutionEstimate {
   static constexpr const int site_code_at = 0;  /* [0,4] including NULL */
   static constexpr const int point_code_at = 5; /* [5,7] including NULL */
@@ -383,6 +467,7 @@ public:
    */
   char *soln_id() noexcept { return charbuf__ + soln_id_at; }
   const char *soln_id() const noexcept { return charbuf__ + soln_id_at; }
+  int soln_id_int() const noexcept;
 
   /** Parameter Units: Units used for the estimates and sigmas. [A4]
    * The notations are:
@@ -416,33 +501,52 @@ public:
   /** @brief Return the index */
   int index() const noexcept { return m_index; }
   int &index() noexcept { return m_index; }
-
-  /** @brief Check if two SolutionEstimate instances describe the same site
-   * A site is consdered a match, if
-   * 1. the SITE CODE's,
-   * 2. the POINT CODE'd
-   * 3. the SOLUTION ID's
-   * are exactly the same.
-   * @return True if the sites are exact match; false otherwise.
-   */
-  bool match_site(const SolutionEstimate &se) const noexcept {
-    return (!std::strcmp(site_code(), se.site_code())) &&
-           (!std::strcmp(point_code(), se.point_code())) &&
-           (!std::strcmp(soln_id(), se.soln_id()));
-  }
-
-  /* @brief Check if the instance's site matches a given SiteId
-   * A site is consdered a match, if both the SITE CODE and the POINT CODE are
-   * exactly the same.
-   * @return True if the sites are exact match; false otherwise.
-   */
-  bool match_site(const SiteId &s) const noexcept {
-    return (!std::strcmp(site_code(), s.site_code())) &&
-           (!std::strcmp(point_code(), s.point_code()));
-  }
 }; /* SolutionEstimate */
 
-/** @class Hold a record line from block SOLUTION/EPOCH */
+/** @class Hold a record line from block SOLUTION/EPOCH 
+ *
+ *
+|____S_O_L_U_T_I_O_N___E_P_O_C_H_S___D_A_T_A___L_I_N_E______________|
+|                |                                   |              |
+|__Field_________|______Description__________________|___Format_____|
+|                |                                   |              |
+| [Site Code]    | Site code for which some          | 1X,A4        |
+|                | parameters are estimated.         |              |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| [Point Code]   | Point Code at a site for which    | 1X,A2        |
+|                | some parameters are estimated.    |              |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| [Solution ID]  | Solution Number at a Site/Point   | 1X,A4        |
+|                | code for which some parameters    |              |
+|                | are estimated.                    |              |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| [Observation   | Identification of the observation | 1X,A1        |
+| Code]          | technique used.                   |              |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| [Time]         | Start time for which the solution | 1X,I2.2,     |
+|                | identified (SPNO) has observations| 1H:,I3.3,    |
+|                |                                   | 1H:,I5.5     |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| [Time]         | End time for which the solution   | 1X,I2.2,     |
+|                | identified (SPNO) has observations| 1H:,I3.3,    |
+|                |                                   | 1H:,I5.5     |
+|________________|___________________________________|______________|
+|                |                                   |              |
+| [Time]         | Mean time of the observations for | 1X,I2.2,     |
+|                | which the solution (SPNO) is      | 1H:,I3.3,    |
+|                | derived.                          | 1H:,I5.5     |
+|________________|___________________________________|______________|
+                                                     |              |
+                                                     | 54           |
+                                                     |______________|
+
+ *
+ * */
 struct SolutionEpoch {
   static constexpr const int site_code_at = 0;  /* [0,4] including NULL */
   static constexpr const int point_code_at = 5; /* [5,7] including NULL */
@@ -464,6 +568,7 @@ struct SolutionEpoch {
    */
   char *soln_id() noexcept { return charbuf__ + soln_id_at; }
   const char *soln_id() const noexcept { return charbuf__ + soln_id_at; }
+  int soln_id_int() const noexcept;
 
   /** Time: Start time for which the solution identified (SPNO) has
    * observations
@@ -525,6 +630,7 @@ struct DataReject {
    */
   char *soln_id() noexcept { return charbuf__ + soln_id_at; }
   const char *soln_id() const noexcept { return charbuf__ + soln_id_at; }
+  int soln_id_int() const noexcept;
 
   /**  Column tagged 'M' */
   char colm() const noexcept { return charbuf__[colm_at]; }
@@ -546,7 +652,7 @@ struct DataReject {
 
   /** Observation Code: Identification of the observation technique used [A1] */
   SinexObservationCode m_obscode;
-};
+}; /* DataReject */
 
 /** @class Hold information stored (per line) in a SITE/ECCENTRICITY Block */
 class SiteEccentricity {
@@ -599,6 +705,7 @@ public:
    */
   char *soln_id() noexcept { return charbuf__ + soln_id_at; }
   const char *soln_id() const noexcept { return charbuf__ + soln_id_at; }
+  int soln_id_int() const noexcept;
 
   /** Eccentricity Reference System: Reference system used to describe vector
    * distance from monument benchmark to the antenna reference point or

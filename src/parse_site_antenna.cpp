@@ -42,8 +42,8 @@ int dso::Sinex::parse_block_site_antenna(
       /* first check site name */
       auto it = std::find_if(
           site_vec.cbegin(), site_vec.cend(), [&](const sinex::SiteId &site) {
-            return !std::strncmp(site.site_code(), line + 1, 4) &&
-                   !std::strncmp(site.point_code(), line + 6, 2);
+            return !std::strncmp(site.site_code(), line + 1, sinex::SITE_CODE_CHAR_SIZE) &&
+                   !std::strncmp(site.point_code(), line + 6, sinex::POINT_CODE_CHAR_SIZE);
           });
 
       /* the station is in the list */
@@ -69,9 +69,12 @@ int dso::Sinex::parse_block_site_antenna(
           out_vec.emplace_back(sinex::SiteAntenna{});
           auto vecit = out_vec.end() - 1;
 
-          ltrim_cpy(vecit->site_code(), line + 1, 4);
-          ltrim_cpy(vecit->point_code(), line + 6, 2);
-          ltrim_cpy(vecit->soln_id(), line + 9, 4);
+          //ltrim_cpy(vecit->site_code(), line + 1, 4);
+          //ltrim_cpy(vecit->point_code(), line + 6, 2);
+          //ltrim_cpy(vecit->soln_id(), line + 9, 4);
+          std::memcpy(vecit->site_code(), line + 1, sinex::SITE_CODE_CHAR_SIZE);
+          std::memcpy(vecit->point_code(), line + 6, sinex::POINT_CODE_CHAR_SIZE);
+          std::memcpy(vecit->soln_id(), line + 9, sinex::SOLN_ID_CHAR_SIZE);
           try {
             vecit->m_obscode =
                 dso::sinex::char_to_SinexObservationCode(line[14]);

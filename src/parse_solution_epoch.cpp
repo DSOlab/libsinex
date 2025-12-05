@@ -8,9 +8,9 @@ int parse_epoch_line(const char *line,
                      const dso::datetime<dso::nanoseconds> &sinex_data_end,
                      dso::sinex::SolutionEpoch &entry) noexcept {
   int error = 0;
-  std::memcpy(entry.site_code(), line + 1, 4);
-  std::memcpy(entry.point_code(), line + 6, 2);
-  std::memcpy(entry.soln_id(), line + 9, 4);
+  std::memcpy(entry.site_code(), line + 1, dso::sinex::SITE_CODE_CHAR_SIZE);
+  std::memcpy(entry.point_code(), line + 6, dso::sinex::POINT_CODE_CHAR_SIZE);
+  std::memcpy(entry.soln_id(), line + 9, dso::sinex::SOLN_ID_CHAR_SIZE);
   try {
     entry.m_obscode = dso::sinex::char_to_SinexObservationCode(line[14]);
   } catch (std::exception &) {
@@ -72,19 +72,19 @@ int dso::Sinex::parse_solution_epoch_noextrapolate(
       /* check if the site is of interest, aka included in site_vec */
       auto it = std::find_if(
           site_vec.cbegin(), site_vec.cend(), [&](const sinex::SiteId &site) {
-            return !std::strncmp(site.site_code(), line + 1, 4) &&
-                   !std::strncmp(site.point_code(), line + 6, 2);
+            return !std::strncmp(site.site_code(), line + 1, dso::sinex::SITE_CODE_CHAR_SIZE) &&
+                   !std::strncmp(site.point_code(), line + 6, dso::sinex::POINT_CODE_CHAR_SIZE);
           });
       /* site is to be collected; parse line  */
       if (it != site_vec.cend()) {
         error = parse_epoch_line(line, m_data_start, m_data_stop, entry);
         /* check interval of solution */
-        if (t >= entry.m_start && t < entry.m_stop && (!error)) {
+        if ((t >= entry.m_start && t < entry.m_stop) && (!error)) {
           /* append epoch solution */
           out_vec.push_back(entry);
         } /* solution interval ok */
       } /* site is in site_vec */
-    } /* mom-comment line */
+    } /* non-comment line */
   } /* end parsing block */
 
   /* check for infinite loop */
@@ -146,8 +146,8 @@ int dso::Sinex::parse_solution_epoch_extrapolate(
       /* check if the site is of interest, aka included in site_vec */
       auto it = std::find_if(
           site_vec.cbegin(), site_vec.cend(), [&](const sinex::SiteId &site) {
-            return !std::strncmp(site.site_code(), line + 1, 4) &&
-                   !std::strncmp(site.point_code(), line + 6, 2);
+            return !std::strncmp(site.site_code(), line + 1, dso::sinex::SITE_CODE_CHAR_SIZE) &&
+                   !std::strncmp(site.point_code(), line + 6, dso::sinex::POINT_CODE_CHAR_SIZE);
           });
       /* site is to be collected; parse line  */
       if (it != site_vec.cend()) {
@@ -178,14 +178,14 @@ int dso::Sinex::parse_solution_epoch_extrapolate(
             } else {
               error = 1;
               fprintf(stderr,
-                      "[ERROR] Cannot decide ona valid SOLUTION/EPOCH interval "
+                      "[ERROR] Cannot decide one valid SOLUTION/EPOCH interval "
                       "for site %s (traceback: %s)\n",
                       entry.site_code(), __func__);
             }
           }
         } /* error while parsing */
       } /* site is in site_vec */
-    } /* mom-comment line */
+    } /* non-comment line */
   } /* end parsing block */
 
   /* check for infinite loop */

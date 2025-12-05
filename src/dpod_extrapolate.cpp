@@ -27,7 +27,7 @@ int dso::dpod_extrapolate(const dso::datetime<dso::nanoseconds> &t,
   
   printf("Step0: SINEX coordinate results:\n");
   for (auto it=crd.cbegin(); it != crd.cend(); ++it) {
-    printf("%s %s (%.3f, %.3f %.3f)\n", it->msite.site_code(), 
+    printf("%s %s (%12.4f, %12.4f %12.4f)\n", it->msite.site_code(), 
     it->msite.domes(), it->x, it->y, it->z);
   }
 
@@ -40,6 +40,12 @@ int dso::dpod_extrapolate(const dso::datetime<dso::nanoseconds> &t,
               dpod_freq, __func__);
       return 1;
     }
+  }
+  
+  printf("Step1: SINEX coordinate results:\n");
+  for (auto it=crd.cbegin(); it != crd.cend(); ++it) {
+    printf("%s %s (%12.4f, %12.4f %12.4f)\n", it->msite.site_code(), 
+    it->msite.domes(), it->x, it->y, it->z);
   }
 
   return 0;

@@ -103,21 +103,23 @@ private:
    * Parse the SINEX block SOLUTION/EPOCHS and return a vector of
    * sinex::SolutionEpoch instances for the sites included in site_vec, valid
    * at the epoch t.
+   *
    * The sites of interest are the ones included in the sites_vec (input)
-   * vector. Any SOLUTION/EPOCHS line for which we have a matching SITE ID and
-   * POINT ID will be inspected. If the input time t matches (ie lies within)
-   * the SOLUTION/EPOCHS recorded interval, then the record will be collected
+   * vector. Any SOLUTION/EPOCHS line for which we have a matching SITE_ID and
+   * POINT_ID will be inspected. If the input time t matches (i.e. lies within) 
+   * the SOLUTION/EPOCHS recorded interval, then the record will be collected 
    * and returned in the out_vec.
+   *
    * @param[in] site_vec A list of SITE/ID instances that shall be considered.
-   *              We will be matching records according to SITE CODE and
-   *              POINT CODE.
+   *              We will be matching records according to SITE_CODE and
+   *              POINT_CODE.
    * @param[in] t Epoch for which we want the solution record (SOLUTION/EPOCHS
    *              line). For a solution record to be collected, the relation:
-   *              SOLUTION ID START <= t < SOLUTION ID STOP
+   *              SOLUTION_ID_START <= t < SOLUTION_ID_STOP
    *              must hold.
    * @param[out] out_vec A vector of sinex::SolutionEpoch instances for some
    *              or all of the sites contained in site_vec, valid for the
-   *              time given (ie t)
+   *              time given (i.e. t)
    * @return Anything other than zero denotes an error
    */
   int parse_solution_epoch_noextrapolate(
@@ -131,22 +133,27 @@ private:
    * sinex::SolutionEpoch instances for the sites included in site_vec.
    *
    * The sites of interest are the ones included in the sites_vec (input)
-   * vector. Any SOLUTION/EPOCHS line for which we have a matching SITE ID and
-   * POINT ID will be inspected. The solution to be collected for each site,
-   * will be the one with a start/stop interval closest to t (ie t does not
-   * have to lay within the interval SOLUTION ID START <= t < SOLUTION ID STOP.
+   * vector. Any SOLUTION/EPOCHS line for which we have a matching SITE_ID and
+   * POINT_ID will be inspected. 
+   *
+   * The solution to be collected for each site, will be the one with a 
+   * start/stop interval closest to t (i.e. t does not have to lay within the 
+   * interval:
+   * SOLUTION_ID_START <= t < SOLUTION_ID_STOP.
    * This means that if a site has only one SOLUTION/EPOCH record, then this
    * will be collected. If it has multiple records, then the one with the
    * closest interval to t will be collected.
    *
    * @param[in] site_vec A list of SITE/ID instances that shall be considered.
-   *              We will be matching records according to SITE CODE and
-   *              POINT CODE.
+   *              We will be matching records according to SITE_CODE and
+   *              POINT_CODE.
    * @param[in] t Epoch for which we want the solution record (SOLUTION/EPOCHS
    *              line).
    * @param[out] out_vec A vector of sinex::SolutionEpoch instances for some
-   *              or all of the sites contained in site_vec, valid for the
-   *              time given (ie t)
+   *              or all of the sites contained in site_vec; the 
+   *              sinex::SolutionEpoch instances may not satisfy 
+   *              SOLUTION_ID_START <= t < SOLUTION_ID_STOP, but will be the 
+   *              closest ones to the time given (i.e. t).
    * @return Anything other than zero denotes an error
    */
   int parse_solution_epoch_extrapolate(
@@ -221,16 +228,20 @@ public:
 
   /** @brief Get SOLUTION/ESTIMATE records for given sites.
    *
-   * Parse the whole SOLUTION/ESTIMATE Block off from the SINEX
+   * Parse the whole SOLUTION/ESTIMATE block off from the SINEX
    * instance and collect sinex::SolutionEstimate records for the SITES of
    * interest. The sites of interest are the ones included in the sites_vec
    * (input) vector. Any SOLUTION/ESTIMATE line for which we have a matching
-   * SITE ID and POINT ID will be collected.
+   * SITE ID and POINT ID will be collected, regardless of parameter type and 
+   * validity interval.
    *
-   * @param[in] site_vec A vector of sinex::SolutionEstimate instances, one
-   *               entry for each block line.
    * @param[in] sites_vec A vector of sinex::SiteId instances to match against,
-   *               using the SITE CODE and POINT CODE fields.
+   *             using the SITE CODE and POINT CODE fields.
+   * @param[out] estimates_vec A vector of sinex::SolutionEstimate instances, 
+   *             one entry for each block line. Of course, for one site, aka 
+   *             one sites_vec entry, there will be a few entries in 
+   *             estimates_vec, depending on available parameters and validity
+   *             intervals.
    * @return Anything other than zero denotes an error
    */
   int parse_block_solution_estimate(
@@ -239,17 +250,18 @@ public:
 
   /** Get SOLUTION/ESTIMATE records for given sites and epoch.
    *
-   * Parse the SOLUTION/ESTIMATE Block off from the SINEX instance and collect
+   * Parse the SOLUTION/ESTIMATE block off from the SINEX instance and collect
    * sinex::SolutionEstimate records for the sites of interest valid (in some
-   * way) at a given epoch.
+   * way) at a given epoch. Any parameter type recorded in block, will be 
+   * collected, no filtering on that.
    *
    * @param[in] sites A vector of sinex::SiteId instances to match against,
-   *               using the SITE CODE and POINT CODE fields.
+   *            using the SITE_CODE and POINT_CODE fields.
    * @param[in] t The epoch to extract solutions/estimates for. Depending on
-   *               the parameter @p allow_extrapolation the epoch is used to
-   *               check if a record is temporaly valid.
+   *              the parameter @p allow_extrapolation the epoch is used to
+   *              check if a record is temporaly valid.
    * @param[in] allow_extrpolation This parameter signals what we mean by the
-   *               phrase "a solution/estimate is valid at t". I.e.
+   *            phrase "a solution/estimate is valid at t". I.e.
    *               * if set to false, then for a SOLUTION/ESTIMATE record to
    *                 be valid at the given t, the record's data start and data
    *                 stop entries should include t, i.e. the condition
@@ -263,8 +275,11 @@ public:
    *                 for a given site, and collect the one closest to t. That
    *                 is, it will assume that the SOLUTION/ESTIMATE record is
    *                 valid forwaard/backward in time.
-   * @param[in] estimates The collected SOLUTION/ESTIMATE records for the
-   *                 given site list, valid (in some way) at epoch t.
+   *            Note that this function will call parse_solution_epoch and this 
+   *            parameter (i.e. @p allow_extrpolation will be forwarded to this 
+   *            call).
+   * @param[out] estimates The collected SOLUTION/ESTIMATE records for the
+   *             given site list, valid (in some way) at epoch t.
    * @return Anything other than zero denotes an error
    */
   int parse_block_solution_estimate(
@@ -393,6 +408,8 @@ public:
         : msite(s), x(mx), y(my), z(mz) {
           std::strcpy(msolnid,solnid);
           }
+    const char *soln_id() const noexcept {return msolnid;}
+    int soln_id_int() const noexcept;
   }; /* SiteCoordinateResults */
 
   /** @brief Extrpolate coordinate estimates for a given epoch.
