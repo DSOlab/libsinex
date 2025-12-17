@@ -2,6 +2,7 @@
 
 int dso::dpod_extrapolate(const dso::datetime<dso::nanoseconds> &t,
                           const std::vector<const char *> &sites_4charid,
+                          std::vector<dso::Sinex::SiteCoordinateResults> &crd,
                           const char *dpod_snx,
                           const char *dpod_freq) noexcept {
   /* create the sinex instance */
@@ -16,19 +17,10 @@ int dso::dpod_extrapolate(const dso::datetime<dso::nanoseconds> &t,
     return 1;
   }
 
-  /* hold results here */
-  std::vector<dso::Sinex::SiteCoordinateResults> crd;
-
   /* extrapolate coordinates (linear model) -> crd */
   if (snx.linear_extrapolate_coordinates(siteids, t, crd)) {
     fprintf(stderr, "ERROR Failed extrapolating coordinate estimates\n");
     return 1;
-  }
-
-  printf("Step0: SINEX coordinate results:\n");
-  for (auto it = crd.cbegin(); it != crd.cend(); ++it) {
-    printf("%s %s (%12.4f, %12.4f %12.4f)\n", it->msite.site_code(),
-           it->msite.domes(), it->x, it->y, it->z);
   }
 
   /* append harmonics signal(s) -> crd */
@@ -40,12 +32,6 @@ int dso::dpod_extrapolate(const dso::datetime<dso::nanoseconds> &t,
               dpod_freq, __func__);
       return 1;
     }
-  }
-
-  printf("Step1: SINEX coordinate results:\n");
-  for (auto it = crd.cbegin(); it != crd.cend(); ++it) {
-    printf("%s %s (%12.4f, %12.4f %12.4f)\n", it->msite.site_code(),
-           it->msite.domes(), it->x, it->y, it->z);
   }
 
   return 0;

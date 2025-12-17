@@ -24,7 +24,9 @@ int main(int argc, char *argv[]) {
   const auto t = dso::datetime<dso::nanoseconds>(
       dso::year(2024), dso::day_of_year(304), dso::nanoseconds(0));
 
-  assert(!dso::dpod_extrapolate(t, sites, argv[1], argv[2]));
+  std::vector<dso::Sinex::SiteCoordinateResults> out;
+
+  assert(!dso::dpod_extrapolate(t, sites, out, argv[1], argv[2]));
 
   return 0;
 }

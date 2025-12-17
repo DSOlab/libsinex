@@ -125,6 +125,7 @@ int apply_dpod_freq_corr(
 [[nodiscard]]
 int dpod_extrapolate(const datetime<dso::nanoseconds> &t,
                      const std::vector<const char *> &sites_4charid,
+                     std::vector<Sinex::SiteCoordinateResults> &sites_crd,
                      const char *dpod_snx,
                      const char *dpod_freq = nullptr) noexcept;
 } /* namespace dso */
