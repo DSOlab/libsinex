@@ -8,6 +8,7 @@
 #include "sinex_blocks.hpp"
 #include <type_traits>
 #include <vector>
+#include "geodesy/transformations.hpp"
 #ifdef DEBUG
 #include "datetime/datetime_write.hpp"
 #include <cstdio>
@@ -408,8 +409,12 @@ public:
         : msite(s), x(mx), y(my), z(mz) {
       std::strcpy(msolnid, solnid);
     }
+    
     const char *soln_id() const noexcept { return msolnid; }
     int soln_id_int() const noexcept;
+    
+    dso::CartesianCrd cartesian_crd() const noexcept {return dso::CartesianCrd(x,y,z);}
+
   }; /* SiteCoordinateResults */
 
   /** @brief Extrpolate coordinate estimates for a given epoch.
