@@ -127,7 +127,8 @@ int dpod_extrapolate(const datetime<dso::nanoseconds> &t,
                      const std::vector<const char *> &sites_4charid,
                      std::vector<Sinex::SiteCoordinateResults> &sites_crd,
                      const char *dpod_snx,
-                     const char *dpod_freq = nullptr) noexcept;
+                     const char *dpod_freq = nullptr,
+                     bool apply_eccentricities=true) noexcept;
 } /* namespace dso */
 
 #endif
